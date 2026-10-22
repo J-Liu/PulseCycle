@@ -3,7 +3,7 @@
 
 import UIKit
 
-class MainViewController: UIViewController, IntervalEngineDelegate {
+class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMonitorDelegate {
     private let phaseLabel = UILabel()
     private let timeLabel = UILabel()
     private let roundLabel = UILabel()
@@ -12,6 +12,7 @@ class MainViewController: UIViewController, IntervalEngineDelegate {
     private let connectionLabel = UILabel()
 
     private let engine: IntervalEngine
+    private let heartRateMonitor: HeartRateMonitor
     private var backgroundTimestamp: Date?
 
     init() {
@@ -23,8 +24,10 @@ class MainViewController: UIViewController, IntervalEngineDelegate {
             coolDownSeconds: 60
         )
         engine = IntervalEngine(config: config)
+        heartRateMonitor = HeartRateMonitor()
         super.init(nibName: nil, bundle: nil)
         engine.delegate = self
+        heartRateMonitor.delegate = self
     }
 
     required init?(coder: NSCoder) {
@@ -36,6 +39,7 @@ class MainViewController: UIViewController, IntervalEngineDelegate {
         setupUI()
         setupGestures()
         updateUI()
+        heartRateMonitor.startScanning()
 
         NotificationCenter.default.addObserver(
             self,
@@ -226,5 +230,46 @@ class MainViewController: UIViewController, IntervalEngineDelegate {
 
     func engineDidFinish(_ engine: IntervalEngine) {
         updateUI()
+    }
+
+    func heartRateMonitor(_ monitor: HeartRateMonitor, didUpdateHeartRate bpm: Int) {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            self.heartRateLabel.text = "\(bpm)"
+
+            UIView.animate(withDuration: 0.1) {
+                self.heartRateLabel.transform = CGAffineTransform(scaleX: 1.1, y: 1.1)
+            } completion: { _ in
+                UIView.animate(withDuration: 0.1) {
+                    self.heartRateLabel.transform = .identity
+                }
+            }
+        }
+    }
+
+    func heartRateMonitor(_ monitor: HeartRateMonitor, didChangeState state: HeartRateMonitorState) {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+
+            switch state {
+            case .idle:
+                self.connectionLabel.text = "Not connected"
+            case .scanning:
+                self.connectionLabel.text = "Scanning…"
+            case .connecting:
+                self.connectionLabel.text = "Connecting…"
+            case .connected:
+                self.connectionLabel.text = "Connected"
+            case .disconnected:
+                self.connectionLabel.text = "Disconnected"
+                self.heartRateLabel.text = "--"
+            }
+        }
+    }
+
+    func heartRateMonitor(_ monitor: HeartRateMonitor, didFailWithError error: Error) {
+        DispatchQueue.main.async { [weak self] in
+            self?.connectionLabel.text = "Error"
+        }
     }
 }
