@@ -3,7 +3,7 @@
 
 import UIKit
 
-class MainViewController: UIViewController {
+class MainViewController: UIViewController, IntervalEngineDelegate {
     private let phaseLabel = UILabel()
     private let timeLabel = UILabel()
     private let roundLabel = UILabel()
@@ -11,9 +11,85 @@ class MainViewController: UIViewController {
     private let bpmLabel = UILabel()
     private let connectionLabel = UILabel()
 
+    private let engine: IntervalEngine
+    private var backgroundTimestamp: Date?
+
+    init() {
+        let config = WorkoutConfig(
+            warmUpSeconds: 60,
+            workSeconds: 30,
+            restSeconds: 15,
+            rounds: 8,
+            coolDownSeconds: 60
+        )
+        engine = IntervalEngine(config: config)
+        super.init(nibName: nil, bundle: nil)
+        engine.delegate = self
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
+        setupGestures()
+        updateUI()
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleResignActive),
+            name: UIScene.willDeactivateNotification,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleEnterForeground),
+            name: UIScene.willEnterForegroundNotification,
+            object: nil
+        )
+    }
+
+    private func setupGestures() {
+        let tap = UITapGestureRecognizer(target: self, action: #selector(handleTap))
+        view.addGestureRecognizer(tap)
+
+        let longPress = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress))
+        view.addGestureRecognizer(longPress)
+    }
+
+    @objc private func handleTap() {
+        if engine.phase == .finished {
+            engine.reset()
+            updateUI()
+        } else {
+            engine.start()
+        }
+    }
+
+    @objc private func handleLongPress(_ gesture: UILongPressGestureRecognizer) {
+        guard gesture.state == .began else { return }
+        engine.reset()
+        updateUI()
+    }
+
+    @objc private func handleResignActive() {
+        backgroundTimestamp = Date()
+        engine.pause()
+    }
+
+    @objc private func handleEnterForeground() {
+        guard let timestamp = backgroundTimestamp else { return }
+        let elapsed = Int(Date().timeIntervalSince(timestamp))
+        backgroundTimestamp = nil
+
+        if elapsed > 0 && engine.phase != .finished {
+            for _ in 0..<elapsed {
+                engine.tick()
+            }
+            engine.start()
+        }
     }
 
     private func setupUI() {
@@ -43,19 +119,16 @@ class MainViewController: UIViewController {
         let container = UIView()
         container.backgroundColor = .systemBlue.withAlphaComponent(0.1)
 
-        phaseLabel.text = "WORK"
         phaseLabel.font = .systemFont(ofSize: 24, weight: .semibold)
         phaseLabel.textAlignment = .center
         phaseLabel.adjustsFontSizeToFitWidth = true
         phaseLabel.translatesAutoresizingMaskIntoConstraints = false
 
-        timeLabel.text = "00:30"
         timeLabel.font = .monospacedDigitSystemFont(ofSize: 72, weight: .bold)
         timeLabel.textAlignment = .center
         timeLabel.adjustsFontSizeToFitWidth = true
         timeLabel.translatesAutoresizingMaskIntoConstraints = false
 
-        roundLabel.text = "Round 2 / 8"
         roundLabel.font = .systemFont(ofSize: 18)
         roundLabel.textAlignment = .center
         roundLabel.adjustsFontSizeToFitWidth = true
@@ -83,7 +156,7 @@ class MainViewController: UIViewController {
         let container = UIView()
         container.backgroundColor = .systemRed.withAlphaComponent(0.1)
 
-        heartRateLabel.text = "142"
+        heartRateLabel.text = "--"
         heartRateLabel.font = .monospacedDigitSystemFont(ofSize: 72, weight: .bold)
         heartRateLabel.textAlignment = .center
         heartRateLabel.adjustsFontSizeToFitWidth = true
@@ -94,7 +167,7 @@ class MainViewController: UIViewController {
         bpmLabel.textAlignment = .center
         bpmLabel.translatesAutoresizingMaskIntoConstraints = false
 
-        connectionLabel.text = "Connected"
+        connectionLabel.text = "Not connected"
         connectionLabel.font = .systemFont(ofSize: 16)
         connectionLabel.textAlignment = .center
         connectionLabel.textColor = .systemGray
@@ -116,5 +189,42 @@ class MainViewController: UIViewController {
         ])
 
         return container
+    }
+
+    private func updateUI() {
+        phaseLabel.text = engine.phase.rawValue
+        timeLabel.text = formatTime(engine.remainingSeconds)
+        roundLabel.text = formatRound()
+    }
+
+    private func formatTime(_ seconds: Int) -> String {
+        let minutes = seconds / 60
+        let secs = seconds % 60
+        return String(format: "%02d:%02d", minutes, secs)
+    }
+
+    private func formatRound() -> String {
+        switch engine.phase {
+        case .warmUp:
+            return "Warm Up"
+        case .work, .rest:
+            return "Round \(engine.currentRound) / \(8)"
+        case .coolDown:
+            return "Cool Down"
+        case .finished:
+            return "Finished"
+        }
+    }
+
+    func engineDidUpdateState(_ engine: IntervalEngine) {
+        updateUI()
+    }
+
+    func engineDidTransitionToPhase(_ engine: IntervalEngine, phase: IntervalPhase) {
+        updateUI()
+    }
+
+    func engineDidFinish(_ engine: IntervalEngine) {
+        updateUI()
     }
 }

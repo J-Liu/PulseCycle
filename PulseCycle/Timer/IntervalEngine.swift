@@ -62,14 +62,17 @@ class IntervalEngine {
         }
     }
 
-    private func tick() {
-        guard remainingSeconds > 0 else { return }
+    func tick() {
+        guard phase != .finished else { return }
 
-        remainingSeconds -= 1
-        totalElapsedSeconds += 1
-        delegate?.engineDidUpdateState(self)
-
-        if remainingSeconds == 0 {
+        if remainingSeconds > 1 {
+            remainingSeconds -= 1
+            totalElapsedSeconds += 1
+            delegate?.engineDidUpdateState(self)
+        } else {
+            remainingSeconds = 0
+            totalElapsedSeconds += 1
+            delegate?.engineDidUpdateState(self)
             advancePhase()
         }
     }
