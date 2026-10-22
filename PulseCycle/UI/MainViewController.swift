@@ -14,6 +14,8 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
     private let engine: IntervalEngine
     private let heartRateMonitor: HeartRateMonitor
     private var backgroundTimestamp: Date?
+    private let impactGenerator = UIImpactFeedbackGenerator(style: .medium)
+    private let notificationGenerator = UINotificationFeedbackGenerator()
 
     init() {
         let config = WorkoutConfig(
@@ -40,6 +42,8 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
         setupGestures()
         updateUI()
         heartRateMonitor.startScanning()
+        impactGenerator.prepare()
+        notificationGenerator.prepare()
 
         NotificationCenter.default.addObserver(
             self,
@@ -226,10 +230,14 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
 
     func engineDidTransitionToPhase(_ engine: IntervalEngine, phase: IntervalPhase) {
         updateUI()
+        impactGenerator.impactOccurred()
+        UIApplication.shared.isIdleTimerDisabled = true
     }
 
     func engineDidFinish(_ engine: IntervalEngine) {
         updateUI()
+        notificationGenerator.notificationOccurred(.success)
+        UIApplication.shared.isIdleTimerDisabled = false
     }
 
     func heartRateMonitor(_ monitor: HeartRateMonitor, didUpdateHeartRate bpm: Int) {
