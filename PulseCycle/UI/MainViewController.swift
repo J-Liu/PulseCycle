@@ -180,9 +180,9 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
         view.backgroundColor = .systemBackground
 
         setupHeader()
+        setupBottomButtons()  // Create bottom first so heartRate can reference it
         setupTimerArea()
         setupHeartRateArea()
-        setupBottomButtons()
     }
 
     private func setupHeader() {
