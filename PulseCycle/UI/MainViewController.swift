@@ -38,7 +38,6 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
     init() {
         heartRateMonitor = HeartRateMonitor()
         super.init(nibName: nil, bundle: nil)
-        heartRateMonitor.delegate = self
     }
 
     required init?(coder: NSCoder) {
@@ -51,6 +50,7 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        heartRateMonitor.delegate = self
         setupEngine()
         setupUI()
         setupActions()
