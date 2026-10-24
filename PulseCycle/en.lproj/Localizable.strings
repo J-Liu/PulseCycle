@@ -1,0 +1,65 @@
+/* Main UI */
+"Work" = "Work";
+"Rest" = "Rest";
+"BPM" = "BPM";
+"Profiles" = "Profiles";
+"Settings" = "Settings";
+
+/* Connection Status */
+"Not connected" = "Not connected";
+"Scanning…" = "Scanning…";
+"Connecting…" = "Connecting…";
+"Connected" = "Connected";
+"Disconnected" = "Disconnected";
+"Error" = "Error";
+
+/* Timer Phases */
+"Warm Up" = "Warm Up";
+"Cool Down" = "Cool Down";
+"Finished" = "Finished";
+"Round %d / %d" = "Round %d / %d";
+
+/* Buttons */
+"Go" = "Go";
+"Pause" = "Pause";
+"Reset" = "Reset";
+
+/* Settings - Profile */
+"Profile Name" = "Profile Name";
+"Rounds" = "Rounds";
+"Work (seconds)" = "Work (seconds)";
+"Rest (seconds)" = "Rest (seconds)";
+"Warning before round end" = "Warning before round end";
+"Warm-up" = "Warm-up";
+"Cool-down" = "Cool-down";
+"Prepare time" = "Prepare time";
+
+/* Settings - Sound */
+"Sound" = "Sound";
+"Start sound" = "Start sound";
+"End sound" = "End sound";
+"Warning sound" = "Warning sound";
+
+/* Settings - Color */
+"Color" = "Color";
+"Heart Rate" = "Heart Rate";
+
+/* Settings - Misc */
+"Misc" = "Misc";
+"Language" = "Language";
+"Voice input" = "Voice input";
+
+/* Language Options */
+"System" = "System";
+"English" = "English";
+"简体中文" = "简体中文";
+"繁體中文" = "繁體中文";
+
+/* Profile List */
+"rounds" = "rounds";
+"work" = "work";
+"rest" = "rest";
+
+/* Common */
+"Cancel" = "Cancel";
+"Profile" = "Profile";

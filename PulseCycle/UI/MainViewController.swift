@@ -168,11 +168,11 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
 
     private func updateGoButton() {
         if isRunning {
-            goButton.setTitle("Pause", for: .normal)
+            goButton.setTitle(L("Pause"), for: .normal)
         } else if engine.phase == .finished {
-            goButton.setTitle("Go", for: .normal)
+            goButton.setTitle(L("Go"), for: .normal)
         } else {
-            goButton.setTitle("Go", for: .normal)
+            goButton.setTitle(L("Go"), for: .normal)
         }
         settingsButton.isEnabled = hasReset
         settingsButton.alpha = hasReset ? 1.0 : 0.5
@@ -192,7 +192,7 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
         headerView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(headerView)
 
-        workLabel.text = "Work"
+        workLabel.text = L("Work")
         workLabel.font = .systemFont(ofSize: 14, weight: .medium)
         workLabel.textAlignment = .left
         workLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -206,7 +206,7 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
         profileLabel.textColor = .systemBlue
         profileLabel.translatesAutoresizingMaskIntoConstraints = false
 
-        restLabel.text = "Rest"
+        restLabel.text = L("Rest")
         restLabel.font = .systemFont(ofSize: 14, weight: .medium)
         restLabel.textAlignment = .right
         restLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -305,12 +305,12 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
         heartRateLabel.adjustsFontSizeToFitWidth = true
         heartRateLabel.translatesAutoresizingMaskIntoConstraints = false
 
-        bpmLabel.text = "BPM"
+        bpmLabel.text = L("BPM")
         bpmLabel.font = .systemFont(ofSize: 24, weight: .medium)
         bpmLabel.textAlignment = .center
         bpmLabel.translatesAutoresizingMaskIntoConstraints = false
 
-        connectionLabel.text = "Not connected"
+        connectionLabel.text = L("Not connected")
         connectionLabel.font = .systemFont(ofSize: 16)
         connectionLabel.textAlignment = .center
         connectionLabel.textColor = .systemGray
@@ -342,15 +342,15 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
         bottomView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(bottomView)
 
-        goButton.setTitle("Go", for: .normal)
+        goButton.setTitle(L("Go"), for: .normal)
         goButton.titleLabel?.font = .systemFont(ofSize: 24, weight: .bold)
         goButton.translatesAutoresizingMaskIntoConstraints = false
 
-        settingsButton.setTitle("Settings", for: .normal)
+        settingsButton.setTitle(L("Settings"), for: .normal)
         settingsButton.titleLabel?.font = .systemFont(ofSize: 16)
         settingsButton.translatesAutoresizingMaskIntoConstraints = false
 
-        resetButton.setTitle("Reset", for: .normal)
+        resetButton.setTitle(L("Reset"), for: .normal)
         resetButton.titleLabel?.font = .systemFont(ofSize: 16)
         resetButton.translatesAutoresizingMaskIntoConstraints = false
 
@@ -381,7 +381,7 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
         workTimeLabel.text = formatTime(profile.workSeconds)
         restTimeLabel.text = formatTime(profile.restSeconds)
 
-        phaseLabel.text = engine.phase.rawValue
+        phaseLabel.text = formatPhase(engine.phase)
         timeLabel.text = formatTime(engine.remainingSeconds)
         roundLabel.text = formatRound()
 
@@ -405,17 +405,32 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
         return String(format: "%d:%02d", minutes, secs)
     }
 
+    private func formatPhase(_ phase: IntervalPhase) -> String {
+        switch phase {
+        case .warmUp:
+            return L("Warm Up")
+        case .work:
+            return L("Work")
+        case .rest:
+            return L("Rest")
+        case .coolDown:
+            return L("Cool Down")
+        case .finished:
+            return L("Finished")
+        }
+    }
+
     private func formatRound() -> String {
         let profile = ProfileManager.shared.currentProfile
         switch engine.phase {
         case .warmUp:
-            return "Warm Up"
+            return L("Warm Up")
         case .work, .rest:
-            return "Round \(engine.currentRound) / \(profile.rounds)"
+            return String(format: L("Round %d / %d"), engine.currentRound, profile.rounds)
         case .coolDown:
-            return "Cool Down"
+            return L("Cool Down")
         case .finished:
-            return "Finished"
+            return L("Finished")
         }
     }
 
@@ -477,15 +492,15 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
 
             switch state {
             case .idle:
-                self.connectionLabel.text = "Not connected"
+                self.connectionLabel.text = L("Not connected")
             case .scanning:
-                self.connectionLabel.text = "Scanning…"
+                self.connectionLabel.text = L("Scanning…")
             case .connecting:
-                self.connectionLabel.text = "Connecting…"
+                self.connectionLabel.text = L("Connecting…")
             case .connected:
-                self.connectionLabel.text = "Connected"
+                self.connectionLabel.text = L("Connected")
             case .disconnected:
-                self.connectionLabel.text = "Disconnected"
+                self.connectionLabel.text = L("Disconnected")
                 self.heartRateLabel.text = "--"
             }
         }
@@ -493,7 +508,7 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
 
     func heartRateMonitor(_ monitor: HeartRateMonitor, didFailWithError error: Error) {
         DispatchQueue.main.async { [weak self] in
-            self?.connectionLabel.text = "Error"
+            self?.connectionLabel.text = L("Error")
         }
     }
 }

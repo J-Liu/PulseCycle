@@ -13,7 +13,7 @@ class ProfileListViewController: UIViewController, UITableViewDelegate, UITableV
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "Profiles"
+        title = L("Profiles")
         navigationItem.rightBarButtonItem = UIBarButtonItem(
             barButtonSystemItem: .add,
             target: self,
@@ -56,7 +56,7 @@ class ProfileListViewController: UIViewController, UITableViewDelegate, UITableV
         let cell = UITableViewCell(style: .subtitle, reuseIdentifier: nil)
         let profile = profiles[indexPath.row]
         cell.textLabel?.text = profile.name
-        cell.detailTextLabel?.text = "\(profile.rounds) rounds • \(profile.workSeconds)s work • \(profile.restSeconds)s rest"
+        cell.detailTextLabel?.text = "\(profile.rounds) \(L("rounds")) • \(profile.workSeconds)s \(L("work")) • \(profile.restSeconds)s \(L("rest"))"
         cell.accessoryType = (indexPath.row == ProfileManager.shared.currentProfileIndex) ? .checkmark : .none
         return cell
     }

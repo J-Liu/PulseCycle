@@ -1,0 +1,65 @@
+/* Main UI */
+"Work" = "運動";
+"Rest" = "休息";
+"BPM" = "次/分";
+"Profiles" = "訓練方案";
+"Settings" = "設定";
+
+/* Connection Status */
+"Not connected" = "未連線";
+"Scanning…" = "正在掃描…";
+"Connecting…" = "正在連線…";
+"Connected" = "已連線";
+"Disconnected" = "已斷線";
+"Error" = "錯誤";
+
+/* Timer Phases */
+"Warm Up" = "熱身";
+"Cool Down" = "放鬆";
+"Finished" = "完成";
+"Round %d / %d" = "第 %d / %d 輪";
+
+/* Buttons */
+"Go" = "開始";
+"Pause" = "暫停";
+"Reset" = "重置";
+
+/* Settings - Profile */
+"Profile Name" = "方案名稱";
+"Rounds" = "輪數";
+"Work (seconds)" = "運動時間（秒）";
+"Rest (seconds)" = "休息時間（秒）";
+"Warning before round end" = "回合結束前警告";
+"Warm-up" = "熱身";
+"Cool-down" = "放鬆";
+"Prepare time" = "準備時間";
+
+/* Settings - Sound */
+"Sound" = "聲音";
+"Start sound" = "開始聲音";
+"End sound" = "結束聲音";
+"Warning sound" = "警告聲音";
+
+/* Settings - Color */
+"Color" = "顏色";
+"Heart Rate" = "心率";
+
+/* Settings - Misc */
+"Misc" = "雜項";
+"Language" = "語言";
+"Voice input" = "語音輸入";
+
+/* Language Options */
+"System" = "跟隨系統";
+"English" = "English";
+"简体中文" = "简体中文";
+"繁體中文" = "繁體中文";
+
+/* Profile List */
+"rounds" = "輪";
+"work" = "運動";
+"rest" = "休息";
+
+/* Common */
+"Cancel" = "取消";
+"Profile" = "方案";

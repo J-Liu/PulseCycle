@@ -22,7 +22,7 @@ class SettingsViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "Settings"
+        title = L("Settings")
         view.backgroundColor = .systemGroupedBackground
 
         navigationItem.rightBarButtonItem = UIBarButtonItem(
@@ -67,10 +67,10 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         switch Section(rawValue: section) {
-        case .profile: return "Profile"
-        case .sound: return "Sound"
-        case .color: return "Color"
-        case .misc: return "Misc"
+        case .profile: return L("Profile")
+        case .sound: return L("Sound")
+        case .color: return L("Color")
+        case .misc: return L("Misc")
         case .none: return nil
         }
     }
@@ -98,12 +98,12 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
     private func configureProfileCell(_ cell: UITableViewCell, row: Int) {
         switch row {
         case 0:
-            cell.textLabel?.text = "Profile Name"
+            cell.textLabel?.text = L("Profile Name")
             cell.detailTextLabel?.text = profile.name
             cell.accessoryType = .disclosureIndicator
             cell.selectionStyle = .default
         case 1:
-            cell.textLabel?.text = "Rounds"
+            cell.textLabel?.text = L("Rounds")
             let stepper = UIStepper()
             stepper.minimumValue = 1
             stepper.maximumValue = 99
@@ -112,7 +112,7 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
             cell.accessoryView = stepper
             cell.detailTextLabel?.text = "\(profile.rounds)"
         case 2:
-            cell.textLabel?.text = "Work (seconds)"
+            cell.textLabel?.text = L("Work (seconds)")
             let stepper = UIStepper()
             stepper.minimumValue = 5
             stepper.maximumValue = 600
@@ -122,7 +122,7 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
             cell.accessoryView = stepper
             cell.detailTextLabel?.text = "\(profile.workSeconds)"
         case 3:
-            cell.textLabel?.text = "Rest (seconds)"
+            cell.textLabel?.text = L("Rest (seconds)")
             let stepper = UIStepper()
             stepper.minimumValue = 5
             stepper.maximumValue = 300
@@ -132,7 +132,7 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
             cell.accessoryView = stepper
             cell.detailTextLabel?.text = "\(profile.restSeconds)"
         case 4:
-            cell.textLabel?.text = "Warning before round end"
+            cell.textLabel?.text = L("Warning before round end")
             let stepper = UIStepper()
             stepper.minimumValue = 0
             stepper.maximumValue = 30
@@ -141,7 +141,7 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
             cell.accessoryView = stepper
             cell.detailTextLabel?.text = "\(profile.warningSeconds)s"
         case 5:
-            cell.textLabel?.text = "Warm-up"
+            cell.textLabel?.text = L("Warm-up")
             let stack = UIStackView()
             let switch_ = UISwitch()
             switch_.isOn = profile.warmUpEnabled
@@ -155,7 +155,7 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
             stack.addArrangedSubview(switch_)
             cell.accessoryView = stack
         case 6:
-            cell.textLabel?.text = "Cool-down"
+            cell.textLabel?.text = L("Cool-down")
             let stack = UIStackView()
             let switch_ = UISwitch()
             switch_.isOn = profile.coolDownEnabled
@@ -169,7 +169,7 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
             stack.addArrangedSubview(switch_)
             cell.accessoryView = stack
         case 7:
-            cell.textLabel?.text = "Prepare time"
+            cell.textLabel?.text = L("Prepare time")
             let stepper = UIStepper()
             stepper.minimumValue = 0
             stepper.maximumValue = 30
@@ -186,15 +186,15 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
         let switch_ = UISwitch()
         switch row {
         case 0:
-            cell.textLabel?.text = "Start sound"
+            cell.textLabel?.text = L("Start sound")
             switch_.isOn = profile.startSoundEnabled
             switch_.addTarget(self, action: #selector(startSoundToggled(_:)), for: .valueChanged)
         case 1:
-            cell.textLabel?.text = "End sound"
+            cell.textLabel?.text = L("End sound")
             switch_.isOn = profile.endSoundEnabled
             switch_.addTarget(self, action: #selector(endSoundToggled(_:)), for: .valueChanged)
         case 2:
-            cell.textLabel?.text = "Warning sound"
+            cell.textLabel?.text = L("Warning sound")
             switch_.isOn = profile.warningSoundEnabled
             switch_.addTarget(self, action: #selector(warningSoundToggled(_:)), for: .valueChanged)
         default:
@@ -205,7 +205,7 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
 
     private func configureColorCell(_ cell: UITableViewCell, row: Int) {
         let colors = ["#FF6B6B", "#E0E0E0", "#FF8A80"]
-        let names = ["Work", "Rest", "Heart Rate"]
+        let names = [L("Work"), L("Rest"), L("Heart Rate")]
         let currentColors = [profile.workColor, profile.restColor, profile.heartRateColor]
 
         cell.textLabel?.text = names[row]
@@ -225,12 +225,13 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
     private func configureMiscCell(_ cell: UITableViewCell, row: Int) {
         switch row {
         case 0:
-            cell.textLabel?.text = "Language"
-            cell.detailTextLabel?.text = "System"
+            cell.textLabel?.text = L("Language")
+            let currentLang = LanguageManager.shared.currentLanguage
+            cell.detailTextLabel?.text = currentLang.displayName
             cell.accessoryType = .disclosureIndicator
             cell.selectionStyle = .default
         case 1:
-            cell.textLabel?.text = "Voice input"
+            cell.textLabel?.text = L("Voice input")
             let switch_ = UISwitch()
             switch_.isOn = false
             cell.accessoryView = switch_
@@ -315,6 +316,33 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
             }
             let nav = UINavigationController(rootViewController: vc)
             present(nav, animated: true)
+        } else if indexPath.section == Section.misc.rawValue && indexPath.row == 0 {
+            showLanguagePicker()
         }
+    }
+
+    private func showLanguagePicker() {
+        let alert = UIAlertController(title: L("Language"), message: nil, preferredStyle: .actionSheet)
+
+        for language in Language.allCases {
+            let action = UIAlertAction(title: language.displayName, style: .default) { [weak self] _ in
+                LanguageManager.shared.applyLanguage(language)
+                self?.tableView.reloadData()
+                self?.onSave?()
+            }
+            if language == LanguageManager.shared.currentLanguage {
+                action.setValue(true, forKey: "checked")
+            }
+            alert.addAction(action)
+        }
+
+        alert.addAction(UIAlertAction(title: L("Cancel"), style: .cancel))
+
+        if let popover = alert.popoverPresentationController {
+            popover.sourceView = tableView
+            popover.sourceRect = tableView.cellForRow(at: IndexPath(row: 0, section: Section.misc.rawValue))?.frame ?? .zero
+        }
+
+        present(alert, animated: true)
     }
 }
