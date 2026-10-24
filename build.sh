@@ -2,6 +2,6 @@
 
 xcodebuild -project PulseCycle.xcodeproj \
   -scheme PulseCycle \
-  -destination 'platform=iOS,name=iPhone' \
+  -destination 'generic/platform=iOS' \
   -allowProvisioningUpdates \
   build
