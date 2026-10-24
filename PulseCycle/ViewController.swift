@@ -1,9 +1,5 @@
-//
-//  ViewController.swift
-//  PulseCycle
-//
-//  Created by Jia Liu on 10/23/26.
-//
+// SPDX-License-Identifier: Apache-2.0-or-later
+// Copyright 2026 Jia Liu
 
 import UIKit
 
@@ -16,4 +12,3 @@ class ViewController: UIViewController {
 
 
 }
-
