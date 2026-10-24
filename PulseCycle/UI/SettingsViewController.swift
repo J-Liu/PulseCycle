@@ -9,6 +9,7 @@ class SettingsViewController: UIViewController {
     var onSave: (() -> Void)?
 
     private let tableView = UITableView(frame: .zero, style: .insetGrouped)
+    private var currentColorRow = 0
     private var profile: WorkoutProfile {
         ProfileManager.shared.currentProfile
     }
@@ -204,7 +205,6 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
     }
 
     private func configureColorCell(_ cell: UITableViewCell, row: Int) {
-        let colors = ["#FF6B6B", "#E0E0E0", "#FF8A80"]
         let names = [L("Work"), L("Rest"), L("Heart Rate")]
         let currentColors = [profile.workColor, profile.restColor, profile.heartRateColor]
 
@@ -220,6 +220,12 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
 
         cell.selectionStyle = .default
         cell.accessoryType = .disclosureIndicator
+
+        // Add long press gesture for reset
+        let longPress = UILongPressGestureRecognizer(target: self, action: #selector(handleColorLongPress(_:)))
+        longPress.minimumPressDuration = 0.5
+        cell.addGestureRecognizer(longPress)
+        cell.tag = row
     }
 
     private func configureMiscCell(_ cell: UITableViewCell, row: Int) {
@@ -318,6 +324,8 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
             present(nav, animated: true)
         } else if indexPath.section == Section.misc.rawValue && indexPath.row == 0 {
             showLanguagePicker()
+        } else if indexPath.section == Section.color.rawValue {
+            showColorPicker(for: indexPath.row)
         }
     }
 
@@ -344,5 +352,81 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
         }
 
         present(alert, animated: true)
+    }
+
+    private func showColorPicker(for row: Int) {
+        currentColorRow = row
+        let colorPicker = UIColorPickerViewController()
+        colorPicker.delegate = self
+
+        let currentColors = [profile.workColor, profile.restColor, profile.heartRateColor]
+        colorPicker.selectedColor = UIColor(hex: currentColors[row]) ?? .white
+
+        present(colorPicker, animated: true)
+    }
+
+    private func resetColor(for row: Int) {
+        var p = profile
+        let defaultColors = ["#FF6B6B", "#E0E0E0", "#FF8A80"]
+
+        switch row {
+        case 0:
+            p.workColor = defaultColors[0]
+        case 1:
+            p.restColor = defaultColors[1]
+        case 2:
+            p.heartRateColor = defaultColors[2]
+        default:
+            break
+        }
+
+        ProfileManager.shared.updateProfile(p)
+        tableView.reloadRows(at: [IndexPath(row: row, section: Section.color.rawValue)], with: .none)
+        onSave?()
+    }
+
+    @objc private func handleColorLongPress(_ gesture: UILongPressGestureRecognizer) {
+        guard gesture.state == .began else { return }
+        guard let cell = gesture.view as? UITableViewCell else { return }
+
+        let row = cell.tag
+        let colorNames = [L("Work"), L("Rest"), L("Heart Rate")]
+        let alert = UIAlertController(title: colorNames[row], message: nil, preferredStyle: .actionSheet)
+
+        alert.addAction(UIAlertAction(title: L("Reset to Default"), style: .default) { [weak self] _ in
+            self?.resetColor(for: row)
+        })
+
+        alert.addAction(UIAlertAction(title: L("Cancel"), style: .cancel))
+
+        if let popover = alert.popoverPresentationController {
+            popover.sourceView = cell
+            popover.sourceRect = cell.bounds
+        }
+
+        present(alert, animated: true)
+    }
+}
+
+extension SettingsViewController: UIColorPickerViewControllerDelegate {
+    func colorPickerViewControllerDidSelectColor(_ viewController: UIColorPickerViewController) {
+        let row = currentColorRow
+        let hex = viewController.selectedColor.toHexString()
+
+        var p = profile
+        switch row {
+        case 0:
+            p.workColor = hex
+        case 1:
+            p.restColor = hex
+        case 2:
+            p.heartRateColor = hex
+        default:
+            break
+        }
+
+        ProfileManager.shared.updateProfile(p)
+        tableView.reloadRows(at: [IndexPath(row: row, section: Section.color.rawValue)], with: .none)
+        onSave?()
     }
 }

@@ -43,6 +43,7 @@
 /* Settings - Color */
 "Color" = "颜色";
 "Heart Rate" = "心率";
+"Reset to Default" = "恢复默认";
 
 /* Settings - Misc */
 "Misc" = "杂项";

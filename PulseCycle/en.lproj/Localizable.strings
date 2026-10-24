@@ -43,6 +43,7 @@
 /* Settings - Color */
 "Color" = "Color";
 "Heart Rate" = "Heart Rate";
+"Reset to Default" = "Reset to Default";
 
 /* Settings - Misc */
 "Misc" = "Misc";
