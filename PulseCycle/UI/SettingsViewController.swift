@@ -362,7 +362,37 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
         let currentColors = [profile.workColor, profile.restColor, profile.heartRateColor]
         colorPicker.selectedColor = UIColor(hex: currentColors[row]) ?? .white
 
+        // Add toolbar with reset button
+        let toolbar = UIToolbar()
+        toolbar.sizeToFit()
+        let resetButton = UIBarButtonItem(title: L("Reset to Default"), style: .plain, target: self, action: #selector(resetColorFromPicker))
+        let flexibleSpace = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
+        let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(dismissColorPicker))
+        toolbar.items = [resetButton, flexibleSpace, doneButton]
+
+        colorPicker.additionalSafeAreaInsets = UIEdgeInsets(top: 0, left: 0, bottom: 44, right: 0)
+        colorPicker.view.addSubview(toolbar)
+        toolbar.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            toolbar.leadingAnchor.constraint(equalTo: colorPicker.view.leadingAnchor),
+            toolbar.trailingAnchor.constraint(equalTo: colorPicker.view.trailingAnchor),
+            toolbar.bottomAnchor.constraint(equalTo: colorPicker.view.safeAreaLayoutGuide.bottomAnchor),
+            toolbar.heightAnchor.constraint(equalToConstant: 44)
+        ])
+
         present(colorPicker, animated: true)
+    }
+
+    @objc private func resetColorFromPicker() {
+        resetColor(for: currentColorRow)
+        if let colorPicker = presentedViewController as? UIColorPickerViewController {
+            let currentColors = [profile.workColor, profile.restColor, profile.heartRateColor]
+            colorPicker.selectedColor = UIColor(hex: currentColors[currentColorRow]) ?? .white
+        }
+    }
+
+    @objc private func dismissColorPicker() {
+        dismiss(animated: true)
     }
 
     private func resetColor(for row: Int) {
