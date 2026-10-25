@@ -110,13 +110,13 @@ class TimePickerViewController: UIViewController {
                 pickerView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 60),
                 pickerView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -60),
 
-                minuteLabel.leadingAnchor.constraint(equalTo: pickerView.leadingAnchor, constant: -50),
+                minuteLabel.leadingAnchor.constraint(equalTo: pickerView.leadingAnchor, constant: -30),
                 minuteLabel.trailingAnchor.constraint(equalTo: pickerView.centerXAnchor, constant: -10),
-                minuteLabel.topAnchor.constraint(equalTo: pickerView.topAnchor, constant: 70),
+                minuteLabel.topAnchor.constraint(equalTo: pickerView.topAnchor, constant: 90),
 
-                secondLabel.leadingAnchor.constraint(equalTo: pickerView.centerXAnchor, constant: 10),
+                secondLabel.leadingAnchor.constraint(equalTo: pickerView.centerXAnchor, constant: -30),
                 secondLabel.trailingAnchor.constraint(equalTo: pickerView.trailingAnchor, constant: 50),
-                secondLabel.topAnchor.constraint(equalTo: pickerView.topAnchor, constant: 70)
+                secondLabel.topAnchor.constraint(equalTo: pickerView.topAnchor, constant: 90)
             ])
         }
 
