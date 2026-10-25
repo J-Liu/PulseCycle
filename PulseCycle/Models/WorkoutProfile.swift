@@ -28,7 +28,7 @@ struct WorkoutProfile: Codable, Identifiable {
         [
             WorkoutProfile(
                 id: UUID(),
-                name: "业余拳击",
+                name: "Amateur Boxing",
                 rounds: 4,
                 workSeconds: 120,
                 restSeconds: 60,
@@ -66,7 +66,7 @@ struct WorkoutProfile: Codable, Identifiable {
             ),
             WorkoutProfile(
                 id: UUID(),
-                name: "经典拳击",
+                name: "Classic Boxing",
                 rounds: 12,
                 workSeconds: 180,
                 restSeconds: 60,
@@ -85,7 +85,7 @@ struct WorkoutProfile: Codable, Identifiable {
             ),
             WorkoutProfile(
                 id: UUID(),
-                name: "拳击训练",
+                name: "Boxing Training",
                 rounds: 3,
                 workSeconds: 300,
                 restSeconds: 60,
@@ -104,7 +104,7 @@ struct WorkoutProfile: Codable, Identifiable {
             ),
             WorkoutProfile(
                 id: UUID(),
-                name: "跳绳",
+                name: "Jump Rope",
                 rounds: 5,
                 workSeconds: 120,
                 restSeconds: 60,

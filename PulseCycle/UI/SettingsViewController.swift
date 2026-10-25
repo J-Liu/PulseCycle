@@ -336,37 +336,17 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
     }
 
     private func showTimePicker(title: String, currentValue: Int, minValue: Int, maxValue: Int, step: Int, completion: @escaping (Int) -> Void) {
-        let alert = UIAlertController(title: title, message: nil, preferredStyle: .actionSheet)
-
+        var values: [Int] = []
         var value = minValue
         while value <= maxValue {
-            let displayText: String
-            if value >= 60 && value % 60 == 0 {
-                displayText = "\(value / 60)m"
-            } else if value >= 60 {
-                displayText = "\(value / 60)m \(value % 60)s"
-            } else {
-                displayText = "\(value)s"
-            }
-
-            let action = UIAlertAction(title: displayText, style: .default) { _ in
-                completion(value)
-            }
-            if value == currentValue {
-                action.setValue(true, forKey: "checked")
-            }
-            alert.addAction(action)
+            values.append(value)
             value += step
         }
 
-        alert.addAction(UIAlertAction(title: L("Cancel"), style: .cancel))
-
-        if let popover = alert.popoverPresentationController {
-            popover.sourceView = tableView
-            popover.sourceRect = tableView.frame
-        }
-
-        present(alert, animated: true)
+        let picker = TimePickerViewController(title: title, values: values, currentValue: currentValue, completion: completion)
+        picker.modalPresentationStyle = .overFullScreen
+        picker.modalTransitionStyle = .crossDissolve
+        present(picker, animated: true)
     }
 
     private func showLanguagePicker() {
