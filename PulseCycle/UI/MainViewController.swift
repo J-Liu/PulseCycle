@@ -116,7 +116,7 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
             engine.pause()
         } else {
             let profile = ProfileManager.shared.currentProfile
-            if profile.startSoundEnabled && engine.phase == .warmUp && engine.remainingSeconds == profile.warmUpSeconds {
+            if profile.prepareCountingSoundEnabled && engine.phase == .warmUp && engine.remainingSeconds == profile.warmUpSeconds {
                 startCountdown()
             } else {
                 engine.start()
@@ -461,9 +461,9 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
         DispatchQueue.main.async { [weak self] in
             self?.updateUI()
 
-            // Play warning sound 10 seconds before round ends
+            // Play ending notify sound 10 seconds before round ends
             let profile = ProfileManager.shared.currentProfile
-            if profile.warningSoundEnabled && engine.phase == .work && engine.remainingSeconds == 10 {
+            if profile.endingNotifySoundEnabled && engine.phase == .work && engine.remainingSeconds == 10 {
                 SoundManager.shared.playPreRoundWarningSound()
             }
         }

@@ -36,7 +36,9 @@
 
 /* Settings - Sound */
 "Sound" = "Sound";
+"Prepare counting sound" = "Prepare counting sound";
 "Start sound" = "Start sound";
+"Ending notify sound" = "Ending notify sound";
 "End sound" = "End sound";
 "Warning sound" = "Warning sound";
 

@@ -36,7 +36,9 @@
 
 /* Settings - Sound */
 "Sound" = "聲音";
+"Prepare counting sound" = "準備倒計時聲音";
 "Start sound" = "開始聲音";
+"Ending notify sound" = "結束提醒聲音";
 "End sound" = "結束聲音";
 "Warning sound" = "警告聲音";
 

@@ -59,7 +59,7 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         switch Section(rawValue: section) {
         case .profile: return 8
-        case .sound: return 3
+        case .sound: return 5
         case .color: return 3
         case .misc: return 2
         case .none: return 0
@@ -187,14 +187,22 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
         let switch_ = UISwitch()
         switch row {
         case 0:
+            cell.textLabel?.text = L("Prepare counting sound")
+            switch_.isOn = profile.prepareCountingSoundEnabled
+            switch_.addTarget(self, action: #selector(prepareCountingSoundToggled(_:)), for: .valueChanged)
+        case 1:
             cell.textLabel?.text = L("Start sound")
             switch_.isOn = profile.startSoundEnabled
             switch_.addTarget(self, action: #selector(startSoundToggled(_:)), for: .valueChanged)
-        case 1:
+        case 2:
+            cell.textLabel?.text = L("Ending notify sound")
+            switch_.isOn = profile.endingNotifySoundEnabled
+            switch_.addTarget(self, action: #selector(endingNotifySoundToggled(_:)), for: .valueChanged)
+        case 3:
             cell.textLabel?.text = L("End sound")
             switch_.isOn = profile.endSoundEnabled
             switch_.addTarget(self, action: #selector(endSoundToggled(_:)), for: .valueChanged)
-        case 2:
+        case 4:
             cell.textLabel?.text = L("Warning sound")
             switch_.isOn = profile.warningSoundEnabled
             switch_.addTarget(self, action: #selector(warningSoundToggled(_:)), for: .valueChanged)
@@ -293,9 +301,21 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
         tableView.reloadRows(at: [IndexPath(row: 5, section: 0), IndexPath(row: 7, section: 0)], with: .none)
     }
 
+    @objc private func prepareCountingSoundToggled(_ switch_: UISwitch) {
+        var p = profile
+        p.prepareCountingSoundEnabled = switch_.isOn
+        ProfileManager.shared.updateProfile(p)
+    }
+
     @objc private func startSoundToggled(_ switch_: UISwitch) {
         var p = profile
         p.startSoundEnabled = switch_.isOn
+        ProfileManager.shared.updateProfile(p)
+    }
+
+    @objc private func endingNotifySoundToggled(_ switch_: UISwitch) {
+        var p = profile
+        p.endingNotifySoundEnabled = switch_.isOn
         ProfileManager.shared.updateProfile(p)
     }
 
