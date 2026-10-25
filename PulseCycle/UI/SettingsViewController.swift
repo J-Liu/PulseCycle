@@ -336,14 +336,7 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
     }
 
     private func showTimePicker(title: String, currentValue: Int, minValue: Int, maxValue: Int, step: Int, completion: @escaping (Int) -> Void) {
-        var values: [Int] = []
-        var value = minValue
-        while value <= maxValue {
-            values.append(value)
-            value += step
-        }
-
-        let picker = TimePickerViewController(title: title, values: values, currentValue: currentValue, completion: completion)
+        let picker = TimePickerViewController(title: title, currentValue: currentValue, maxValue: maxValue, step: step, completion: completion)
         picker.modalPresentationStyle = .overFullScreen
         picker.modalTransitionStyle = .crossDissolve
         present(picker, animated: true)

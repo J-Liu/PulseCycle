@@ -7,19 +7,37 @@ import UIKit
 
 class TimePickerViewController: UIViewController {
     private let pickerView = UIPickerView()
-    private var values: [Int]
-    private var selectedIndex: Int
     private let titleText: String
-    private let unit: String
+    private let maxValue: Int
+    private let step: Int
     private let completion: (Int) -> Void
 
-    init(title: String, values: [Int], currentValue: Int, unit: String = "s", completion: @escaping (Int) -> Void) {
+    private var minutes: [Int] = []
+    private var seconds: [Int] = []
+    private var initialMinutes: Int = 0
+    private var initialSeconds: Int = 0
+
+    init(title: String, currentValue: Int, maxValue: Int, step: Int, completion: @escaping (Int) -> Void) {
         self.titleText = title
-        self.values = values
-        self.unit = unit
+        self.maxValue = maxValue
+        self.step = step
         self.completion = completion
-        self.selectedIndex = values.firstIndex(of: currentValue) ?? 0
         super.init(nibName: nil, bundle: nil)
+
+        // Calculate minutes and seconds arrays
+        let maxMinutes = maxValue / 60
+        minutes = Array(0...maxMinutes)
+
+        // Generate seconds based on step
+        var secs = 0
+        while secs < 60 {
+            seconds.append(secs)
+            secs += step
+        }
+
+        // Calculate initial values
+        initialMinutes = currentValue / 60
+        initialSeconds = (currentValue % 60 / step) * step
     }
 
     required init?(coder: NSCoder) {
@@ -49,11 +67,26 @@ class TimePickerViewController: UIViewController {
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         containerView.addSubview(titleLabel)
 
+        // Labels for units
+        let minuteLabel = UILabel()
+        minuteLabel.text = L("min")
+        minuteLabel.font = .systemFont(ofSize: 16)
+        minuteLabel.textAlignment = .center
+        minuteLabel.translatesAutoresizingMaskIntoConstraints = false
+
+        let secondLabel = UILabel()
+        secondLabel.text = L("sec")
+        secondLabel.font = .systemFont(ofSize: 16)
+        secondLabel.textAlignment = .center
+        secondLabel.translatesAutoresizingMaskIntoConstraints = false
+
         // Picker
         pickerView.delegate = self
         pickerView.dataSource = self
         pickerView.translatesAutoresizingMaskIntoConstraints = false
         containerView.addSubview(pickerView)
+        containerView.addSubview(minuteLabel)
+        containerView.addSubview(secondLabel)
 
         // Buttons
         let cancelButton = UIButton(type: .system)
@@ -84,9 +117,17 @@ class TimePickerViewController: UIViewController {
             titleLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
 
             pickerView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 8),
-            pickerView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
-            pickerView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
+            pickerView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 40),
+            pickerView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -40),
             pickerView.heightAnchor.constraint(equalToConstant: 180),
+
+            minuteLabel.leadingAnchor.constraint(equalTo: pickerView.leadingAnchor),
+            minuteLabel.trailingAnchor.constraint(equalTo: pickerView.centerXAnchor, constant: -10),
+            minuteLabel.topAnchor.constraint(equalTo: pickerView.topAnchor, constant: 70),
+
+            secondLabel.leadingAnchor.constraint(equalTo: pickerView.centerXAnchor, constant: 10),
+            secondLabel.trailingAnchor.constraint(equalTo: pickerView.trailingAnchor),
+            secondLabel.topAnchor.constraint(equalTo: pickerView.topAnchor, constant: 70),
 
             buttonStack.topAnchor.constraint(equalTo: pickerView.bottomAnchor, constant: 8),
             buttonStack.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
@@ -95,7 +136,9 @@ class TimePickerViewController: UIViewController {
             buttonStack.heightAnchor.constraint(equalToConstant: 44)
         ])
 
-        pickerView.selectRow(selectedIndex, inComponent: 0, animated: false)
+        // Set initial values
+        pickerView.selectRow(initialMinutes, inComponent: 0, animated: false)
+        pickerView.selectRow(initialSeconds / step, inComponent: 1, animated: false)
     }
 
     @objc private func cancelTapped() {
@@ -103,33 +146,42 @@ class TimePickerViewController: UIViewController {
     }
 
     @objc private func doneTapped() {
-        let selectedValue = values[pickerView.selectedRow(inComponent: 0)]
-        completion(selectedValue)
+        let selectedMinutes = pickerView.selectedRow(inComponent: 0)
+        let selectedSecondsIndex = pickerView.selectedRow(inComponent: 1)
+        let selectedSeconds = seconds[selectedSecondsIndex]
+
+        let totalSeconds = selectedMinutes * 60 + selectedSeconds
+        completion(totalSeconds)
         dismiss(animated: true)
     }
 }
 
 extension TimePickerViewController: UIPickerViewDelegate, UIPickerViewDataSource {
     func numberOfComponents(in pickerView: UIPickerView) -> Int {
-        return 1
+        return 2
     }
 
     func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-        return values.count
+        if component == 0 {
+            return minutes.count
+        } else {
+            return seconds.count
+        }
     }
 
     func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
-        let value = values[row]
-        if value >= 60 && value % 60 == 0 {
-            return "\(value / 60)m"
-        } else if value >= 60 {
-            return "\(value / 60)m \(value % 60)s"
+        if component == 0 {
+            return "\(minutes[row])"
         } else {
-            return "\(value)\(unit)"
+            return String(format: "%02d", seconds[row])
         }
     }
 
     func pickerView(_ pickerView: UIPickerView, rowHeightForComponent component: Int) -> CGFloat {
         return 44
+    }
+
+    func pickerView(_ pickerView: UIPickerView, widthForComponent component: Int) -> CGFloat {
+        return 100
     }
 }
