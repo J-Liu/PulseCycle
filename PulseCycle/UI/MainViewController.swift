@@ -4,7 +4,6 @@
 // under Section 7. See LICENSE for details.
 
 import UIKit
-import AudioToolbox
 
 class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMonitorDelegate {
     private let headerView = UIView()
@@ -116,6 +115,10 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
         if isRunning {
             engine.pause()
         } else {
+            let profile = ProfileManager.shared.currentProfile
+            if profile.startSoundEnabled && engine.phase == .warmUp && engine.remainingSeconds == profile.warmUpSeconds {
+                SoundManager.shared.playStartSound()
+            }
             engine.start()
         }
         isRunning.toggle()
@@ -448,8 +451,8 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
             UIApplication.shared.isIdleTimerDisabled = true
 
             let profile = ProfileManager.shared.currentProfile
-            if profile.warningSoundEnabled && phase == .rest && engine.currentRound > 0 {
-                AudioServicesPlaySystemSound(1052)
+            if profile.warningSoundEnabled {
+                SoundManager.shared.playWarningSound()
             }
         }
     }
@@ -466,7 +469,7 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
 
             let profile = ProfileManager.shared.currentProfile
             if profile.endSoundEnabled {
-                AudioServicesPlaySystemSound(1057)
+                SoundManager.shared.playEndSound()
             }
         }
     }
