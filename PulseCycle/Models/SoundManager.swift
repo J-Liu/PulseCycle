@@ -46,15 +46,19 @@ class SoundManager {
         player.play()
     }
 
-    func playStartSound() {
+    func playCountdownBeep() {
+        playSound("countdown_beep")
+    }
+
+    func playPhaseStartSound() {
         playSound("boxing-bell-1")
     }
 
-    func playEndSound() {
-        playSound("boxing-bell-3")
+    func playPreRoundWarningSound() {
+        playSound("boxing-bell-2")
     }
 
-    func playWarningSound() {
-        playSound("countdown_beep")
+    func playRoundEndSound() {
+        playSound("boxing-bell-3")
     }
 }

@@ -117,12 +117,32 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
         } else {
             let profile = ProfileManager.shared.currentProfile
             if profile.startSoundEnabled && engine.phase == .warmUp && engine.remainingSeconds == profile.warmUpSeconds {
-                SoundManager.shared.playStartSound()
+                startCountdown()
+            } else {
+                engine.start()
             }
-            engine.start()
         }
         isRunning.toggle()
         updateGoButton()
+    }
+
+    private func startCountdown() {
+        var countdown = 5
+        let timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] timer in
+            guard let self = self else {
+                timer.invalidate()
+                return
+            }
+
+            SoundManager.shared.playCountdownBeep()
+            countdown -= 1
+
+            if countdown == 0 {
+                timer.invalidate()
+                self.engine.start()
+            }
+        }
+        timer.fire()
     }
 
     @objc private func handleSettings() {
@@ -440,6 +460,12 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
     func engineDidUpdateState(_ engine: IntervalEngine) {
         DispatchQueue.main.async { [weak self] in
             self?.updateUI()
+
+            // Play warning sound 10 seconds before round ends
+            let profile = ProfileManager.shared.currentProfile
+            if profile.warningSoundEnabled && engine.phase == .work && engine.remainingSeconds == 10 {
+                SoundManager.shared.playPreRoundWarningSound()
+            }
         }
     }
 
@@ -450,9 +476,10 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
             self.impactGenerator.impactOccurred()
             UIApplication.shared.isIdleTimerDisabled = true
 
+            // Play phase start sound for warmUp, work, coolDown
             let profile = ProfileManager.shared.currentProfile
-            if profile.warningSoundEnabled {
-                SoundManager.shared.playWarningSound()
+            if profile.startSoundEnabled && (phase == .warmUp || phase == .work || phase == .coolDown) {
+                SoundManager.shared.playPhaseStartSound()
             }
         }
     }
@@ -467,9 +494,10 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
             self.hasReset = false
             self.updateGoButton()
 
+            // Play round end sound
             let profile = ProfileManager.shared.currentProfile
             if profile.endSoundEnabled {
-                SoundManager.shared.playEndSound()
+                SoundManager.shared.playRoundEndSound()
             }
         }
     }
