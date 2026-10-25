@@ -272,13 +272,7 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
         if indexPath.section == Section.profile.rawValue {
             switch indexPath.row {
             case 0:
-                let vc = ProfileListViewController()
-                vc.onSelect = { [weak self] in
-                    self?.tableView.reloadData()
-                    self?.onSave?()
-                }
-                let nav = UINavigationController(rootViewController: vc)
-                present(nav, animated: true)
+                showNameEditor()
             case 1:
                 showRoundsPicker(title: L("Rounds"), currentValue: profile.rounds) { [weak self] value in
                     var p = ProfileManager.shared.currentProfile
@@ -348,6 +342,24 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
         picker.modalPresentationStyle = .overFullScreen
         picker.modalTransitionStyle = .crossDissolve
         present(picker, animated: true)
+    }
+
+    private func showNameEditor() {
+        let alert = UIAlertController(title: L("Profile Name"), message: nil, preferredStyle: .alert)
+        alert.addTextField { textField in
+            textField.text = ProfileManager.shared.currentProfile.name
+            textField.placeholder = L("Enter name")
+        }
+        alert.addAction(UIAlertAction(title: L("Cancel"), style: .cancel))
+        alert.addAction(UIAlertAction(title: L("Done"), style: .default) { [weak self] _ in
+            guard let name = alert.textFields?.first?.text, !name.isEmpty else { return }
+            var p = ProfileManager.shared.currentProfile
+            p.name = name
+            ProfileManager.shared.updateProfile(p)
+            self?.tableView.reloadRows(at: [IndexPath(row: 0, section: 0)], with: .none)
+            self?.onSave?()
+        })
+        present(alert, animated: true)
     }
 
     private func showLanguagePicker() {

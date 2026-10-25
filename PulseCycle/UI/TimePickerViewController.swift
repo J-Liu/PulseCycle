@@ -107,16 +107,16 @@ class TimePickerViewController: UIViewController {
             containerView.addSubview(secondLabel)
 
             NSLayoutConstraint.activate([
-                pickerView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 60),
-                pickerView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -60),
+                pickerView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
+                pickerView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
 
-                minuteLabel.leadingAnchor.constraint(equalTo: pickerView.leadingAnchor, constant: -30),
-                minuteLabel.trailingAnchor.constraint(equalTo: pickerView.centerXAnchor, constant: -10),
-                minuteLabel.topAnchor.constraint(equalTo: pickerView.topAnchor, constant: 90),
+                minuteLabel.leadingAnchor.constraint(equalTo: pickerView.leadingAnchor, constant: -45),
+                minuteLabel.trailingAnchor.constraint(equalTo: pickerView.centerXAnchor, constant: -25),
+                minuteLabel.topAnchor.constraint(equalTo: pickerView.topAnchor, constant: 80),
 
-                secondLabel.leadingAnchor.constraint(equalTo: pickerView.centerXAnchor, constant: -30),
-                secondLabel.trailingAnchor.constraint(equalTo: pickerView.trailingAnchor, constant: 50),
-                secondLabel.topAnchor.constraint(equalTo: pickerView.topAnchor, constant: 90)
+                secondLabel.leadingAnchor.constraint(equalTo: pickerView.centerXAnchor, constant: -100),
+                secondLabel.trailingAnchor.constraint(equalTo: pickerView.trailingAnchor, constant: -20),
+                secondLabel.topAnchor.constraint(equalTo: pickerView.topAnchor, constant: 80)
             ])
         }
 
@@ -218,7 +218,7 @@ extension TimePickerViewController: UIPickerViewDelegate, UIPickerViewDataSource
         if isSingleWheel {
             return 200
         } else {
-            return 100
+            return 150
         }
     }
 }
