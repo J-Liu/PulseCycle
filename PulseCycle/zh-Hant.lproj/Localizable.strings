@@ -27,11 +27,12 @@
 /* Settings - Profile */
 "Profile Name" = "方案名稱";
 "Rounds" = "輪數";
-"Work (seconds)" = "運動時間（秒）";
-"Rest (seconds)" = "休息時間（秒）";
+"Work" = "運動";
+"Rest" = "休息";
 "Warm-up" = "熱身";
 "Cool-down" = "放鬆";
 "Prepare time" = "準備時間";
+"Disabled" = "已禁用";
 
 /* Settings - Sound */
 "Sound" = "聲音";

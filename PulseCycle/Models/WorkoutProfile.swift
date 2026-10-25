@@ -11,6 +11,7 @@ struct WorkoutProfile: Codable, Identifiable {
     var rounds: Int
     var workSeconds: Int
     var restSeconds: Int
+    var prepareTime: Int
     var warmUpSeconds: Int
     var warmUpEnabled: Bool
     var coolDownSeconds: Int
@@ -23,25 +24,108 @@ struct WorkoutProfile: Codable, Identifiable {
     var restColor: String
     var heartRateColor: String
 
+    static var defaultProfiles: [WorkoutProfile] {
+        [
+            WorkoutProfile(
+                id: UUID(),
+                name: "业余拳击",
+                rounds: 4,
+                workSeconds: 120,
+                restSeconds: 60,
+                prepareTime: 5,
+                warmUpSeconds: 180,
+                warmUpEnabled: false,
+                coolDownSeconds: 180,
+                coolDownEnabled: false,
+                prepareCountingSoundEnabled: true,
+                startSoundEnabled: true,
+                endingNotifySoundEnabled: true,
+                endSoundEnabled: true,
+                workColor: "#FF6B6B",
+                restColor: "#E0E0E0",
+                heartRateColor: "#FF8A80"
+            ),
+            WorkoutProfile(
+                id: UUID(),
+                name: "MMA",
+                rounds: 5,
+                workSeconds: 300,
+                restSeconds: 60,
+                prepareTime: 5,
+                warmUpSeconds: 300,
+                warmUpEnabled: false,
+                coolDownSeconds: 300,
+                coolDownEnabled: false,
+                prepareCountingSoundEnabled: true,
+                startSoundEnabled: true,
+                endingNotifySoundEnabled: true,
+                endSoundEnabled: true,
+                workColor: "#FF6B6B",
+                restColor: "#E0E0E0",
+                heartRateColor: "#FF8A80"
+            ),
+            WorkoutProfile(
+                id: UUID(),
+                name: "经典拳击",
+                rounds: 12,
+                workSeconds: 180,
+                restSeconds: 60,
+                prepareTime: 5,
+                warmUpSeconds: 180,
+                warmUpEnabled: false,
+                coolDownSeconds: 180,
+                coolDownEnabled: false,
+                prepareCountingSoundEnabled: true,
+                startSoundEnabled: true,
+                endingNotifySoundEnabled: true,
+                endSoundEnabled: true,
+                workColor: "#FF6B6B",
+                restColor: "#E0E0E0",
+                heartRateColor: "#FF8A80"
+            ),
+            WorkoutProfile(
+                id: UUID(),
+                name: "拳击训练",
+                rounds: 3,
+                workSeconds: 300,
+                restSeconds: 60,
+                prepareTime: 5,
+                warmUpSeconds: 600,
+                warmUpEnabled: true,
+                coolDownSeconds: 600,
+                coolDownEnabled: true,
+                prepareCountingSoundEnabled: true,
+                startSoundEnabled: true,
+                endingNotifySoundEnabled: true,
+                endSoundEnabled: true,
+                workColor: "#FF6B6B",
+                restColor: "#E0E0E0",
+                heartRateColor: "#FF8A80"
+            ),
+            WorkoutProfile(
+                id: UUID(),
+                name: "跳绳",
+                rounds: 5,
+                workSeconds: 120,
+                restSeconds: 60,
+                prepareTime: 5,
+                warmUpSeconds: 120,
+                warmUpEnabled: false,
+                coolDownSeconds: 120,
+                coolDownEnabled: false,
+                prepareCountingSoundEnabled: true,
+                startSoundEnabled: true,
+                endingNotifySoundEnabled: true,
+                endSoundEnabled: true,
+                workColor: "#FF6B6B",
+                restColor: "#E0E0E0",
+                heartRateColor: "#FF8A80"
+            )
+        ]
+    }
+
     static var defaultProfile: WorkoutProfile {
-        WorkoutProfile(
-            id: UUID(),
-            name: "Default",
-            rounds: 8,
-            workSeconds: 30,
-            restSeconds: 15,
-            warmUpSeconds: 60,
-            warmUpEnabled: true,
-            coolDownSeconds: 60,
-            coolDownEnabled: true,
-            prepareCountingSoundEnabled: true,
-            startSoundEnabled: true,
-            endingNotifySoundEnabled: true,
-            endSoundEnabled: true,
-            workColor: "#FF6B6B",
-            restColor: "#E0E0E0",
-            heartRateColor: "#FF8A80"
-        )
+        return defaultProfiles[0]
     }
 }
 
@@ -61,7 +145,7 @@ class ProfileManager {
            let decoded = try? JSONDecoder().decode([WorkoutProfile].self, from: data) {
             profiles = decoded
         } else {
-            profiles = [WorkoutProfile.defaultProfile]
+            profiles = WorkoutProfile.defaultProfiles
         }
     }
 

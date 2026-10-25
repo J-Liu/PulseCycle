@@ -105,73 +105,60 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
             cell.selectionStyle = .default
         case 1:
             cell.textLabel?.text = L("Rounds")
-            let stepper = UIStepper()
-            stepper.minimumValue = 1
-            stepper.maximumValue = 99
-            stepper.value = Double(profile.rounds)
-            stepper.addTarget(self, action: #selector(roundsChanged(_:)), for: .valueChanged)
-            cell.accessoryView = stepper
             cell.detailTextLabel?.text = "\(profile.rounds)"
+            cell.accessoryType = .disclosureIndicator
+            cell.selectionStyle = .default
         case 2:
-            cell.textLabel?.text = L("Work (seconds)")
-            let stepper = UIStepper()
-            stepper.minimumValue = 5
-            stepper.maximumValue = 600
-            stepper.stepValue = 5
-            stepper.value = Double(profile.workSeconds)
-            stepper.addTarget(self, action: #selector(workChanged(_:)), for: .valueChanged)
-            cell.accessoryView = stepper
-            cell.detailTextLabel?.text = "\(profile.workSeconds)"
+            cell.textLabel?.text = L("Work")
+            cell.detailTextLabel?.text = formatTime(profile.workSeconds)
+            cell.accessoryType = .disclosureIndicator
+            cell.selectionStyle = .default
         case 3:
-            cell.textLabel?.text = L("Rest (seconds)")
-            let stepper = UIStepper()
-            stepper.minimumValue = 5
-            stepper.maximumValue = 300
-            stepper.stepValue = 5
-            stepper.value = Double(profile.restSeconds)
-            stepper.addTarget(self, action: #selector(restChanged(_:)), for: .valueChanged)
-            cell.accessoryView = stepper
-            cell.detailTextLabel?.text = "\(profile.restSeconds)"
+            cell.textLabel?.text = L("Rest")
+            cell.detailTextLabel?.text = formatTime(profile.restSeconds)
+            cell.accessoryType = .disclosureIndicator
+            cell.selectionStyle = .default
         case 4:
-            cell.textLabel?.text = L("Warm-up")
-            let stack = UIStackView()
-            let switch_ = UISwitch()
-            switch_.isOn = profile.warmUpEnabled
-            switch_.addTarget(self, action: #selector(warmUpToggled(_:)), for: .valueChanged)
-            let label = UILabel()
-            label.text = "\(profile.warmUpSeconds)s"
-            label.textColor = .secondaryLabel
-            stack.axis = .horizontal
-            stack.spacing = 8
-            stack.addArrangedSubview(label)
-            stack.addArrangedSubview(switch_)
-            cell.accessoryView = stack
-        case 5:
-            cell.textLabel?.text = L("Cool-down")
-            let stack = UIStackView()
-            let switch_ = UISwitch()
-            switch_.isOn = profile.coolDownEnabled
-            switch_.addTarget(self, action: #selector(coolDownToggled(_:)), for: .valueChanged)
-            let label = UILabel()
-            label.text = "\(profile.coolDownSeconds)s"
-            label.textColor = .secondaryLabel
-            stack.axis = .horizontal
-            stack.spacing = 8
-            stack.addArrangedSubview(label)
-            stack.addArrangedSubview(switch_)
-            cell.accessoryView = stack
-        case 6:
             cell.textLabel?.text = L("Prepare time")
-            let stepper = UIStepper()
-            stepper.minimumValue = 0
-            stepper.maximumValue = 30
-            stepper.value = Double(profile.warmUpSeconds)
-            stepper.addTarget(self, action: #selector(prepareChanged(_:)), for: .valueChanged)
-            cell.accessoryView = stepper
-            cell.detailTextLabel?.text = "\(profile.warmUpSeconds)s"
+            cell.detailTextLabel?.text = "\(profile.prepareTime)s"
+            cell.accessoryType = .disclosureIndicator
+            cell.selectionStyle = .default
+        case 5:
+            let checkbox = UIButton(type: .custom)
+            checkbox.frame = CGRect(x: 0, y: 0, width: 30, height: 30)
+            checkbox.setImage(UIImage(systemName: profile.warmUpEnabled ? "checkmark.square.fill" : "square"), for: .normal)
+            checkbox.tintColor = .systemBlue
+            checkbox.tag = 5
+            checkbox.addTarget(self, action: #selector(warmUpCheckboxTapped(_:)), for: .touchUpInside)
+            cell.accessoryView = checkbox
+            cell.textLabel?.text = L("Warm-up")
+            cell.detailTextLabel?.text = profile.warmUpEnabled ? formatTime(profile.warmUpSeconds) : L("Disabled")
+            cell.selectionStyle = profile.warmUpEnabled ? .default : .none
+            cell.isUserInteractionEnabled = true
+        case 6:
+            let checkbox = UIButton(type: .custom)
+            checkbox.frame = CGRect(x: 0, y: 0, width: 30, height: 30)
+            checkbox.setImage(UIImage(systemName: profile.coolDownEnabled ? "checkmark.square.fill" : "square"), for: .normal)
+            checkbox.tintColor = .systemBlue
+            checkbox.tag = 6
+            checkbox.addTarget(self, action: #selector(coolDownCheckboxTapped(_:)), for: .touchUpInside)
+            cell.accessoryView = checkbox
+            cell.textLabel?.text = L("Cool-down")
+            cell.detailTextLabel?.text = profile.coolDownEnabled ? formatTime(profile.coolDownSeconds) : L("Disabled")
+            cell.selectionStyle = profile.coolDownEnabled ? .default : .none
+            cell.isUserInteractionEnabled = true
         default:
             break
         }
+    }
+
+    private func formatTime(_ seconds: Int) -> String {
+        let minutes = seconds / 60
+        let secs = seconds % 60
+        if minutes > 0 {
+            return "\(minutes)m \(secs)s"
+        }
+        return "\(secs)s"
     }
 
     private func configureSoundCell(_ cell: UITableViewCell, row: Int) {
@@ -241,44 +228,18 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
         }
     }
 
-    @objc private func roundsChanged(_ stepper: UIStepper) {
+    @objc private func warmUpCheckboxTapped(_ sender: UIButton) {
         var p = profile
-        p.rounds = Int(stepper.value)
+        p.warmUpEnabled = !p.warmUpEnabled
         ProfileManager.shared.updateProfile(p)
-        tableView.reloadRows(at: [IndexPath(row: 1, section: 0)], with: .none)
+        tableView.reloadRows(at: [IndexPath(row: 5, section: 0)], with: .none)
     }
 
-    @objc private func workChanged(_ stepper: UIStepper) {
+    @objc private func coolDownCheckboxTapped(_ sender: UIButton) {
         var p = profile
-        p.workSeconds = Int(stepper.value)
+        p.coolDownEnabled = !p.coolDownEnabled
         ProfileManager.shared.updateProfile(p)
-        tableView.reloadRows(at: [IndexPath(row: 2, section: 0)], with: .none)
-    }
-
-    @objc private func restChanged(_ stepper: UIStepper) {
-        var p = profile
-        p.restSeconds = Int(stepper.value)
-        ProfileManager.shared.updateProfile(p)
-        tableView.reloadRows(at: [IndexPath(row: 3, section: 0)], with: .none)
-    }
-
-    @objc private func warmUpToggled(_ switch_: UISwitch) {
-        var p = profile
-        p.warmUpEnabled = switch_.isOn
-        ProfileManager.shared.updateProfile(p)
-    }
-
-    @objc private func coolDownToggled(_ switch_: UISwitch) {
-        var p = profile
-        p.coolDownEnabled = switch_.isOn
-        ProfileManager.shared.updateProfile(p)
-    }
-
-    @objc private func prepareChanged(_ stepper: UIStepper) {
-        var p = profile
-        p.warmUpSeconds = Int(stepper.value)
-        ProfileManager.shared.updateProfile(p)
-        tableView.reloadRows(at: [IndexPath(row: 5, section: 0), IndexPath(row: 7, section: 0)], with: .none)
+        tableView.reloadRows(at: [IndexPath(row: 6, section: 0)], with: .none)
     }
 
     @objc private func prepareCountingSoundToggled(_ switch_: UISwitch) {
@@ -308,19 +269,104 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
 
-        if indexPath.section == Section.profile.rawValue && indexPath.row == 0 {
-            let vc = ProfileListViewController()
-            vc.onSelect = { [weak self] in
-                self?.tableView.reloadData()
-                self?.onSave?()
+        if indexPath.section == Section.profile.rawValue {
+            switch indexPath.row {
+            case 0:
+                let vc = ProfileListViewController()
+                vc.onSelect = { [weak self] in
+                    self?.tableView.reloadData()
+                    self?.onSave?()
+                }
+                let nav = UINavigationController(rootViewController: vc)
+                present(nav, animated: true)
+            case 1:
+                showTimePicker(title: L("Rounds"), currentValue: profile.rounds, minValue: 1, maxValue: 99, step: 1) { [weak self] value in
+                    var p = ProfileManager.shared.currentProfile
+                    p.rounds = value
+                    ProfileManager.shared.updateProfile(p)
+                    self?.tableView.reloadRows(at: [IndexPath(row: 1, section: 0)], with: .none)
+                }
+            case 2:
+                showTimePicker(title: L("Work"), currentValue: profile.workSeconds, minValue: 5, maxValue: 600, step: 5) { [weak self] value in
+                    var p = ProfileManager.shared.currentProfile
+                    p.workSeconds = value
+                    ProfileManager.shared.updateProfile(p)
+                    self?.tableView.reloadRows(at: [IndexPath(row: 2, section: 0)], with: .none)
+                }
+            case 3:
+                showTimePicker(title: L("Rest"), currentValue: profile.restSeconds, minValue: 5, maxValue: 300, step: 5) { [weak self] value in
+                    var p = ProfileManager.shared.currentProfile
+                    p.restSeconds = value
+                    ProfileManager.shared.updateProfile(p)
+                    self?.tableView.reloadRows(at: [IndexPath(row: 3, section: 0)], with: .none)
+                }
+            case 4:
+                showTimePicker(title: L("Prepare time"), currentValue: profile.prepareTime, minValue: 0, maxValue: 30, step: 1) { [weak self] value in
+                    var p = ProfileManager.shared.currentProfile
+                    p.prepareTime = value
+                    ProfileManager.shared.updateProfile(p)
+                    self?.tableView.reloadRows(at: [IndexPath(row: 4, section: 0)], with: .none)
+                }
+            case 5:
+                if profile.warmUpEnabled {
+                    showTimePicker(title: L("Warm-up"), currentValue: profile.warmUpSeconds, minValue: 10, maxValue: 1800, step: 10) { [weak self] value in
+                        var p = ProfileManager.shared.currentProfile
+                        p.warmUpSeconds = value
+                        ProfileManager.shared.updateProfile(p)
+                        self?.tableView.reloadRows(at: [IndexPath(row: 5, section: 0)], with: .none)
+                    }
+                }
+            case 6:
+                if profile.coolDownEnabled {
+                    showTimePicker(title: L("Cool-down"), currentValue: profile.coolDownSeconds, minValue: 10, maxValue: 1800, step: 10) { [weak self] value in
+                        var p = ProfileManager.shared.currentProfile
+                        p.coolDownSeconds = value
+                        ProfileManager.shared.updateProfile(p)
+                        self?.tableView.reloadRows(at: [IndexPath(row: 6, section: 0)], with: .none)
+                    }
+                }
+            default:
+                break
             }
-            let nav = UINavigationController(rootViewController: vc)
-            present(nav, animated: true)
         } else if indexPath.section == Section.misc.rawValue && indexPath.row == 0 {
             showLanguagePicker()
         } else if indexPath.section == Section.color.rawValue {
             showColorPicker(for: indexPath.row)
         }
+    }
+
+    private func showTimePicker(title: String, currentValue: Int, minValue: Int, maxValue: Int, step: Int, completion: @escaping (Int) -> Void) {
+        let alert = UIAlertController(title: title, message: nil, preferredStyle: .actionSheet)
+
+        var value = minValue
+        while value <= maxValue {
+            let displayText: String
+            if value >= 60 && value % 60 == 0 {
+                displayText = "\(value / 60)m"
+            } else if value >= 60 {
+                displayText = "\(value / 60)m \(value % 60)s"
+            } else {
+                displayText = "\(value)s"
+            }
+
+            let action = UIAlertAction(title: displayText, style: .default) { _ in
+                completion(value)
+            }
+            if value == currentValue {
+                action.setValue(true, forKey: "checked")
+            }
+            alert.addAction(action)
+            value += step
+        }
+
+        alert.addAction(UIAlertAction(title: L("Cancel"), style: .cancel))
+
+        if let popover = alert.popoverPresentationController {
+            popover.sourceView = tableView
+            popover.sourceRect = tableView.frame
+        }
+
+        present(alert, animated: true)
     }
 
     private func showLanguagePicker() {

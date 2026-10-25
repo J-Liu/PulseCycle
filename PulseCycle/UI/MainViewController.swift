@@ -116,7 +116,7 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
             engine.pause()
         } else {
             let profile = ProfileManager.shared.currentProfile
-            if profile.prepareCountingSoundEnabled && engine.phase == .warmUp && engine.remainingSeconds == profile.warmUpSeconds {
+            if profile.prepareCountingSoundEnabled && engine.phase == .warmUp && engine.remainingSeconds == (profile.warmUpEnabled ? profile.warmUpSeconds : 0) {
                 startCountdown()
             } else {
                 engine.start()
@@ -127,7 +127,8 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
     }
 
     private func startCountdown() {
-        var countdown = 5
+        let profile = ProfileManager.shared.currentProfile
+        var countdown = profile.prepareTime
         let timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] timer in
             guard let self = self else {
                 timer.invalidate()

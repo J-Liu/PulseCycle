@@ -27,11 +27,12 @@
 /* Settings - Profile */
 "Profile Name" = "Profile Name";
 "Rounds" = "Rounds";
-"Work (seconds)" = "Work (seconds)";
-"Rest (seconds)" = "Rest (seconds)";
+"Work" = "Work";
+"Rest" = "Rest";
 "Warm-up" = "Warm-up";
 "Cool-down" = "Cool-down";
 "Prepare time" = "Prepare time";
+"Disabled" = "Disabled";
 
 /* Settings - Sound */
 "Sound" = "Sound";
