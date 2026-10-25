@@ -8,36 +8,46 @@ import UIKit
 class TimePickerViewController: UIViewController {
     private let pickerView = UIPickerView()
     private let titleText: String
-    private let maxValue: Int
-    private let step: Int
     private let completion: (Int) -> Void
 
+    // For single wheel (rounds)
+    private var singleWheelValues: [Int] = []
+    private var initialSingleIndex: Int = 0
+    private var isSingleWheel: Bool = false
+
+    // For dual wheel (time)
     private var minutes: [Int] = []
     private var seconds: [Int] = []
     private var initialMinutes: Int = 0
     private var initialSeconds: Int = 0
 
-    init(title: String, currentValue: Int, maxValue: Int, step: Int, completion: @escaping (Int) -> Void) {
+    // Single wheel initializer
+    init(title: String, values: [Int], currentValue: Int, completion: @escaping (Int) -> Void) {
         self.titleText = title
-        self.maxValue = maxValue
-        self.step = step
         self.completion = completion
+        self.singleWheelValues = values
+        self.initialSingleIndex = values.firstIndex(of: currentValue) ?? 0
+        self.isSingleWheel = true
         super.init(nibName: nil, bundle: nil)
+    }
 
-        // Calculate minutes and seconds arrays
-        let maxMinutes = maxValue / 60
+    // Dual wheel initializer
+    init(title: String, currentValue: Int, maxMinutes: Int, completion: @escaping (Int) -> Void) {
+        self.titleText = title
+        self.completion = completion
+        self.isSingleWheel = false
+
+        // Minutes: 0 to maxMinutes
         minutes = Array(0...maxMinutes)
 
-        // Generate seconds based on step
-        var secs = 0
-        while secs < 60 {
-            seconds.append(secs)
-            secs += step
-        }
+        // Seconds: 0 to 59, step 1
+        seconds = Array(0...59)
 
         // Calculate initial values
         initialMinutes = currentValue / 60
-        initialSeconds = (currentValue % 60 / step) * step
+        initialSeconds = currentValue % 60
+
+        super.init(nibName: nil, bundle: nil)
     }
 
     required init?(coder: NSCoder) {
@@ -67,26 +77,48 @@ class TimePickerViewController: UIViewController {
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         containerView.addSubview(titleLabel)
 
-        // Labels for units
-        let minuteLabel = UILabel()
-        minuteLabel.text = L("min")
-        minuteLabel.font = .systemFont(ofSize: 16)
-        minuteLabel.textAlignment = .center
-        minuteLabel.translatesAutoresizingMaskIntoConstraints = false
-
-        let secondLabel = UILabel()
-        secondLabel.text = L("sec")
-        secondLabel.font = .systemFont(ofSize: 16)
-        secondLabel.textAlignment = .center
-        secondLabel.translatesAutoresizingMaskIntoConstraints = false
-
         // Picker
         pickerView.delegate = self
         pickerView.dataSource = self
         pickerView.translatesAutoresizingMaskIntoConstraints = false
         containerView.addSubview(pickerView)
-        containerView.addSubview(minuteLabel)
-        containerView.addSubview(secondLabel)
+
+        if isSingleWheel {
+            // Single wheel - no labels needed
+            NSLayoutConstraint.activate([
+                pickerView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
+                pickerView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor)
+            ])
+        } else {
+            // Dual wheel - add labels
+            let minuteLabel = UILabel()
+            minuteLabel.text = L("min")
+            minuteLabel.font = .systemFont(ofSize: 16)
+            minuteLabel.textAlignment = .right
+            minuteLabel.translatesAutoresizingMaskIntoConstraints = false
+
+            let secondLabel = UILabel()
+            secondLabel.text = L("sec")
+            secondLabel.font = .systemFont(ofSize: 16)
+            secondLabel.textAlignment = .right
+            secondLabel.translatesAutoresizingMaskIntoConstraints = false
+
+            containerView.addSubview(minuteLabel)
+            containerView.addSubview(secondLabel)
+
+            NSLayoutConstraint.activate([
+                pickerView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 60),
+                pickerView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -60),
+
+                minuteLabel.leadingAnchor.constraint(equalTo: pickerView.leadingAnchor, constant: -50),
+                minuteLabel.trailingAnchor.constraint(equalTo: pickerView.centerXAnchor, constant: -10),
+                minuteLabel.topAnchor.constraint(equalTo: pickerView.topAnchor, constant: 70),
+
+                secondLabel.leadingAnchor.constraint(equalTo: pickerView.centerXAnchor, constant: 10),
+                secondLabel.trailingAnchor.constraint(equalTo: pickerView.trailingAnchor, constant: 50),
+                secondLabel.topAnchor.constraint(equalTo: pickerView.topAnchor, constant: 70)
+            ])
+        }
 
         // Buttons
         let cancelButton = UIButton(type: .system)
@@ -117,17 +149,7 @@ class TimePickerViewController: UIViewController {
             titleLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
 
             pickerView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 8),
-            pickerView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 40),
-            pickerView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -40),
             pickerView.heightAnchor.constraint(equalToConstant: 180),
-
-            minuteLabel.leadingAnchor.constraint(equalTo: pickerView.leadingAnchor),
-            minuteLabel.trailingAnchor.constraint(equalTo: pickerView.centerXAnchor, constant: -10),
-            minuteLabel.topAnchor.constraint(equalTo: pickerView.topAnchor, constant: 70),
-
-            secondLabel.leadingAnchor.constraint(equalTo: pickerView.centerXAnchor, constant: 10),
-            secondLabel.trailingAnchor.constraint(equalTo: pickerView.trailingAnchor),
-            secondLabel.topAnchor.constraint(equalTo: pickerView.topAnchor, constant: 70),
 
             buttonStack.topAnchor.constraint(equalTo: pickerView.bottomAnchor, constant: 8),
             buttonStack.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
@@ -137,8 +159,12 @@ class TimePickerViewController: UIViewController {
         ])
 
         // Set initial values
-        pickerView.selectRow(initialMinutes, inComponent: 0, animated: false)
-        pickerView.selectRow(initialSeconds / step, inComponent: 1, animated: false)
+        if isSingleWheel {
+            pickerView.selectRow(initialSingleIndex, inComponent: 0, animated: false)
+        } else {
+            pickerView.selectRow(initialMinutes, inComponent: 0, animated: false)
+            pickerView.selectRow(initialSeconds, inComponent: 1, animated: false)
+        }
     }
 
     @objc private func cancelTapped() {
@@ -146,34 +172,41 @@ class TimePickerViewController: UIViewController {
     }
 
     @objc private func doneTapped() {
-        let selectedMinutes = pickerView.selectedRow(inComponent: 0)
-        let selectedSecondsIndex = pickerView.selectedRow(inComponent: 1)
-        let selectedSeconds = seconds[selectedSecondsIndex]
-
-        let totalSeconds = selectedMinutes * 60 + selectedSeconds
-        completion(totalSeconds)
+        if isSingleWheel {
+            let selectedValue = singleWheelValues[pickerView.selectedRow(inComponent: 0)]
+            completion(selectedValue)
+        } else {
+            let selectedMinutes = pickerView.selectedRow(inComponent: 0)
+            let selectedSeconds = pickerView.selectedRow(inComponent: 1)
+            let totalSeconds = selectedMinutes * 60 + selectedSeconds
+            completion(totalSeconds)
+        }
         dismiss(animated: true)
     }
 }
 
 extension TimePickerViewController: UIPickerViewDelegate, UIPickerViewDataSource {
     func numberOfComponents(in pickerView: UIPickerView) -> Int {
-        return 2
+        return isSingleWheel ? 1 : 2
     }
 
     func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-        if component == 0 {
-            return minutes.count
+        if isSingleWheel {
+            return singleWheelValues.count
         } else {
-            return seconds.count
+            return component == 0 ? minutes.count : seconds.count
         }
     }
 
     func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
-        if component == 0 {
-            return "\(minutes[row])"
+        if isSingleWheel {
+            return "\(singleWheelValues[row])"
         } else {
-            return String(format: "%02d", seconds[row])
+            if component == 0 {
+                return "\(minutes[row])"
+            } else {
+                return String(format: "%02d", seconds[row])
+            }
         }
     }
 
@@ -182,6 +215,10 @@ extension TimePickerViewController: UIPickerViewDelegate, UIPickerViewDataSource
     }
 
     func pickerView(_ pickerView: UIPickerView, widthForComponent component: Int) -> CGFloat {
-        return 100
+        if isSingleWheel {
+            return 200
+        } else {
+            return 100
+        }
     }
 }

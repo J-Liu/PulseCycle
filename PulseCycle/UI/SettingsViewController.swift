@@ -280,28 +280,28 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
                 let nav = UINavigationController(rootViewController: vc)
                 present(nav, animated: true)
             case 1:
-                showTimePicker(title: L("Rounds"), currentValue: profile.rounds, minValue: 1, maxValue: 99, step: 1) { [weak self] value in
+                showRoundsPicker(title: L("Rounds"), currentValue: profile.rounds) { [weak self] value in
                     var p = ProfileManager.shared.currentProfile
                     p.rounds = value
                     ProfileManager.shared.updateProfile(p)
                     self?.tableView.reloadRows(at: [IndexPath(row: 1, section: 0)], with: .none)
                 }
             case 2:
-                showTimePicker(title: L("Work"), currentValue: profile.workSeconds, minValue: 5, maxValue: 600, step: 5) { [weak self] value in
+                showTimePicker(title: L("Work"), currentValue: profile.workSeconds, maxMinutes: 60) { [weak self] value in
                     var p = ProfileManager.shared.currentProfile
                     p.workSeconds = value
                     ProfileManager.shared.updateProfile(p)
                     self?.tableView.reloadRows(at: [IndexPath(row: 2, section: 0)], with: .none)
                 }
             case 3:
-                showTimePicker(title: L("Rest"), currentValue: profile.restSeconds, minValue: 5, maxValue: 300, step: 5) { [weak self] value in
+                showTimePicker(title: L("Rest"), currentValue: profile.restSeconds, maxMinutes: 60) { [weak self] value in
                     var p = ProfileManager.shared.currentProfile
                     p.restSeconds = value
                     ProfileManager.shared.updateProfile(p)
                     self?.tableView.reloadRows(at: [IndexPath(row: 3, section: 0)], with: .none)
                 }
             case 4:
-                showTimePicker(title: L("Prepare time"), currentValue: profile.prepareTime, minValue: 0, maxValue: 30, step: 1) { [weak self] value in
+                showTimePicker(title: L("Prepare time"), currentValue: profile.prepareTime, maxMinutes: 60) { [weak self] value in
                     var p = ProfileManager.shared.currentProfile
                     p.prepareTime = value
                     ProfileManager.shared.updateProfile(p)
@@ -309,7 +309,7 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
                 }
             case 5:
                 if profile.warmUpEnabled {
-                    showTimePicker(title: L("Warm-up"), currentValue: profile.warmUpSeconds, minValue: 10, maxValue: 1800, step: 10) { [weak self] value in
+                    showTimePicker(title: L("Warm-up"), currentValue: profile.warmUpSeconds, maxMinutes: 60) { [weak self] value in
                         var p = ProfileManager.shared.currentProfile
                         p.warmUpSeconds = value
                         ProfileManager.shared.updateProfile(p)
@@ -318,7 +318,7 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
                 }
             case 6:
                 if profile.coolDownEnabled {
-                    showTimePicker(title: L("Cool-down"), currentValue: profile.coolDownSeconds, minValue: 10, maxValue: 1800, step: 10) { [weak self] value in
+                    showTimePicker(title: L("Cool-down"), currentValue: profile.coolDownSeconds, maxMinutes: 60) { [weak self] value in
                         var p = ProfileManager.shared.currentProfile
                         p.coolDownSeconds = value
                         ProfileManager.shared.updateProfile(p)
@@ -335,8 +335,16 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
         }
     }
 
-    private func showTimePicker(title: String, currentValue: Int, minValue: Int, maxValue: Int, step: Int, completion: @escaping (Int) -> Void) {
-        let picker = TimePickerViewController(title: title, currentValue: currentValue, maxValue: maxValue, step: step, completion: completion)
+    private func showRoundsPicker(title: String, currentValue: Int, completion: @escaping (Int) -> Void) {
+        let values = Array(1...99)
+        let picker = TimePickerViewController(title: title, values: values, currentValue: currentValue, completion: completion)
+        picker.modalPresentationStyle = .overFullScreen
+        picker.modalTransitionStyle = .crossDissolve
+        present(picker, animated: true)
+    }
+
+    private func showTimePicker(title: String, currentValue: Int, maxMinutes: Int, completion: @escaping (Int) -> Void) {
+        let picker = TimePickerViewController(title: title, currentValue: currentValue, maxMinutes: maxMinutes, completion: completion)
         picker.modalPresentationStyle = .overFullScreen
         picker.modalTransitionStyle = .crossDissolve
         present(picker, animated: true)
