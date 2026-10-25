@@ -155,10 +155,10 @@ class ProfileManager {
         }
     }
 
-    func addProfile(copyFrom profile: WorkoutProfile) -> WorkoutProfile {
+    func addProfile(copyFrom profile: WorkoutProfile, name: String? = nil) -> WorkoutProfile {
         var newProfile = profile
         newProfile.id = UUID()
-        newProfile.name = "\(profile.name) Copy"
+        newProfile.name = name ?? "\(profile.name) Copy"
         profiles.append(newProfile)
         save()
         return newProfile

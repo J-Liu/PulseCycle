@@ -43,9 +43,18 @@ class ProfileListViewController: UIViewController, UITableViewDelegate, UITableV
     }
 
     @objc private func addProfile() {
-        let current = ProfileManager.shared.currentProfile
-        _ = ProfileManager.shared.addProfile(copyFrom: current)
-        tableView.reloadData()
+        let alert = UIAlertController(title: L("New Profile"), message: nil, preferredStyle: .alert)
+        alert.addTextField { textField in
+            textField.placeholder = L("Enter name")
+        }
+        alert.addAction(UIAlertAction(title: L("Cancel"), style: .cancel))
+        alert.addAction(UIAlertAction(title: L("Create"), style: .default) { [weak self] _ in
+            guard let name = alert.textFields?.first?.text, !name.isEmpty else { return }
+            let current = ProfileManager.shared.currentProfile
+            _ = ProfileManager.shared.addProfile(copyFrom: current, name: name)
+            self?.tableView.reloadData()
+        })
+        present(alert, animated: true)
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
