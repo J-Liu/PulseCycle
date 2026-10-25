@@ -58,8 +58,8 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         switch Section(rawValue: section) {
-        case .profile: return 8
-        case .sound: return 5
+        case .profile: return 7
+        case .sound: return 4
         case .color: return 3
         case .misc: return 2
         case .none: return 0
@@ -133,15 +133,6 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
             cell.accessoryView = stepper
             cell.detailTextLabel?.text = "\(profile.restSeconds)"
         case 4:
-            cell.textLabel?.text = L("Warning before round end")
-            let stepper = UIStepper()
-            stepper.minimumValue = 0
-            stepper.maximumValue = 30
-            stepper.value = Double(profile.warningSeconds)
-            stepper.addTarget(self, action: #selector(warningChanged(_:)), for: .valueChanged)
-            cell.accessoryView = stepper
-            cell.detailTextLabel?.text = "\(profile.warningSeconds)s"
-        case 5:
             cell.textLabel?.text = L("Warm-up")
             let stack = UIStackView()
             let switch_ = UISwitch()
@@ -155,7 +146,7 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
             stack.addArrangedSubview(label)
             stack.addArrangedSubview(switch_)
             cell.accessoryView = stack
-        case 6:
+        case 5:
             cell.textLabel?.text = L("Cool-down")
             let stack = UIStackView()
             let switch_ = UISwitch()
@@ -169,7 +160,7 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
             stack.addArrangedSubview(label)
             stack.addArrangedSubview(switch_)
             cell.accessoryView = stack
-        case 7:
+        case 6:
             cell.textLabel?.text = L("Prepare time")
             let stepper = UIStepper()
             stepper.minimumValue = 0
@@ -202,10 +193,6 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
             cell.textLabel?.text = L("End sound")
             switch_.isOn = profile.endSoundEnabled
             switch_.addTarget(self, action: #selector(endSoundToggled(_:)), for: .valueChanged)
-        case 4:
-            cell.textLabel?.text = L("Warning sound")
-            switch_.isOn = profile.warningSoundEnabled
-            switch_.addTarget(self, action: #selector(warningSoundToggled(_:)), for: .valueChanged)
         default:
             break
         }
@@ -275,13 +262,6 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
         tableView.reloadRows(at: [IndexPath(row: 3, section: 0)], with: .none)
     }
 
-    @objc private func warningChanged(_ stepper: UIStepper) {
-        var p = profile
-        p.warningSeconds = Int(stepper.value)
-        ProfileManager.shared.updateProfile(p)
-        tableView.reloadRows(at: [IndexPath(row: 4, section: 0)], with: .none)
-    }
-
     @objc private func warmUpToggled(_ switch_: UISwitch) {
         var p = profile
         p.warmUpEnabled = switch_.isOn
@@ -322,12 +302,6 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
     @objc private func endSoundToggled(_ switch_: UISwitch) {
         var p = profile
         p.endSoundEnabled = switch_.isOn
-        ProfileManager.shared.updateProfile(p)
-    }
-
-    @objc private func warningSoundToggled(_ switch_: UISwitch) {
-        var p = profile
-        p.warningSoundEnabled = switch_.isOn
         ProfileManager.shared.updateProfile(p)
     }
 

@@ -29,7 +29,6 @@
 "Rounds" = "輪數";
 "Work (seconds)" = "運動時間（秒）";
 "Rest (seconds)" = "休息時間（秒）";
-"Warning before round end" = "回合結束前警告";
 "Warm-up" = "熱身";
 "Cool-down" = "放鬆";
 "Prepare time" = "準備時間";
@@ -40,7 +39,6 @@
 "Start sound" = "開始聲音";
 "Ending notify sound" = "結束提醒聲音";
 "End sound" = "結束聲音";
-"Warning sound" = "警告聲音";
 
 /* Settings - Color */
 "Color" = "顏色";

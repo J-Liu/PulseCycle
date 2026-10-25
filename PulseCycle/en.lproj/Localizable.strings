@@ -29,7 +29,6 @@
 "Rounds" = "Rounds";
 "Work (seconds)" = "Work (seconds)";
 "Rest (seconds)" = "Rest (seconds)";
-"Warning before round end" = "Warning before round end";
 "Warm-up" = "Warm-up";
 "Cool-down" = "Cool-down";
 "Prepare time" = "Prepare time";
@@ -40,7 +39,6 @@
 "Start sound" = "Start sound";
 "Ending notify sound" = "Ending notify sound";
 "End sound" = "End sound";
-"Warning sound" = "Warning sound";
 
 /* Settings - Color */
 "Color" = "Color";

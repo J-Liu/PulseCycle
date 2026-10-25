@@ -11,7 +11,6 @@ struct WorkoutProfile: Codable, Identifiable {
     var rounds: Int
     var workSeconds: Int
     var restSeconds: Int
-    var warningSeconds: Int
     var warmUpSeconds: Int
     var warmUpEnabled: Bool
     var coolDownSeconds: Int
@@ -20,7 +19,6 @@ struct WorkoutProfile: Codable, Identifiable {
     var startSoundEnabled: Bool
     var endingNotifySoundEnabled: Bool
     var endSoundEnabled: Bool
-    var warningSoundEnabled: Bool
     var workColor: String
     var restColor: String
     var heartRateColor: String
@@ -32,7 +30,6 @@ struct WorkoutProfile: Codable, Identifiable {
             rounds: 8,
             workSeconds: 30,
             restSeconds: 15,
-            warningSeconds: 3,
             warmUpSeconds: 60,
             warmUpEnabled: true,
             coolDownSeconds: 60,
@@ -41,7 +38,6 @@ struct WorkoutProfile: Codable, Identifiable {
             startSoundEnabled: true,
             endingNotifySoundEnabled: true,
             endSoundEnabled: true,
-            warningSoundEnabled: true,
             workColor: "#FF6B6B",
             restColor: "#E0E0E0",
             heartRateColor: "#FF8A80"
