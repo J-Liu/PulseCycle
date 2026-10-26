@@ -151,8 +151,13 @@ class ProfileManager {
     static let shared = ProfileManager()
 
     private let userDefaultsKey = "workout_profiles"
+    private let currentProfileIndexKey = "current_profile_index"
     private(set) var profiles: [WorkoutProfile]
-    private(set) var currentProfileIndex: Int = 0
+    private(set) var currentProfileIndex: Int = 0 {
+        didSet {
+            UserDefaults.standard.set(currentProfileIndex, forKey: currentProfileIndexKey)
+        }
+    }
 
     var currentProfile: WorkoutProfile {
         profiles[currentProfileIndex]
@@ -164,6 +169,12 @@ class ProfileManager {
             profiles = decoded
         } else {
             profiles = WorkoutProfile.defaultProfiles
+        }
+
+        // Restore last selected profile index
+        currentProfileIndex = UserDefaults.standard.integer(forKey: currentProfileIndexKey)
+        if currentProfileIndex >= profiles.count {
+            currentProfileIndex = 0
         }
     }
 
@@ -188,13 +199,13 @@ class ProfileManager {
         if currentProfileIndex >= profiles.count {
             currentProfileIndex = profiles.count - 1
         }
-        save()
+        // currentProfileIndex didSet will automatically save to UserDefaults
     }
 
     func selectProfile(at index: Int) {
         guard index < profiles.count else { return }
         currentProfileIndex = index
-        save()
+        // currentProfileIndex didSet will automatically save to UserDefaults
     }
 
     func updateProfile(_ profile: WorkoutProfile) {

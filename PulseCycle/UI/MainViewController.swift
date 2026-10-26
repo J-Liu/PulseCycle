@@ -13,7 +13,6 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
     private let restLabel = UILabel()
     private let restTimeLabel = UILabel()
 
-    private let phaseLabel = UILabel()
     private let timeLabel = UILabel()
     private let roundLabel = UILabel()
 
@@ -400,22 +399,16 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
 
         let timerCenterY = timerContainer.centerYAnchor
 
-        phaseLabel.font = .systemFont(ofSize: 24, weight: .semibold)
-        phaseLabel.textAlignment = .center
-        phaseLabel.adjustsFontSizeToFitWidth = true
-        phaseLabel.translatesAutoresizingMaskIntoConstraints = false
-
         timeLabel.font = .monospacedDigitSystemFont(ofSize: 140, weight: .bold)
         timeLabel.textAlignment = .center
         timeLabel.adjustsFontSizeToFitWidth = true
         timeLabel.translatesAutoresizingMaskIntoConstraints = false
 
-        roundLabel.font = .systemFont(ofSize: 18)
+        roundLabel.font = .systemFont(ofSize: 24, weight: .bold)
         roundLabel.textAlignment = .center
         roundLabel.adjustsFontSizeToFitWidth = true
         roundLabel.translatesAutoresizingMaskIntoConstraints = false
 
-        timerContainer.addSubview(phaseLabel)
         timerContainer.addSubview(timeLabel)
         timerContainer.addSubview(roundLabel)
 
@@ -425,13 +418,8 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
             timerContainer.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             timerContainer.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: 0.65),
 
-            phaseLabel.centerXAnchor.constraint(equalTo: timerContainer.centerXAnchor),
-            phaseLabel.centerYAnchor.constraint(equalTo: timerCenterY, constant: -80),
-            phaseLabel.leadingAnchor.constraint(equalTo: timerContainer.leadingAnchor, constant: 16),
-            phaseLabel.trailingAnchor.constraint(equalTo: timerContainer.trailingAnchor, constant: -16),
-
             timeLabel.centerXAnchor.constraint(equalTo: timerContainer.centerXAnchor),
-            timeLabel.centerYAnchor.constraint(equalTo: timerCenterY),
+            timeLabel.centerYAnchor.constraint(equalTo: timerCenterY, constant: -20),
             timeLabel.leadingAnchor.constraint(equalTo: timerContainer.leadingAnchor, constant: 16),
             timeLabel.trailingAnchor.constraint(equalTo: timerContainer.trailingAnchor, constant: -16),
 
@@ -555,11 +543,9 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
         restTimeLabel.text = formatTime(profile.restSeconds)
 
         if isPreparing {
-            phaseLabel.text = L("Prepare")
             timeLabel.text = "\(prepareCountdown)"
-            roundLabel.text = ""
+            roundLabel.text = L("Prepare")
         } else {
-            phaseLabel.text = formatPhase(engine.phase)
             timeLabel.text = formatTime(engine.remainingSeconds)
             roundLabel.text = formatRound()
         }
@@ -591,21 +577,6 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
         let minutes = seconds / 60
         let secs = seconds % 60
         return String(format: "%d:%02d", minutes, secs)
-    }
-
-    private func formatPhase(_ phase: IntervalPhase) -> String {
-        switch phase {
-        case .warmUp:
-            return L("Warm Up")
-        case .work:
-            return L("Work")
-        case .rest:
-            return L("Rest")
-        case .coolDown:
-            return L("Cool Down")
-        case .finished:
-            return L("Finished")
-        }
     }
 
     private func formatRound() -> String {
