@@ -62,8 +62,8 @@ struct PhaseItem {
             startSound: nil,  // No start sound, immediately follows work phase
             endSound: profile.endSoundEnabled ? "boxing-bell-3" : nil,
             tickSound: nil,
-            warningAtSeconds: profile.coolDownSeconds >= 15 && profile.endingNotifySoundEnabled ? 10 : nil,
-            warningSound: profile.endingNotifySoundEnabled ? "boxing-bell-2" : nil
+            warningAtSeconds: nil,  // No warning sound for cool-down
+            warningSound: nil
         )
     }
 }

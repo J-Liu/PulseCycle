@@ -133,6 +133,22 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
             return
         }
 
+        // If workout finished, reset and start countdown
+        if engine.phase == .finished {
+            handleReset()
+            let profile = ProfileManager.shared.currentProfile
+            if profile.prepareCountingSoundEnabled {
+                startCountdown()
+            } else {
+                engine.start()
+                isRunning = true
+            }
+            hasReset = false
+            UIApplication.shared.isIdleTimerDisabled = true
+            updateGoButton()
+            return
+        }
+
         if isRunning {
             engine.pause()
             isRunning = false
