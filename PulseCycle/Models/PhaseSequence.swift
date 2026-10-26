@@ -12,7 +12,7 @@ struct PhaseItem {
     let startSound: String?
     let endSound: String?
     let tickSound: String?
-    let warningAtSeconds: Int?  // 在剩余多少秒时播放警告音
+    let warningAtSeconds: Int?  // Play warning sound at remaining seconds
     let warningSound: String?
 
     static func warmUp(_ profile: WorkoutProfile) -> PhaseItem {
@@ -21,7 +21,7 @@ struct PhaseItem {
             duration: profile.warmUpSeconds,
             color: profile.warmUpColor,
             startSound: profile.startSoundEnabled ? "boxing-bell-1" : nil,
-            endSound: nil,  // warm-up结束后立即进入正式回合
+            endSound: nil,  // No end sound, immediately followed by work phase
             tickSound: nil,
             warningAtSeconds: nil,
             warningSound: nil
@@ -46,10 +46,10 @@ struct PhaseItem {
             phase: .rest,
             duration: profile.restSeconds,
             color: profile.restColor,
-            startSound: nil,  // rest 开始时不播放声音
-            endSound: nil,    // rest 结束时不播放声音
+            startSound: nil,  // No start sound for rest phase
+            endSound: nil,    // No end sound for rest phase
             tickSound: nil,
-            warningAtSeconds: nil,  // rest 不播放警告音
+            warningAtSeconds: nil,  // No warning sound for rest phase
             warningSound: nil
         )
     }
@@ -59,7 +59,7 @@ struct PhaseItem {
             phase: .coolDown,
             duration: profile.coolDownSeconds,
             color: profile.coolDownColor,
-            startSound: nil,  // cool-down紧接着正式回合结束
+            startSound: nil,  // No start sound, immediately follows work phase
             endSound: profile.endSoundEnabled ? "boxing-bell-3" : nil,
             tickSound: nil,
             warningAtSeconds: profile.coolDownSeconds >= 15 && profile.endingNotifySoundEnabled ? 10 : nil,
