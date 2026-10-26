@@ -35,6 +35,8 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
 
     private var isRunning = false
     private var hasReset = true
+    private var isPreparing = false
+    private var prepareCountdown: Int = 0
 
     init() {
         heartRateMonitor = HeartRateMonitor()
@@ -128,7 +130,10 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
 
     private func startCountdown() {
         let profile = ProfileManager.shared.currentProfile
-        var countdown = profile.prepareTime
+        isPreparing = true
+        prepareCountdown = profile.prepareTime
+        updateUI()
+
         let timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] timer in
             guard let self = self else {
                 timer.invalidate()
@@ -136,11 +141,14 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
             }
 
             SoundManager.shared.playCountdownBeep()
-            countdown -= 1
+            self.prepareCountdown -= 1
+            self.updateUI()
 
-            if countdown == 0 {
+            if self.prepareCountdown == 0 {
                 timer.invalidate()
+                self.isPreparing = false
                 self.engine.start()
+                self.updateUI()
             }
         }
         timer.fire()
@@ -195,11 +203,13 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
             goButton.setTitle(L("Pause"), for: .normal)
         } else if engine.phase == .finished {
             goButton.setTitle(L("Go"), for: .normal)
-        } else {
+        } else if hasReset {
             goButton.setTitle(L("Go"), for: .normal)
+        } else {
+            goButton.setTitle(L("Resume"), for: .normal)
         }
-        settingsButton.isEnabled = hasReset
-        settingsButton.alpha = hasReset ? 1.0 : 0.5
+        settingsButton.isEnabled = hasReset || engine.phase == .finished
+        settingsButton.alpha = settingsButton.isEnabled ? 1.0 : 0.5
     }
 
     private func setupUI() {
@@ -428,9 +438,15 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
         workTimeLabel.text = formatTime(profile.workSeconds)
         restTimeLabel.text = formatTime(profile.restSeconds)
 
-        phaseLabel.text = formatPhase(engine.phase)
-        timeLabel.text = formatTime(engine.remainingSeconds)
-        roundLabel.text = formatRound()
+        if isPreparing {
+            phaseLabel.text = L("Prepare")
+            timeLabel.text = "\(prepareCountdown)"
+            roundLabel.text = ""
+        } else {
+            phaseLabel.text = formatPhase(engine.phase)
+            timeLabel.text = formatTime(engine.remainingSeconds)
+            roundLabel.text = formatRound()
+        }
 
         updateColors()
         updateGoButton()
@@ -441,8 +457,28 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
         let workColor = UIColor(hex: profile.workColor) ?? .systemRed.withAlphaComponent(0.15)
         let restColor = UIColor(hex: profile.restColor) ?? .systemGray.withAlphaComponent(0.15)
         let hrColor = UIColor(hex: profile.heartRateColor) ?? .systemRed.withAlphaComponent(0.1)
+        let prepareColor = UIColor(hex: profile.prepareColor) ?? .systemRed.withAlphaComponent(0.05)
+        let warmUpColor = UIColor(hex: profile.warmUpColor) ?? .systemRed.withAlphaComponent(0.1)
+        let coolDownColor = UIColor(hex: profile.coolDownColor) ?? .systemGray.withAlphaComponent(0.2)
 
-        let timerColor = (engine.phase == .work) ? workColor : restColor
+        let timerColor: UIColor
+        if isPreparing {
+            timerColor = prepareColor
+        } else {
+            switch engine.phase {
+            case .warmUp:
+                timerColor = warmUpColor
+            case .work:
+                timerColor = workColor
+            case .rest:
+                timerColor = restColor
+            case .coolDown:
+                timerColor = coolDownColor
+            case .finished:
+                timerColor = restColor
+            }
+        }
+
         headerView.backgroundColor = timerColor
         timerContainer?.backgroundColor = timerColor
         heartRateContainer.backgroundColor = hrColor
@@ -487,10 +523,30 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
         DispatchQueue.main.async { [weak self] in
             self?.updateUI()
 
-            // Play ending notify sound 10 seconds before round ends
             let profile = ProfileManager.shared.currentProfile
-            if profile.endingNotifySoundEnabled && engine.phase == .work && engine.remainingSeconds == 10 {
-                SoundManager.shared.playPreRoundWarningSound()
+
+            // Play ending notify sound 10 seconds before phase ends (if phase >= 15s)
+            if profile.endingNotifySoundEnabled && engine.remainingSeconds == 10 {
+                let phaseDuration: Int
+                switch engine.phase {
+                case .work:
+                    phaseDuration = profile.workSeconds
+                case .warmUp:
+                    phaseDuration = profile.warmUpEnabled ? profile.warmUpSeconds : 0
+                case .coolDown:
+                    phaseDuration = profile.coolDownEnabled ? profile.coolDownSeconds : 0
+                default:
+                    phaseDuration = 0
+                }
+
+                if phaseDuration >= 15 {
+                    SoundManager.shared.playPreRoundWarningSound()
+                }
+            }
+
+            // Play phase end sound when phase ends (except coolDown, which is handled by engineDidFinish)
+            if profile.endSoundEnabled && engine.remainingSeconds == 0 && engine.phase != .finished && engine.phase != .coolDown {
+                SoundManager.shared.playRoundEndSound()
             }
         }
     }

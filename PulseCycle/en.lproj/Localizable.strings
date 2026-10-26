@@ -22,6 +22,7 @@
 /* Buttons */
 "Go" = "Go";
 "Pause" = "Pause";
+"Resume" = "Resume";
 "Reset" = "Reset";
 
 /* Settings - Profile */
@@ -44,12 +45,15 @@
 /* Settings - Color */
 "Color" = "Color";
 "Heart Rate" = "Heart Rate";
+"Prepare" = "Prepare";
+"Warm Up" = "Warm Up";
+"Cool Down" = "Cool Down";
 "Reset to Default" = "Reset to Default";
 
 /* Settings - Misc */
 "Misc" = "Misc";
 "Language" = "Language";
-"Voice input" = "Voice input";
+"Voice output" = "Voice output";
 
 /* Language Options */
 "System" = "System";

@@ -22,6 +22,7 @@
 /* Buttons */
 "Go" = "开始";
 "Pause" = "暂停";
+"Resume" = "继续";
 "Reset" = "重置";
 
 /* Settings - Profile */
@@ -44,12 +45,15 @@
 /* Settings - Color */
 "Color" = "颜色";
 "Heart Rate" = "心率";
+"Prepare" = "准备";
+"Warm Up" = "热身";
+"Cool Down" = "放松";
 "Reset to Default" = "恢复默认";
 
 /* Settings - Misc */
 "Misc" = "杂项";
 "Language" = "语言";
-"Voice input" = "语音输入";
+"Voice output" = "语音输出";
 
 /* Language Options */
 "System" = "跟随系统";

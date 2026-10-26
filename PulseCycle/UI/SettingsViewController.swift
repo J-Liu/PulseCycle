@@ -60,7 +60,7 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
         switch Section(rawValue: section) {
         case .profile: return 7
         case .sound: return 4
-        case .color: return 3
+        case .color: return 6
         case .misc: return 2
         case .none: return 0
         }
@@ -187,8 +187,8 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
     }
 
     private func configureColorCell(_ cell: UITableViewCell, row: Int) {
-        let names = [L("Work"), L("Rest"), L("Heart Rate")]
-        let currentColors = [profile.workColor, profile.restColor, profile.heartRateColor]
+        let names = [L("Work"), L("Rest"), L("Heart Rate"), L("Prepare"), L("Warm Up"), L("Cool Down")]
+        let currentColors = [profile.workColor, profile.restColor, profile.heartRateColor, profile.prepareColor, profile.warmUpColor, profile.coolDownColor]
 
         cell.textLabel?.text = names[row]
 
@@ -219,7 +219,7 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
             cell.accessoryType = .disclosureIndicator
             cell.selectionStyle = .default
         case 1:
-            cell.textLabel?.text = L("Voice input")
+            cell.textLabel?.text = L("Voice output")
             let switch_ = UISwitch()
             switch_.isOn = false
             cell.accessoryView = switch_
@@ -392,7 +392,7 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
         let colorPicker = UIColorPickerViewController()
         colorPicker.delegate = self
 
-        let currentColors = [profile.workColor, profile.restColor, profile.heartRateColor]
+        let currentColors = [profile.workColor, profile.restColor, profile.heartRateColor, profile.prepareColor, profile.warmUpColor, profile.coolDownColor]
         colorPicker.selectedColor = UIColor(hex: currentColors[row]) ?? .white
 
         // Add toolbar with reset button
@@ -419,7 +419,7 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
     @objc private func resetColorFromPicker() {
         resetColor(for: currentColorRow)
         if let colorPicker = presentedViewController as? UIColorPickerViewController {
-            let currentColors = [profile.workColor, profile.restColor, profile.heartRateColor]
+            let currentColors = [profile.workColor, profile.restColor, profile.heartRateColor, profile.prepareColor, profile.warmUpColor, profile.coolDownColor]
             colorPicker.selectedColor = UIColor(hex: currentColors[currentColorRow]) ?? .white
         }
     }
@@ -430,7 +430,7 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
 
     private func resetColor(for row: Int) {
         var p = profile
-        let defaultColors = ["#FF6B6B", "#E0E0E0", "#FF8A80"]
+        let defaultColors = ["#FF6B6B", "#E0E0E0", "#FF8A80", "#FFAAAA", "#FF8888", "#E8A0A0"]
 
         switch row {
         case 0:
@@ -439,6 +439,12 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
             p.restColor = defaultColors[1]
         case 2:
             p.heartRateColor = defaultColors[2]
+        case 3:
+            p.prepareColor = defaultColors[3]
+        case 4:
+            p.warmUpColor = defaultColors[4]
+        case 5:
+            p.coolDownColor = defaultColors[5]
         default:
             break
         }
@@ -453,7 +459,7 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
         guard let cell = gesture.view as? UITableViewCell else { return }
 
         let row = cell.tag
-        let colorNames = [L("Work"), L("Rest"), L("Heart Rate")]
+        let colorNames = [L("Work"), L("Rest"), L("Heart Rate"), L("Prepare"), L("Warm Up"), L("Cool Down")]
         let alert = UIAlertController(title: colorNames[row], message: nil, preferredStyle: .actionSheet)
 
         alert.addAction(UIAlertAction(title: L("Reset to Default"), style: .default) { [weak self] _ in
@@ -484,6 +490,12 @@ extension SettingsViewController: UIColorPickerViewControllerDelegate {
             p.restColor = hex
         case 2:
             p.heartRateColor = hex
+        case 3:
+            p.prepareColor = hex
+        case 4:
+            p.warmUpColor = hex
+        case 5:
+            p.coolDownColor = hex
         default:
             break
         }

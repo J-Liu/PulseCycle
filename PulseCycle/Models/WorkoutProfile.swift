@@ -23,6 +23,9 @@ struct WorkoutProfile: Codable, Identifiable {
     var workColor: String
     var restColor: String
     var heartRateColor: String
+    var prepareColor: String
+    var warmUpColor: String
+    var coolDownColor: String
 
     static var defaultProfiles: [WorkoutProfile] {
         [
@@ -43,7 +46,10 @@ struct WorkoutProfile: Codable, Identifiable {
                 endSoundEnabled: true,
                 workColor: "#FF6B6B",
                 restColor: "#E0E0E0",
-                heartRateColor: "#FF8A80"
+                heartRateColor: "#FF8A80",
+                prepareColor: "#FFAAAA",
+                warmUpColor: "#FF8888",
+                coolDownColor: "#E8A0A0"
             ),
             WorkoutProfile(
                 id: UUID(),
@@ -62,7 +68,10 @@ struct WorkoutProfile: Codable, Identifiable {
                 endSoundEnabled: true,
                 workColor: "#FF6B6B",
                 restColor: "#E0E0E0",
-                heartRateColor: "#FF8A80"
+                heartRateColor: "#FF8A80",
+                prepareColor: "#FFAAAA",
+                warmUpColor: "#FF8888",
+                coolDownColor: "#E8A0A0"
             ),
             WorkoutProfile(
                 id: UUID(),
@@ -81,7 +90,10 @@ struct WorkoutProfile: Codable, Identifiable {
                 endSoundEnabled: true,
                 workColor: "#FF6B6B",
                 restColor: "#E0E0E0",
-                heartRateColor: "#FF8A80"
+                heartRateColor: "#FF8A80",
+                prepareColor: "#FFAAAA",
+                warmUpColor: "#FF8888",
+                coolDownColor: "#E8A0A0"
             ),
             WorkoutProfile(
                 id: UUID(),
@@ -100,7 +112,10 @@ struct WorkoutProfile: Codable, Identifiable {
                 endSoundEnabled: true,
                 workColor: "#FF6B6B",
                 restColor: "#E0E0E0",
-                heartRateColor: "#FF8A80"
+                heartRateColor: "#FF8A80",
+                prepareColor: "#FFAAAA",
+                warmUpColor: "#FF8888",
+                coolDownColor: "#E8A0A0"
             ),
             WorkoutProfile(
                 id: UUID(),
@@ -119,7 +134,10 @@ struct WorkoutProfile: Codable, Identifiable {
                 endSoundEnabled: true,
                 workColor: "#FF6B6B",
                 restColor: "#E0E0E0",
-                heartRateColor: "#FF8A80"
+                heartRateColor: "#FF8A80",
+                prepareColor: "#FFAAAA",
+                warmUpColor: "#FF8888",
+                coolDownColor: "#E8A0A0"
             )
         ]
     }
