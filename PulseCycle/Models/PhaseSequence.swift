@@ -36,7 +36,7 @@ struct PhaseItem {
             startSound: profile.startSoundEnabled ? "boxing-bell-1" : nil,
             endSound: profile.endSoundEnabled ? "boxing-bell-3" : nil,
             tickSound: nil,
-            warningAtSeconds: profile.workSeconds >= 15 && profile.endingNotifySoundEnabled ? 10 : nil,
+            warningAtSeconds: profile.workSeconds >= 15 ? 10 : nil,
             warningSound: profile.endingNotifySoundEnabled ? "boxing-bell-2" : nil
         )
     }
@@ -46,11 +46,11 @@ struct PhaseItem {
             phase: .rest,
             duration: profile.restSeconds,
             color: profile.restColor,
-            startSound: profile.startSoundEnabled ? "boxing-bell-1" : nil,
-            endSound: profile.endSoundEnabled ? "boxing-bell-3" : nil,
+            startSound: nil,  // rest 开始时不播放声音
+            endSound: nil,    // rest 结束时不播放声音
             tickSound: nil,
-            warningAtSeconds: profile.restSeconds >= 15 && profile.endingNotifySoundEnabled ? 10 : nil,
-            warningSound: profile.endingNotifySoundEnabled ? "boxing-bell-2" : nil
+            warningAtSeconds: nil,  // rest 不播放警告音
+            warningSound: nil
         )
     }
 
