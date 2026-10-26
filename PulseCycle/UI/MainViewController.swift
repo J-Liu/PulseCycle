@@ -535,9 +535,14 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
         if isPreparing {
             timeLabel.text = "\(prepareCountdown)"
             roundLabel.text = L("Prepare")
-        } else {
+        } else if isRunning || (!hasReset && engine.phase != .finished) {
+            // Show round label only when timer is running or paused (not reset and not finished)
             timeLabel.text = formatTime(engine.remainingSeconds)
             roundLabel.text = formatRound()
+        } else {
+            // Initial state or after reset/finish - don't show round label
+            timeLabel.text = formatTime(engine.remainingSeconds)
+            roundLabel.text = ""
         }
 
         updateColors()
