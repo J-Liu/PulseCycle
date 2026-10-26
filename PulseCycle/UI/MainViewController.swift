@@ -274,17 +274,17 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
 
         let timerCenterY = timerContainer.centerYAnchor
 
-        phaseLabel.font = .systemFont(ofSize: 24, weight: .semibold)
+        phaseLabel.font = .systemFont(ofSize: 28, weight: .semibold)
         phaseLabel.textAlignment = .center
         phaseLabel.adjustsFontSizeToFitWidth = true
         phaseLabel.translatesAutoresizingMaskIntoConstraints = false
 
-        timeLabel.font = .monospacedDigitSystemFont(ofSize: 72, weight: .bold)
+        timeLabel.font = .monospacedDigitSystemFont(ofSize: 96, weight: .bold)
         timeLabel.textAlignment = .center
         timeLabel.adjustsFontSizeToFitWidth = true
         timeLabel.translatesAutoresizingMaskIntoConstraints = false
 
-        roundLabel.font = .systemFont(ofSize: 18)
+        roundLabel.font = .systemFont(ofSize: 22)
         roundLabel.textAlignment = .center
         roundLabel.adjustsFontSizeToFitWidth = true
         roundLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -294,13 +294,13 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
         timerContainer.addSubview(roundLabel)
 
         NSLayoutConstraint.activate([
-            timerContainer.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            timerContainer.topAnchor.constraint(equalTo: view.topAnchor),
             timerContainer.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             timerContainer.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            timerContainer.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: 0.45),
+            timerContainer.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: 0.5),
 
             phaseLabel.centerXAnchor.constraint(equalTo: timerContainer.centerXAnchor),
-            phaseLabel.centerYAnchor.constraint(equalTo: timerCenterY, constant: -60),
+            phaseLabel.centerYAnchor.constraint(equalTo: timerCenterY, constant: -80),
             phaseLabel.leadingAnchor.constraint(equalTo: timerContainer.leadingAnchor, constant: 16),
             phaseLabel.trailingAnchor.constraint(equalTo: timerContainer.trailingAnchor, constant: -16),
 
@@ -310,7 +310,7 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
             timeLabel.trailingAnchor.constraint(equalTo: timerContainer.trailingAnchor, constant: -16),
 
             roundLabel.centerXAnchor.constraint(equalTo: timerContainer.centerXAnchor),
-            roundLabel.topAnchor.constraint(equalTo: timeLabel.bottomAnchor, constant: 16)
+            roundLabel.topAnchor.constraint(equalTo: timeLabel.bottomAnchor, constant: 20)
         ])
 
         self.timerContainer = timerContainer
@@ -323,18 +323,18 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
         view.addSubview(heartRateContainer)
 
         heartRateLabel.text = "--"
-        heartRateLabel.font = .monospacedDigitSystemFont(ofSize: 72, weight: .bold)
+        heartRateLabel.font = .monospacedDigitSystemFont(ofSize: 96, weight: .bold)
         heartRateLabel.textAlignment = .center
         heartRateLabel.adjustsFontSizeToFitWidth = true
         heartRateLabel.translatesAutoresizingMaskIntoConstraints = false
 
         bpmLabel.text = L("BPM")
-        bpmLabel.font = .systemFont(ofSize: 24, weight: .medium)
+        bpmLabel.font = .systemFont(ofSize: 28, weight: .medium)
         bpmLabel.textAlignment = .center
         bpmLabel.translatesAutoresizingMaskIntoConstraints = false
 
         connectionLabel.text = L("Not connected")
-        connectionLabel.font = .systemFont(ofSize: 16)
+        connectionLabel.font = .systemFont(ofSize: 18)
         connectionLabel.textAlignment = .center
         connectionLabel.textColor = .systemGray
         connectionLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -344,10 +344,10 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
         heartRateContainer.addSubview(connectionLabel)
 
         NSLayoutConstraint.activate([
-            heartRateContainer.topAnchor.constraint(equalTo: view.centerYAnchor),
+            heartRateContainer.topAnchor.constraint(equalTo: timerContainer!.bottomAnchor),
             heartRateContainer.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             heartRateContainer.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            heartRateContainer.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            heartRateContainer.bottomAnchor.constraint(equalTo: view.bottomAnchor),
 
             heartRateLabel.centerXAnchor.constraint(equalTo: heartRateContainer.centerXAnchor),
             heartRateLabel.centerYAnchor.constraint(equalTo: heartRateContainer.centerYAnchor, constant: -40),
