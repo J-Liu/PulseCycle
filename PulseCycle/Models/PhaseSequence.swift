@@ -78,9 +78,14 @@ class PhaseSequenceBuilder {
         }
 
         // Work/Rest rounds
-        for _ in 0..<profile.rounds {
+        for i in 0..<profile.rounds {
             items.append(.work(profile))
-            items.append(.rest(profile))
+
+            // Add rest after each work except the last one
+            // Last work is followed by cool-down (if enabled) or ends the workout
+            if i < profile.rounds - 1 {
+                items.append(.rest(profile))
+            }
         }
 
         // Cool-down
