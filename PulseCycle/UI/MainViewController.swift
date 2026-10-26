@@ -205,10 +205,10 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
     private func setupUI() {
         view.backgroundColor = .systemBackground
 
-        setupHeader()
-        setupBottomButtons()  // Create bottom first so heartRate can reference it
         setupTimerArea()
+        setupHeader()
         setupHeartRateArea()
+        setupBottomButtons()
     }
 
     private func setupHeader() {
@@ -218,28 +218,23 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
 
         workLabel.text = L("Work")
         workLabel.font = .systemFont(ofSize: 20, weight: .bold)
-        workLabel.textColor = .white
         workLabel.textAlignment = .left
         workLabel.translatesAutoresizingMaskIntoConstraints = false
 
         workTimeLabel.font = .monospacedDigitSystemFont(ofSize: 20, weight: .bold)
-        workTimeLabel.textColor = .white
         workTimeLabel.textAlignment = .left
         workTimeLabel.translatesAutoresizingMaskIntoConstraints = false
 
         profileLabel.font = .systemFont(ofSize: 22, weight: .bold)
-        profileLabel.textColor = .white
         profileLabel.textAlignment = .center
         profileLabel.translatesAutoresizingMaskIntoConstraints = false
 
         restLabel.text = L("Rest")
         restLabel.font = .systemFont(ofSize: 20, weight: .bold)
-        restLabel.textColor = .white
         restLabel.textAlignment = .right
         restLabel.translatesAutoresizingMaskIntoConstraints = false
 
         restTimeLabel.font = .monospacedDigitSystemFont(ofSize: 20, weight: .bold)
-        restTimeLabel.textColor = .white
         restTimeLabel.textAlignment = .right
         restTimeLabel.translatesAutoresizingMaskIntoConstraints = false
 
@@ -250,7 +245,7 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
         headerView.addSubview(restTimeLabel)
 
         NSLayoutConstraint.activate([
-            headerView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            headerView.topAnchor.constraint(equalTo: timerContainer!.topAnchor),
             headerView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 32),
             headerView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -32),
             headerView.heightAnchor.constraint(equalToConstant: 60),
@@ -299,7 +294,7 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
         timerContainer.addSubview(roundLabel)
 
         NSLayoutConstraint.activate([
-            timerContainer.topAnchor.constraint(equalTo: headerView.bottomAnchor),
+            timerContainer.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             timerContainer.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             timerContainer.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             timerContainer.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: 0.45),
@@ -352,7 +347,7 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
             heartRateContainer.topAnchor.constraint(equalTo: view.centerYAnchor),
             heartRateContainer.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             heartRateContainer.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            heartRateContainer.bottomAnchor.constraint(equalTo: bottomView.topAnchor),
+            heartRateContainer.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
 
             heartRateLabel.centerXAnchor.constraint(equalTo: heartRateContainer.centerXAnchor),
             heartRateLabel.centerYAnchor.constraint(equalTo: heartRateContainer.centerYAnchor, constant: -40),
@@ -368,7 +363,7 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
     private func setupBottomButtons() {
         bottomView.backgroundColor = .clear
         bottomView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(bottomView)
+        heartRateContainer.addSubview(bottomView)
 
         // Go button - larger, bold, red background
         goButton.setTitle(L("Go"), for: .normal)
@@ -380,21 +375,21 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
         goButton.layer.borderColor = UIColor.white.cgColor
         goButton.translatesAutoresizingMaskIntoConstraints = false
 
-        // Settings button - white border, white text
+        // Settings button - red background, white text, white border
         settingsButton.setTitle(L("Settings"), for: .normal)
         settingsButton.titleLabel?.font = .systemFont(ofSize: 20, weight: .bold)
         settingsButton.setTitleColor(.white, for: .normal)
-        settingsButton.backgroundColor = .clear
+        settingsButton.backgroundColor = .systemRed
         settingsButton.layer.cornerRadius = 10
         settingsButton.layer.borderWidth = 2
         settingsButton.layer.borderColor = UIColor.white.cgColor
         settingsButton.translatesAutoresizingMaskIntoConstraints = false
 
-        // Reset button - white border, white text
+        // Reset button - red background, white text, white border
         resetButton.setTitle(L("Reset"), for: .normal)
         resetButton.titleLabel?.font = .systemFont(ofSize: 20, weight: .bold)
         resetButton.setTitleColor(.white, for: .normal)
-        resetButton.backgroundColor = .clear
+        resetButton.backgroundColor = .systemRed
         resetButton.layer.cornerRadius = 10
         resetButton.layer.borderWidth = 2
         resetButton.layer.borderColor = UIColor.white.cgColor
@@ -405,9 +400,9 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
         bottomView.addSubview(resetButton)
 
         NSLayoutConstraint.activate([
-            bottomView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            bottomView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            bottomView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            bottomView.leadingAnchor.constraint(equalTo: heartRateContainer.leadingAnchor),
+            bottomView.trailingAnchor.constraint(equalTo: heartRateContainer.trailingAnchor),
+            bottomView.bottomAnchor.constraint(equalTo: heartRateContainer.bottomAnchor),
             bottomView.heightAnchor.constraint(equalToConstant: 120),
 
             goButton.centerXAnchor.constraint(equalTo: bottomView.centerXAnchor),
