@@ -37,6 +37,7 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
     private var hasReset = true
     private var isPreparing = false
     private var prepareCountdown: Int = 0
+    private var prepareTimer: Timer?
 
     init() {
         heartRateMonitor = HeartRateMonitor()
@@ -115,6 +116,14 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
 
     @objc private func handleGo() {
         if isPreparing {
+            // Stop countdown
+            prepareTimer?.invalidate()
+            prepareTimer = nil
+            isPreparing = false
+            prepareCountdown = 0
+            isRunning = false
+            updateUI()
+            updateGoButton()
             return
         }
 
@@ -140,7 +149,7 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
         prepareCountdown = profile.prepareTime
         updateUI()
 
-        let timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] timer in
+        prepareTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] timer in
             guard let self = self else {
                 timer.invalidate()
                 return
@@ -152,6 +161,7 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
 
             if self.prepareCountdown == 0 {
                 timer.invalidate()
+                self.prepareTimer = nil
                 self.isPreparing = false
                 self.engine.start()
                 self.isRunning = true
@@ -159,7 +169,7 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
                 self.updateGoButton()
             }
         }
-        timer.fire()
+        prepareTimer?.fire()
     }
 
     @objc private func handleSettings() {
@@ -531,10 +541,11 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
         DispatchQueue.main.async { [weak self] in
             self?.updateUI()
 
+            guard let self = self else { return }
             let profile = ProfileManager.shared.currentProfile
 
             // Play ending notify sound 10 seconds before phase ends (if phase >= 15s)
-            if profile.endingNotifySoundEnabled && engine.remainingSeconds == 10 {
+            if profile.endingNotifySoundEnabled && engine.remainingSeconds == 10 && self.isRunning {
                 let phaseDuration: Int
                 switch engine.phase {
                 case .work:
@@ -553,7 +564,7 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
             }
 
             // Play phase end sound when phase ends (except coolDown, which is handled by engineDidFinish)
-            if profile.endSoundEnabled && engine.remainingSeconds == 0 && engine.phase != .finished && engine.phase != .coolDown {
+            if profile.endSoundEnabled && engine.remainingSeconds == 0 && engine.phase != .finished && engine.phase != .coolDown && self.isRunning {
                 SoundManager.shared.playRoundEndSound()
             }
         }
