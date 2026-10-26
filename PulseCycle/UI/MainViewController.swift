@@ -212,30 +212,34 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
     }
 
     private func setupHeader() {
-        headerView.backgroundColor = .systemBackground
+        headerView.backgroundColor = .clear
         headerView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(headerView)
 
         workLabel.text = L("Work")
-        workLabel.font = .systemFont(ofSize: 14, weight: .medium)
+        workLabel.font = .systemFont(ofSize: 20, weight: .bold)
+        workLabel.textColor = .white
         workLabel.textAlignment = .left
         workLabel.translatesAutoresizingMaskIntoConstraints = false
 
-        workTimeLabel.font = .monospacedDigitSystemFont(ofSize: 14, weight: .bold)
+        workTimeLabel.font = .monospacedDigitSystemFont(ofSize: 20, weight: .bold)
+        workTimeLabel.textColor = .white
         workTimeLabel.textAlignment = .left
         workTimeLabel.translatesAutoresizingMaskIntoConstraints = false
 
-        profileLabel.font = .systemFont(ofSize: 18, weight: .semibold)
+        profileLabel.font = .systemFont(ofSize: 22, weight: .bold)
+        profileLabel.textColor = .white
         profileLabel.textAlignment = .center
-        profileLabel.textColor = .systemBlue
         profileLabel.translatesAutoresizingMaskIntoConstraints = false
 
         restLabel.text = L("Rest")
-        restLabel.font = .systemFont(ofSize: 14, weight: .medium)
+        restLabel.font = .systemFont(ofSize: 20, weight: .bold)
+        restLabel.textColor = .white
         restLabel.textAlignment = .right
         restLabel.translatesAutoresizingMaskIntoConstraints = false
 
-        restTimeLabel.font = .monospacedDigitSystemFont(ofSize: 14, weight: .bold)
+        restTimeLabel.font = .monospacedDigitSystemFont(ofSize: 20, weight: .bold)
+        restTimeLabel.textColor = .white
         restTimeLabel.textAlignment = .right
         restTimeLabel.translatesAutoresizingMaskIntoConstraints = false
 
@@ -247,15 +251,15 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
 
         NSLayoutConstraint.activate([
             headerView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            headerView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            headerView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            headerView.heightAnchor.constraint(equalToConstant: 50),
+            headerView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 32),
+            headerView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -32),
+            headerView.heightAnchor.constraint(equalToConstant: 60),
 
             workLabel.leadingAnchor.constraint(equalTo: headerView.leadingAnchor),
             workLabel.topAnchor.constraint(equalTo: headerView.topAnchor, constant: 8),
 
             workTimeLabel.leadingAnchor.constraint(equalTo: headerView.leadingAnchor),
-            workTimeLabel.topAnchor.constraint(equalTo: workLabel.bottomAnchor, constant: 2),
+            workTimeLabel.topAnchor.constraint(equalTo: workLabel.bottomAnchor, constant: 4),
 
             profileLabel.centerXAnchor.constraint(equalTo: headerView.centerXAnchor),
             profileLabel.centerYAnchor.constraint(equalTo: headerView.centerYAnchor),
@@ -264,7 +268,7 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
             restLabel.topAnchor.constraint(equalTo: headerView.topAnchor, constant: 8),
 
             restTimeLabel.trailingAnchor.constraint(equalTo: headerView.trailingAnchor),
-            restTimeLabel.topAnchor.constraint(equalTo: restLabel.bottomAnchor, constant: 2)
+            restTimeLabel.topAnchor.constraint(equalTo: restLabel.bottomAnchor, constant: 4)
         ])
     }
 
@@ -362,20 +366,38 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
     }
 
     private func setupBottomButtons() {
-        bottomView.backgroundColor = .systemBackground
+        bottomView.backgroundColor = .clear
         bottomView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(bottomView)
 
+        // Go button - larger, bold, red background
         goButton.setTitle(L("Go"), for: .normal)
-        goButton.titleLabel?.font = .systemFont(ofSize: 24, weight: .bold)
+        goButton.titleLabel?.font = .systemFont(ofSize: 28, weight: .bold)
+        goButton.setTitleColor(.white, for: .normal)
+        goButton.backgroundColor = .systemRed
+        goButton.layer.cornerRadius = 12
+        goButton.layer.borderWidth = 2
+        goButton.layer.borderColor = UIColor.white.cgColor
         goButton.translatesAutoresizingMaskIntoConstraints = false
 
+        // Settings button - white border, white text
         settingsButton.setTitle(L("Settings"), for: .normal)
-        settingsButton.titleLabel?.font = .systemFont(ofSize: 16)
+        settingsButton.titleLabel?.font = .systemFont(ofSize: 20, weight: .bold)
+        settingsButton.setTitleColor(.white, for: .normal)
+        settingsButton.backgroundColor = .clear
+        settingsButton.layer.cornerRadius = 10
+        settingsButton.layer.borderWidth = 2
+        settingsButton.layer.borderColor = UIColor.white.cgColor
         settingsButton.translatesAutoresizingMaskIntoConstraints = false
 
+        // Reset button - white border, white text
         resetButton.setTitle(L("Reset"), for: .normal)
-        resetButton.titleLabel?.font = .systemFont(ofSize: 16)
+        resetButton.titleLabel?.font = .systemFont(ofSize: 20, weight: .bold)
+        resetButton.setTitleColor(.white, for: .normal)
+        resetButton.backgroundColor = .clear
+        resetButton.layer.cornerRadius = 10
+        resetButton.layer.borderWidth = 2
+        resetButton.layer.borderColor = UIColor.white.cgColor
         resetButton.translatesAutoresizingMaskIntoConstraints = false
 
         bottomView.addSubview(goButton)
@@ -386,22 +408,28 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
             bottomView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             bottomView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             bottomView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-            bottomView.heightAnchor.constraint(equalToConstant: 100),
+            bottomView.heightAnchor.constraint(equalToConstant: 120),
 
             goButton.centerXAnchor.constraint(equalTo: bottomView.centerXAnchor),
-            goButton.topAnchor.constraint(equalTo: bottomView.topAnchor, constant: 8),
+            goButton.topAnchor.constraint(equalTo: bottomView.topAnchor, constant: 12),
+            goButton.widthAnchor.constraint(equalToConstant: 140),
+            goButton.heightAnchor.constraint(equalToConstant: 56),
 
             settingsButton.leadingAnchor.constraint(equalTo: bottomView.leadingAnchor, constant: 24),
             settingsButton.centerYAnchor.constraint(equalTo: goButton.centerYAnchor),
+            settingsButton.widthAnchor.constraint(equalToConstant: 100),
+            settingsButton.heightAnchor.constraint(equalToConstant: 48),
 
             resetButton.trailingAnchor.constraint(equalTo: bottomView.trailingAnchor, constant: -24),
-            resetButton.centerYAnchor.constraint(equalTo: goButton.centerYAnchor)
+            resetButton.centerYAnchor.constraint(equalTo: goButton.centerYAnchor),
+            resetButton.widthAnchor.constraint(equalToConstant: 100),
+            resetButton.heightAnchor.constraint(equalToConstant: 48)
         ])
     }
 
     private func updateUI() {
         let profile = ProfileManager.shared.currentProfile
-        profileLabel.text = profile.name
+        profileLabel.text = "\(profile.name) ▼"
         workTimeLabel.text = formatTime(profile.workSeconds)
         restTimeLabel.text = formatTime(profile.restSeconds)
 
@@ -419,7 +447,9 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
         let restColor = UIColor(hex: profile.restColor) ?? .systemGray.withAlphaComponent(0.15)
         let hrColor = UIColor(hex: profile.heartRateColor) ?? .systemRed.withAlphaComponent(0.1)
 
-        timerContainer?.backgroundColor = (engine.phase == .work) ? workColor : restColor
+        let timerColor = (engine.phase == .work) ? workColor : restColor
+        headerView.backgroundColor = timerColor
+        timerContainer?.backgroundColor = timerColor
         heartRateContainer.backgroundColor = hrColor
     }
 
