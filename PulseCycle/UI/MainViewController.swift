@@ -36,6 +36,7 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
     private var isRunning = false
     private var hasReset = true
     private var isPreparing = false
+    private var isCountdownPaused = false
     private var prepareCountdown: Int = 0
     private var prepareTimer: Timer?
 
@@ -116,13 +117,16 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
 
     @objc private func handleGo() {
         if isPreparing {
-            // Stop countdown
-            prepareTimer?.invalidate()
-            prepareTimer = nil
-            isPreparing = false
-            prepareCountdown = 0
-            isRunning = false
-            updateUI()
+            // Handle countdown pause/resume
+            if isCountdownPaused {
+                // Resume countdown
+                isCountdownPaused = false
+                resumeCountdown()
+            } else {
+                // Pause countdown
+                isCountdownPaused = true
+                pauseCountdown()
+            }
             updateGoButton()
             return
         }
@@ -146,9 +150,40 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
     private func startCountdown() {
         let profile = ProfileManager.shared.currentProfile
         isPreparing = true
+        isCountdownPaused = false
         prepareCountdown = profile.prepareTime
         updateUI()
 
+        prepareTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] timer in
+            guard let self = self else {
+                timer.invalidate()
+                return
+            }
+
+            SoundManager.shared.playCountdownBeep()
+            self.prepareCountdown -= 1
+            self.updateUI()
+
+            if self.prepareCountdown == 0 {
+                timer.invalidate()
+                self.prepareTimer = nil
+                self.isPreparing = false
+                self.engine.start()
+                self.isRunning = true
+                self.updateUI()
+                self.updateGoButton()
+            }
+        }
+        prepareTimer?.fire()
+    }
+
+    private func pauseCountdown() {
+        prepareTimer?.invalidate()
+        prepareTimer = nil
+        updateUI()
+    }
+
+    private func resumeCountdown() {
         prepareTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] timer in
             guard let self = self else {
                 timer.invalidate()
@@ -187,6 +222,15 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
     }
 
     @objc private func handleReset() {
+        // Stop countdown if in progress
+        if isPreparing {
+            prepareTimer?.invalidate()
+            prepareTimer = nil
+            isPreparing = false
+            isCountdownPaused = false
+            prepareCountdown = 0
+        }
+
         engine.reset()
         isRunning = false
         hasReset = true
@@ -217,7 +261,13 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
     }
 
     private func updateGoButton() {
-        if isRunning {
+        if isPreparing {
+            if isCountdownPaused {
+                goButton.setTitle(L("Resume"), for: .normal)
+            } else {
+                goButton.setTitle(L("Pause"), for: .normal)
+            }
+        } else if isRunning {
             goButton.setTitle(L("Pause"), for: .normal)
         } else if engine.phase == .finished {
             goButton.setTitle(L("Go"), for: .normal)
@@ -563,8 +613,8 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
                 }
             }
 
-            // Play phase end sound when phase ends (except coolDown, which is handled by engineDidFinish)
-            if profile.endSoundEnabled && engine.remainingSeconds == 0 && engine.phase != .finished && engine.phase != .coolDown && self.isRunning {
+            // Play phase end sound when phase ends (except when transitioning to finished, which is handled by engineDidFinish)
+            if profile.endSoundEnabled && engine.remainingSeconds == 0 && engine.phase != .finished && self.isRunning {
                 SoundManager.shared.playRoundEndSound()
             }
         }
