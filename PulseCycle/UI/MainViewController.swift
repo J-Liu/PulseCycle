@@ -18,7 +18,6 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
 
     private let heartRateContainer = UIView()
     private let heartRateLabel = UILabel()
-    private let bpmLabel = UILabel()
     private let connectionLabel = UILabel()
 
     private let opView = UIView()
@@ -442,11 +441,6 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
         heartRateLabel.adjustsFontSizeToFitWidth = true
         heartRateLabel.translatesAutoresizingMaskIntoConstraints = false
 
-        bpmLabel.text = L("BPM")
-        bpmLabel.font = .systemFont(ofSize: 24, weight: .medium)
-        bpmLabel.textAlignment = .center
-        bpmLabel.translatesAutoresizingMaskIntoConstraints = false
-
         connectionLabel.text = L("Not connected")
         connectionLabel.font = .systemFont(ofSize: 16)
         connectionLabel.textAlignment = .center
@@ -454,7 +448,6 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
         connectionLabel.translatesAutoresizingMaskIntoConstraints = false
 
         heartRateContainer.addSubview(heartRateLabel)
-        heartRateContainer.addSubview(bpmLabel)
         heartRateContainer.addSubview(connectionLabel)
 
         NSLayoutConstraint.activate([
@@ -464,13 +457,10 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
             heartRateContainer.bottomAnchor.constraint(equalTo: view.bottomAnchor),
 
             heartRateLabel.centerXAnchor.constraint(equalTo: heartRateContainer.centerXAnchor),
-            heartRateLabel.centerYAnchor.constraint(equalTo: heartRateContainer.centerYAnchor, constant: -40),
-
-            bpmLabel.centerXAnchor.constraint(equalTo: heartRateContainer.centerXAnchor),
-            bpmLabel.topAnchor.constraint(equalTo: heartRateLabel.bottomAnchor, constant: 8),
+            heartRateLabel.centerYAnchor.constraint(equalTo: heartRateContainer.centerYAnchor, constant: -20),
 
             connectionLabel.centerXAnchor.constraint(equalTo: heartRateContainer.centerXAnchor),
-            connectionLabel.topAnchor.constraint(equalTo: bpmLabel.bottomAnchor, constant: 16)
+            connectionLabel.topAnchor.constraint(equalTo: heartRateLabel.bottomAnchor, constant: 16)
         ])
     }
 
