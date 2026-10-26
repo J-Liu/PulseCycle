@@ -258,6 +258,9 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
             isRunning = false
         }
 
+        // Allow screen to lock when in background
+        UIApplication.shared.isIdleTimerDisabled = false
+
         updateGoButton()
     }
 
@@ -270,6 +273,7 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
         if isPreparing && isCountdownPaused {
             isCountdownPaused = false
             resumeCountdown()
+            UIApplication.shared.isIdleTimerDisabled = true
             updateGoButton()
             return
         }
@@ -283,6 +287,7 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
             }
             engine.start()
             isRunning = true
+            UIApplication.shared.isIdleTimerDisabled = true
             updateGoButton()
         }
     }
