@@ -221,7 +221,8 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
         case 1:
             cell.textLabel?.text = L("Voice output")
             let switch_ = UISwitch()
-            switch_.isOn = false
+            switch_.isOn = profile.voiceOutputEnabled
+            switch_.addTarget(self, action: #selector(voiceOutputToggled(_:)), for: .valueChanged)
             cell.accessoryView = switch_
         default:
             break
@@ -263,6 +264,12 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
     @objc private func endSoundToggled(_ switch_: UISwitch) {
         var p = profile
         p.endSoundEnabled = switch_.isOn
+        ProfileManager.shared.updateProfile(p)
+    }
+
+    @objc private func voiceOutputToggled(_ switch_: UISwitch) {
+        var p = profile
+        p.voiceOutputEnabled = switch_.isOn
         ProfileManager.shared.updateProfile(p)
     }
 

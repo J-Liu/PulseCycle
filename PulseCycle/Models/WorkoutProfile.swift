@@ -20,6 +20,7 @@ struct WorkoutProfile: Codable, Identifiable {
     var startSoundEnabled: Bool
     var endingNotifySoundEnabled: Bool
     var endSoundEnabled: Bool
+    var voiceOutputEnabled: Bool
     var workColor: String
     var restColor: String
     var heartRateColor: String
@@ -44,6 +45,7 @@ struct WorkoutProfile: Codable, Identifiable {
                 startSoundEnabled: true,
                 endingNotifySoundEnabled: true,
                 endSoundEnabled: true,
+                voiceOutputEnabled: true,
                 workColor: "#FF6B6B",
                 restColor: "#E0E0E0",
                 heartRateColor: "#FF8A80",
@@ -66,6 +68,7 @@ struct WorkoutProfile: Codable, Identifiable {
                 startSoundEnabled: true,
                 endingNotifySoundEnabled: true,
                 endSoundEnabled: true,
+                voiceOutputEnabled: true,
                 workColor: "#FF6B6B",
                 restColor: "#E0E0E0",
                 heartRateColor: "#FF8A80",
@@ -88,6 +91,7 @@ struct WorkoutProfile: Codable, Identifiable {
                 startSoundEnabled: true,
                 endingNotifySoundEnabled: true,
                 endSoundEnabled: true,
+                voiceOutputEnabled: true,
                 workColor: "#FF6B6B",
                 restColor: "#E0E0E0",
                 heartRateColor: "#FF8A80",
@@ -110,6 +114,7 @@ struct WorkoutProfile: Codable, Identifiable {
                 startSoundEnabled: true,
                 endingNotifySoundEnabled: true,
                 endSoundEnabled: true,
+                voiceOutputEnabled: true,
                 workColor: "#FF6B6B",
                 restColor: "#E0E0E0",
                 heartRateColor: "#FF8A80",
@@ -132,6 +137,7 @@ struct WorkoutProfile: Codable, Identifiable {
                 startSoundEnabled: true,
                 endingNotifySoundEnabled: true,
                 endSoundEnabled: true,
+                voiceOutputEnabled: true,
                 workColor: "#FF6B6B",
                 restColor: "#E0E0E0",
                 heartRateColor: "#FF8A80",

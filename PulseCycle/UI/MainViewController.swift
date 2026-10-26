@@ -612,6 +612,12 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
         }
     }
 
+    func engineDidSpeak(_ engine: IntervalEngine, text: String) {
+        DispatchQueue.main.async { [weak self] in
+            VoiceManager.shared.speak(text)
+        }
+    }
+
     func engineDidFinish(_ engine: IntervalEngine) {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }

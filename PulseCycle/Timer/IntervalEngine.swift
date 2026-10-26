@@ -10,6 +10,7 @@ protocol IntervalEngineDelegate: AnyObject {
     func engineDidTransitionToPhase(_ engine: IntervalEngine, phase: IntervalPhase)
     func engineDidEndPhase(_ engine: IntervalEngine, phase: IntervalPhase)
     func engineDidPlaySound(_ engine: IntervalEngine, sound: String)
+    func engineDidSpeak(_ engine: IntervalEngine, text: String)
     func engineDidFinish(_ engine: IntervalEngine)
 }
 
@@ -57,6 +58,11 @@ class IntervalEngine {
             // Play start sound for first phase
             if let startSound = phaseSequence[0].startSound {
                 delegate?.engineDidPlaySound(self, sound: startSound)
+            }
+
+            // Speak voice text for first phase
+            if let voiceText = phaseSequence[0].voiceText {
+                delegate?.engineDidSpeak(self, text: voiceText)
             }
         }
 
@@ -148,6 +154,11 @@ class IntervalEngine {
             // Play start sound if configured
             if let startSound = nextPhaseItem.startSound {
                 delegate?.engineDidPlaySound(self, sound: startSound)
+            }
+
+            // Speak voice text if configured
+            if let voiceText = nextPhaseItem.voiceText {
+                delegate?.engineDidSpeak(self, text: voiceText)
             }
 
             delegate?.engineDidTransitionToPhase(self, phase: phase)

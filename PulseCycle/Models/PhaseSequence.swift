@@ -14,6 +14,7 @@ struct PhaseItem {
     let tickSound: String?
     let warningAtSeconds: Int?  // Play warning sound at remaining seconds
     let warningSound: String?
+    let voiceText: String?  // Voice announcement text
 
     static func warmUp(_ profile: WorkoutProfile) -> PhaseItem {
         return PhaseItem(
@@ -24,11 +25,12 @@ struct PhaseItem {
             endSound: nil,  // No end sound, immediately followed by work phase
             tickSound: nil,
             warningAtSeconds: nil,
-            warningSound: nil
+            warningSound: nil,
+            voiceText: profile.voiceOutputEnabled && profile.warmUpSeconds >= 5 ? "Warm up" : nil
         )
     }
 
-    static func work(_ profile: WorkoutProfile) -> PhaseItem {
+    static func work(_ profile: WorkoutProfile, roundNumber: Int) -> PhaseItem {
         return PhaseItem(
             phase: .work,
             duration: profile.workSeconds,
@@ -37,7 +39,8 @@ struct PhaseItem {
             endSound: profile.endSoundEnabled ? "boxing-bell-3" : nil,
             tickSound: nil,
             warningAtSeconds: profile.workSeconds >= 15 ? 10 : nil,
-            warningSound: profile.endingNotifySoundEnabled ? "boxing-bell-2" : nil
+            warningSound: profile.endingNotifySoundEnabled ? "boxing-bell-2" : nil,
+            voiceText: profile.voiceOutputEnabled && profile.workSeconds >= 5 ? "Round \(roundNumber)" : nil
         )
     }
 
@@ -50,7 +53,8 @@ struct PhaseItem {
             endSound: nil,    // No end sound for rest phase
             tickSound: nil,
             warningAtSeconds: nil,  // No warning sound for rest phase
-            warningSound: nil
+            warningSound: nil,
+            voiceText: nil
         )
     }
 
@@ -63,7 +67,8 @@ struct PhaseItem {
             endSound: profile.endSoundEnabled ? "boxing-bell-3" : nil,
             tickSound: nil,
             warningAtSeconds: nil,  // No warning sound for cool-down
-            warningSound: nil
+            warningSound: nil,
+            voiceText: profile.voiceOutputEnabled && profile.coolDownSeconds >= 5 ? "Cool down" : nil
         )
     }
 }
@@ -79,7 +84,7 @@ class PhaseSequenceBuilder {
 
         // Work/Rest rounds
         for i in 0..<profile.rounds {
-            items.append(.work(profile))
+            items.append(.work(profile, roundNumber: i + 1))
 
             // Add rest after each work except the last one
             // Last work is followed by cool-down (if enabled) or ends the workout
