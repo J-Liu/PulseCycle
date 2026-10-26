@@ -8,6 +8,7 @@ import Foundation
 protocol IntervalEngineDelegate: AnyObject {
     func engineDidUpdateState(_ engine: IntervalEngine)
     func engineDidTransitionToPhase(_ engine: IntervalEngine, phase: IntervalPhase)
+    func engineDidEndPhase(_ engine: IntervalEngine, phase: IntervalPhase)
     func engineDidFinish(_ engine: IntervalEngine)
 }
 
@@ -80,6 +81,8 @@ class IntervalEngine {
     }
 
     private func advancePhase() {
+        let endedPhase = phase
+
         switch phase {
         case .warmUp:
             phase = .work
@@ -104,6 +107,11 @@ class IntervalEngine {
             delegate?.engineDidFinish(self)
         case .finished:
             break
+        }
+
+        // Notify that a phase has ended (before transitioning to new phase)
+        if endedPhase != .finished {
+            delegate?.engineDidEndPhase(self, phase: endedPhase)
         }
 
         delegate?.engineDidTransitionToPhase(self, phase: phase)

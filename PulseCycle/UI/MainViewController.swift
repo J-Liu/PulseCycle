@@ -612,11 +612,6 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
                     SoundManager.shared.playPreRoundWarningSound()
                 }
             }
-
-            // Play phase end sound when phase ends (except when transitioning to finished, which is handled by engineDidFinish)
-            if profile.endSoundEnabled && engine.remainingSeconds == 0 && engine.phase != .finished && self.isRunning {
-                SoundManager.shared.playRoundEndSound()
-            }
         }
     }
 
@@ -635,6 +630,18 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
         }
     }
 
+    func engineDidEndPhase(_ engine: IntervalEngine, phase: IntervalPhase) {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+
+            // Play phase end sound
+            let profile = ProfileManager.shared.currentProfile
+            if profile.endSoundEnabled {
+                SoundManager.shared.playRoundEndSound()
+            }
+        }
+    }
+
     func engineDidFinish(_ engine: IntervalEngine) {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
@@ -644,12 +651,6 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
             self.isRunning = false
             self.hasReset = false
             self.updateGoButton()
-
-            // Play round end sound
-            let profile = ProfileManager.shared.currentProfile
-            if profile.endSoundEnabled {
-                SoundManager.shared.playRoundEndSound()
-            }
         }
     }
 
