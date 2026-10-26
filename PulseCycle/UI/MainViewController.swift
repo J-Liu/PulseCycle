@@ -122,10 +122,12 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
                 // Resume countdown
                 isCountdownPaused = false
                 resumeCountdown()
+                UIApplication.shared.isIdleTimerDisabled = true
             } else {
                 // Pause countdown
                 isCountdownPaused = true
                 pauseCountdown()
+                UIApplication.shared.isIdleTimerDisabled = false
             }
             updateGoButton()
             return
@@ -134,6 +136,7 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
         if isRunning {
             engine.pause()
             isRunning = false
+            UIApplication.shared.isIdleTimerDisabled = false
         } else {
             let profile = ProfileManager.shared.currentProfile
             if hasReset && profile.prepareCountingSoundEnabled && engine.phase == .warmUp && engine.remainingSeconds == (profile.warmUpEnabled ? profile.warmUpSeconds : 0) {
@@ -143,6 +146,7 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
                 isRunning = true
             }
             hasReset = false
+            UIApplication.shared.isIdleTimerDisabled = true
         }
         updateGoButton()
     }
@@ -240,9 +244,21 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
 
     @objc private func handleResignActive() {
         backgroundTimestamp = Date()
+
+        // Pause countdown if in progress
+        if isPreparing && !isCountdownPaused {
+            isCountdownPaused = true
+            prepareTimer?.invalidate()
+            prepareTimer = nil
+        }
+
+        // Pause engine if running
         if isRunning {
             engine.pause()
+            isRunning = false
         }
+
+        updateGoButton()
     }
 
     @objc private func handleEnterForeground() {
@@ -250,13 +266,24 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
         let elapsed = Int(Date().timeIntervalSince(timestamp))
         backgroundTimestamp = nil
 
-        if elapsed > 0 && engine.phase != .finished && engine.phase != .warmUp {
-            for _ in 0..<min(elapsed, engine.remainingSeconds) {
-                engine.tick()
-            }
+        // Resume countdown if was in progress
+        if isPreparing && isCountdownPaused {
+            isCountdownPaused = false
+            resumeCountdown()
+            updateGoButton()
+            return
         }
-        if isRunning {
+
+        // Resume engine if was running
+        if !hasReset && engine.phase != .finished {
+            if elapsed > 0 && engine.phase != .warmUp {
+                for _ in 0..<min(elapsed, engine.remainingSeconds) {
+                    engine.tick()
+                }
+            }
             engine.start()
+            isRunning = true
+            updateGoButton()
         }
     }
 
@@ -585,7 +612,6 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
             guard let self = self else { return }
             self.updateUI()
             self.impactGenerator.impactOccurred()
-            UIApplication.shared.isIdleTimerDisabled = true
         }
     }
 
