@@ -35,6 +35,7 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
     private var hasReset = true
     private var isPreparing = false
     private var isCountdownPaused = false
+    private var isProfileListPresented = false
     private var prepareCountdown: Int = 0
     private var prepareTimer: Timer?
 
@@ -100,17 +101,43 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
     }
 
     @objc private func showProfileList() {
+        // Only allow profile selection when timer is reset or finished
+        guard hasReset || engine.phase == .finished else { return }
+
         let vc = ProfileListViewController()
         vc.onSelect = { [weak self] in
             self?.setupEngine()
             self?.updateUI()
+        }
+        vc.onDismiss = { [weak self] in
+            self?.isProfileListPresented = false
+            self?.updateProfileArrow(animated: true)
         }
         let nav = UINavigationController(rootViewController: vc)
         nav.modalPresentationStyle = .pageSheet
         if let sheet = nav.sheetPresentationController {
             sheet.detents = [.medium(), .large()]
         }
+
+        // Animate arrow rotation and track presentation state
+        isProfileListPresented = true
+        updateProfileArrow(animated: true)
+
         present(nav, animated: true)
+    }
+
+    private func updateProfileArrow(animated: Bool) {
+        let profile = ProfileManager.shared.currentProfile
+        let arrow = isProfileListPresented ? "▲" : "▼"
+        let newText = "\(profile.name) \(arrow)"
+
+        if animated {
+            UIView.transition(with: profileLabel, duration: 0.2, options: .transitionCrossDissolve, animations: {
+                self.profileLabel.text = newText
+            }, completion: nil)
+        } else {
+            profileLabel.text = newText
+        }
     }
 
     @objc private func handleGo() {
@@ -527,8 +554,8 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
     }
 
     private func updateUI() {
+        updateProfileArrow(animated: false)
         let profile = ProfileManager.shared.currentProfile
-        profileLabel.text = "\(profile.name) ▼"
         workTimeLabel.text = formatTime(profile.workSeconds)
         restTimeLabel.text = formatTime(profile.restSeconds)
 

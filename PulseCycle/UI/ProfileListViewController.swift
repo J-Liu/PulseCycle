@@ -10,6 +10,7 @@ class ProfileListViewController: UIViewController, UITableViewDelegate, UITableV
     private var profiles: [WorkoutProfile] { ProfileManager.shared.profiles }
 
     var onSelect: (() -> Void)?
+    var onDismiss: (() -> Void)?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -36,6 +37,11 @@ class ProfileListViewController: UIViewController, UITableViewDelegate, UITableV
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        onDismiss?()
     }
 
     @objc private func dismissVC() {
