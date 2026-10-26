@@ -53,6 +53,11 @@ class IntervalEngine {
             currentPhaseIndex = 0
             phase = phaseSequence[0].phase
             remainingSeconds = phaseSequence[0].duration
+
+            // Play start sound for first phase
+            if let startSound = phaseSequence[0].startSound {
+                delegate?.engineDidPlaySound(self, sound: startSound)
+            }
         }
 
         isRunning = true
