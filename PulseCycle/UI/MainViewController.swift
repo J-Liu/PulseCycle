@@ -245,7 +245,7 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
         headerView.addSubview(restTimeLabel)
 
         NSLayoutConstraint.activate([
-            headerView.topAnchor.constraint(equalTo: timerContainer!.topAnchor),
+            headerView.topAnchor.constraint(equalTo: timerContainer!.topAnchor, constant: 60),
             headerView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 32),
             headerView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -32),
             headerView.heightAnchor.constraint(equalToConstant: 60),
@@ -274,17 +274,17 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
 
         let timerCenterY = timerContainer.centerYAnchor
 
-        phaseLabel.font = .systemFont(ofSize: 28, weight: .semibold)
+        phaseLabel.font = .systemFont(ofSize: 24, weight: .semibold)
         phaseLabel.textAlignment = .center
         phaseLabel.adjustsFontSizeToFitWidth = true
         phaseLabel.translatesAutoresizingMaskIntoConstraints = false
 
-        timeLabel.font = .monospacedDigitSystemFont(ofSize: 96, weight: .bold)
+        timeLabel.font = .monospacedDigitSystemFont(ofSize: 140, weight: .bold)
         timeLabel.textAlignment = .center
         timeLabel.adjustsFontSizeToFitWidth = true
         timeLabel.translatesAutoresizingMaskIntoConstraints = false
 
-        roundLabel.font = .systemFont(ofSize: 22)
+        roundLabel.font = .systemFont(ofSize: 18)
         roundLabel.textAlignment = .center
         roundLabel.adjustsFontSizeToFitWidth = true
         roundLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -323,18 +323,18 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
         view.addSubview(heartRateContainer)
 
         heartRateLabel.text = "--"
-        heartRateLabel.font = .monospacedDigitSystemFont(ofSize: 96, weight: .bold)
+        heartRateLabel.font = .monospacedDigitSystemFont(ofSize: 140, weight: .bold)
         heartRateLabel.textAlignment = .center
         heartRateLabel.adjustsFontSizeToFitWidth = true
         heartRateLabel.translatesAutoresizingMaskIntoConstraints = false
 
         bpmLabel.text = L("BPM")
-        bpmLabel.font = .systemFont(ofSize: 28, weight: .medium)
+        bpmLabel.font = .systemFont(ofSize: 24, weight: .medium)
         bpmLabel.textAlignment = .center
         bpmLabel.translatesAutoresizingMaskIntoConstraints = false
 
         connectionLabel.text = L("Not connected")
-        connectionLabel.font = .systemFont(ofSize: 18)
+        connectionLabel.font = .systemFont(ofSize: 16)
         connectionLabel.textAlignment = .center
         connectionLabel.textColor = .systemGray
         connectionLabel.translatesAutoresizingMaskIntoConstraints = false
