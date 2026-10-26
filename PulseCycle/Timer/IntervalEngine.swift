@@ -9,6 +9,7 @@ protocol IntervalEngineDelegate: AnyObject {
     func engineDidUpdateState(_ engine: IntervalEngine)
     func engineDidTransitionToPhase(_ engine: IntervalEngine, phase: IntervalPhase)
     func engineDidEndPhase(_ engine: IntervalEngine, phase: IntervalPhase)
+    func engineDidPlaySound(_ engine: IntervalEngine, sound: String)
     func engineDidFinish(_ engine: IntervalEngine)
 }
 
@@ -25,6 +26,15 @@ class IntervalEngine {
     private var timer: Timer?
     private var isRunning = false
 
+    // Phase sequence
+    private var phaseSequence: [PhaseItem] = []
+    private var currentPhaseIndex: Int = 0
+
+    var currentPhaseItem: PhaseItem? {
+        guard currentPhaseIndex < phaseSequence.count else { return nil }
+        return phaseSequence[currentPhaseIndex]
+    }
+
     init(config: WorkoutConfig) {
         self.config = config
         self.remainingSeconds = config.warmUpSeconds
@@ -35,6 +45,16 @@ class IntervalEngine {
 
     func start() {
         guard !isRunning else { return }
+
+        // Build phase sequence on first start
+        if phaseSequence.isEmpty {
+            let profile = ProfileManager.shared.currentProfile
+            phaseSequence = PhaseSequenceBuilder.build(from: profile)
+            currentPhaseIndex = 0
+            phase = phaseSequence[0].phase
+            remainingSeconds = phaseSequence[0].duration
+        }
+
         isRunning = true
         scheduleTimer()
     }
@@ -52,6 +72,8 @@ class IntervalEngine {
 
     func reset() {
         pause()
+        phaseSequence = []
+        currentPhaseIndex = 0
         phase = .warmUp
         remainingSeconds = config.warmUpSeconds
         currentRound = 0
@@ -71,6 +93,15 @@ class IntervalEngine {
         if remainingSeconds > 1 {
             remainingSeconds -= 1
             totalElapsedSeconds += 1
+
+            // Check for warning sound
+            if let phaseItem = currentPhaseItem,
+               let warningAt = phaseItem.warningAtSeconds,
+               remainingSeconds == warningAt,
+               let warningSound = phaseItem.warningSound {
+                delegate?.engineDidPlaySound(self, sound: warningSound)
+            }
+
             delegate?.engineDidUpdateState(self)
         } else {
             remainingSeconds = 0
@@ -82,39 +113,41 @@ class IntervalEngine {
 
     private func advancePhase() {
         let endedPhase = phase
+        let endedPhaseItem = currentPhaseItem
 
-        switch phase {
-        case .warmUp:
-            phase = .work
-            currentRound = 1
-            remainingSeconds = config.workSeconds
-        case .work:
-            if currentRound >= config.rounds {
-                phase = .coolDown
-                remainingSeconds = config.coolDownSeconds
-            } else {
-                phase = .rest
-                remainingSeconds = config.restSeconds
-            }
-        case .rest:
-            phase = .work
-            currentRound += 1
-            remainingSeconds = config.workSeconds
-        case .coolDown:
+        // Play end sound if configured
+        if let endSound = endedPhaseItem?.endSound {
+            delegate?.engineDidPlaySound(self, sound: endSound)
+        }
+
+        // Move to next phase
+        currentPhaseIndex += 1
+
+        if currentPhaseIndex >= phaseSequence.count {
+            // All phases completed
             phase = .finished
             remainingSeconds = 0
             pause()
             delegate?.engineDidFinish(self)
-        case .finished:
-            break
+        } else {
+            // Transition to next phase
+            let nextPhaseItem = phaseSequence[currentPhaseIndex]
+            phase = nextPhaseItem.phase
+            remainingSeconds = nextPhaseItem.duration
+
+            // Update currentRound for work/rest phases
+            if phase == .work {
+                currentRound += 1
+            }
+
+            // Play start sound if configured
+            if let startSound = nextPhaseItem.startSound {
+                delegate?.engineDidPlaySound(self, sound: startSound)
+            }
+
+            delegate?.engineDidTransitionToPhase(self, phase: phase)
         }
 
-        // Notify that a phase has ended (before transitioning to new phase)
-        if endedPhase != .finished {
-            delegate?.engineDidEndPhase(self, phase: endedPhase)
-        }
-
-        delegate?.engineDidTransitionToPhase(self, phase: phase)
         delegate?.engineDidUpdateState(self)
     }
 }

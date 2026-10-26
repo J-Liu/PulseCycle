@@ -522,29 +522,16 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
 
     private func updateColors() {
         let profile = ProfileManager.shared.currentProfile
-        let workColor = UIColor(hex: profile.workColor) ?? .systemRed.withAlphaComponent(0.15)
-        let restColor = UIColor(hex: profile.restColor) ?? .systemGray.withAlphaComponent(0.15)
         let hrColor = UIColor(hex: profile.heartRateColor) ?? .systemRed.withAlphaComponent(0.1)
         let prepareColor = UIColor(hex: profile.prepareColor) ?? .systemRed.withAlphaComponent(0.05)
-        let warmUpColor = UIColor(hex: profile.warmUpColor) ?? .systemRed.withAlphaComponent(0.1)
-        let coolDownColor = UIColor(hex: profile.coolDownColor) ?? .systemGray.withAlphaComponent(0.2)
 
         let timerColor: UIColor
         if isPreparing {
             timerColor = prepareColor
+        } else if let phaseItem = engine.currentPhaseItem {
+            timerColor = UIColor(hex: phaseItem.color) ?? .systemGray
         } else {
-            switch engine.phase {
-            case .warmUp:
-                timerColor = warmUpColor
-            case .work:
-                timerColor = workColor
-            case .rest:
-                timerColor = restColor
-            case .coolDown:
-                timerColor = coolDownColor
-            case .finished:
-                timerColor = restColor
-            }
+            timerColor = .systemGray
         }
 
         headerView.backgroundColor = timerColor
@@ -590,28 +577,6 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
     func engineDidUpdateState(_ engine: IntervalEngine) {
         DispatchQueue.main.async { [weak self] in
             self?.updateUI()
-
-            guard let self = self else { return }
-            let profile = ProfileManager.shared.currentProfile
-
-            // Play ending notify sound 10 seconds before phase ends (if phase >= 15s)
-            if profile.endingNotifySoundEnabled && engine.remainingSeconds == 10 && self.isRunning {
-                let phaseDuration: Int
-                switch engine.phase {
-                case .work:
-                    phaseDuration = profile.workSeconds
-                case .warmUp:
-                    phaseDuration = profile.warmUpEnabled ? profile.warmUpSeconds : 0
-                case .coolDown:
-                    phaseDuration = profile.coolDownEnabled ? profile.coolDownSeconds : 0
-                default:
-                    phaseDuration = 0
-                }
-
-                if phaseDuration >= 15 {
-                    SoundManager.shared.playPreRoundWarningSound()
-                }
-            }
         }
     }
 
@@ -621,24 +586,16 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
             self.updateUI()
             self.impactGenerator.impactOccurred()
             UIApplication.shared.isIdleTimerDisabled = true
-
-            // Play phase start sound for warmUp, work, coolDown
-            let profile = ProfileManager.shared.currentProfile
-            if profile.startSoundEnabled && (phase == .warmUp || phase == .work || phase == .coolDown) {
-                SoundManager.shared.playPhaseStartSound()
-            }
         }
     }
 
     func engineDidEndPhase(_ engine: IntervalEngine, phase: IntervalPhase) {
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
+        // No longer needed - sounds are now handled in engineDidPlaySound
+    }
 
-            // Play phase end sound
-            let profile = ProfileManager.shared.currentProfile
-            if profile.endSoundEnabled {
-                SoundManager.shared.playRoundEndSound()
-            }
+    func engineDidPlaySound(_ engine: IntervalEngine, sound: String) {
+        DispatchQueue.main.async { [weak self] in
+            SoundManager.shared.playSound(sound)
         }
     }
 
