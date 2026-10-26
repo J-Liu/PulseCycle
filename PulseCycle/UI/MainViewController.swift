@@ -216,7 +216,7 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
         } else {
             goButton.setTitle(L("Resume"), for: .normal)
         }
-        settingsButton.isEnabled = hasReset || engine.phase == .finished
+        settingsButton.isEnabled = !isRunning && (hasReset || engine.phase == .finished)
         settingsButton.alpha = settingsButton.isEnabled ? 1.0 : 0.5
     }
 
