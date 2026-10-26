@@ -114,17 +114,23 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
     }
 
     @objc private func handleGo() {
+        if isPreparing {
+            return
+        }
+
         if isRunning {
             engine.pause()
+            isRunning = false
         } else {
             let profile = ProfileManager.shared.currentProfile
-            if profile.prepareCountingSoundEnabled && engine.phase == .warmUp && engine.remainingSeconds == (profile.warmUpEnabled ? profile.warmUpSeconds : 0) {
+            if hasReset && profile.prepareCountingSoundEnabled && engine.phase == .warmUp && engine.remainingSeconds == (profile.warmUpEnabled ? profile.warmUpSeconds : 0) {
                 startCountdown()
             } else {
                 engine.start()
+                isRunning = true
             }
+            hasReset = false
         }
-        isRunning.toggle()
         updateGoButton()
     }
 
@@ -148,7 +154,9 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
                 timer.invalidate()
                 self.isPreparing = false
                 self.engine.start()
+                self.isRunning = true
                 self.updateUI()
+                self.updateGoButton()
             }
         }
         timer.fire()
