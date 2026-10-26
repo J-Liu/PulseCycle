@@ -22,7 +22,7 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
     private let bpmLabel = UILabel()
     private let connectionLabel = UILabel()
 
-    private let bottomView = UIView()
+    private let opView = UIView()
     private let goButton = UIButton(type: .system)
     private let settingsButton = UIButton(type: .system)
     private let resetButton = UIButton(type: .system)
@@ -207,8 +207,8 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
 
         setupTimerArea()
         setupHeader()
+        setupOpView()
         setupHeartRateArea()
-        setupBottomButtons()
     }
 
     private func setupHeader() {
@@ -297,7 +297,7 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
             timerContainer.topAnchor.constraint(equalTo: view.topAnchor),
             timerContainer.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             timerContainer.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            timerContainer.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: 0.5),
+            timerContainer.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: 0.65),
 
             phaseLabel.centerXAnchor.constraint(equalTo: timerContainer.centerXAnchor),
             phaseLabel.centerYAnchor.constraint(equalTo: timerCenterY, constant: -80),
@@ -360,10 +360,10 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
         ])
     }
 
-    private func setupBottomButtons() {
-        bottomView.backgroundColor = .clear
-        bottomView.translatesAutoresizingMaskIntoConstraints = false
-        heartRateContainer.addSubview(bottomView)
+    private func setupOpView() {
+        opView.backgroundColor = .clear
+        opView.translatesAutoresizingMaskIntoConstraints = false
+        timerContainer!.addSubview(opView)
 
         // Go button - larger, bold, red background
         goButton.setTitle(L("Go"), for: .normal)
@@ -395,27 +395,27 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
         resetButton.layer.borderColor = UIColor.white.cgColor
         resetButton.translatesAutoresizingMaskIntoConstraints = false
 
-        bottomView.addSubview(goButton)
-        bottomView.addSubview(settingsButton)
-        bottomView.addSubview(resetButton)
+        opView.addSubview(goButton)
+        opView.addSubview(settingsButton)
+        opView.addSubview(resetButton)
 
         NSLayoutConstraint.activate([
-            bottomView.leadingAnchor.constraint(equalTo: heartRateContainer.leadingAnchor),
-            bottomView.trailingAnchor.constraint(equalTo: heartRateContainer.trailingAnchor),
-            bottomView.bottomAnchor.constraint(equalTo: heartRateContainer.bottomAnchor),
-            bottomView.heightAnchor.constraint(equalToConstant: 120),
+            opView.leadingAnchor.constraint(equalTo: timerContainer!.leadingAnchor),
+            opView.trailingAnchor.constraint(equalTo: timerContainer!.trailingAnchor),
+            opView.bottomAnchor.constraint(equalTo: timerContainer!.bottomAnchor),
+            opView.heightAnchor.constraint(equalToConstant: 120),
 
-            goButton.centerXAnchor.constraint(equalTo: bottomView.centerXAnchor),
-            goButton.topAnchor.constraint(equalTo: bottomView.topAnchor, constant: 12),
+            goButton.centerXAnchor.constraint(equalTo: opView.centerXAnchor),
+            goButton.topAnchor.constraint(equalTo: opView.topAnchor, constant: 12),
             goButton.widthAnchor.constraint(equalToConstant: 140),
             goButton.heightAnchor.constraint(equalToConstant: 56),
 
-            settingsButton.leadingAnchor.constraint(equalTo: bottomView.leadingAnchor, constant: 24),
+            settingsButton.leadingAnchor.constraint(equalTo: opView.leadingAnchor, constant: 24),
             settingsButton.centerYAnchor.constraint(equalTo: goButton.centerYAnchor),
             settingsButton.widthAnchor.constraint(equalToConstant: 100),
             settingsButton.heightAnchor.constraint(equalToConstant: 48),
 
-            resetButton.trailingAnchor.constraint(equalTo: bottomView.trailingAnchor, constant: -24),
+            resetButton.trailingAnchor.constraint(equalTo: opView.trailingAnchor, constant: -24),
             resetButton.centerYAnchor.constraint(equalTo: goButton.centerYAnchor),
             resetButton.widthAnchor.constraint(equalToConstant: 100),
             resetButton.heightAnchor.constraint(equalToConstant: 48)
