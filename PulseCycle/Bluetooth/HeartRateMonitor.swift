@@ -9,6 +9,7 @@ protocol HeartRateMonitorDelegate: AnyObject {
     func heartRateMonitor(_ monitor: HeartRateMonitor, didUpdateHeartRate bpm: Int)
     func heartRateMonitor(_ monitor: HeartRateMonitor, didChangeState state: HeartRateMonitorState)
     func heartRateMonitor(_ monitor: HeartRateMonitor, didFailWithError error: Error)
+    func heartRateMonitor(_ monitor: HeartRateMonitor, didConnectDevice name: String)
 }
 
 enum HeartRateMonitorState {
@@ -31,10 +32,73 @@ class HeartRateMonitor: NSObject {
     private let heartRateMeasurementUUID = CBUUID(string: "2A37")
 
     private var scanTimer: DispatchSourceTimer?
+    private var targetDeviceUUID: String?
+    private var isAutoConnecting = false
+
+    var connectedDeviceName: String? {
+        return connectedPeripheral?.name
+    }
 
     override init() {
         super.init()
         centralManager = CBCentralManager(delegate: self, queue: queue)
+    }
+
+    // Auto-connect to default device or try other saved devices
+    func autoConnect() {
+        guard centralManager.state == .poweredOn else { return }
+
+        isAutoConnecting = true
+
+        // Try default device first
+        if let defaultDevice = DeviceManager.shared.getDefaultDevice(),
+           let uuid = UUID(uuidString: defaultDevice.uuid) {
+            let peripherals = centralManager.retrievePeripherals(withIdentifiers: [uuid])
+            if let peripheral = peripherals.first {
+                targetDeviceUUID = defaultDevice.uuid
+                connectedPeripheral = peripheral
+                peripheral.delegate = self
+                delegate?.heartRateMonitor(self, didChangeState: .connecting)
+                centralManager.connect(peripheral, options: nil)
+                return
+            }
+        }
+
+        // Try other saved devices
+        for device in DeviceManager.shared.devices {
+            if device.uuid != DeviceManager.shared.defaultDeviceUUID,
+               let uuid = UUID(uuidString: device.uuid) {
+                let peripherals = centralManager.retrievePeripherals(withIdentifiers: [uuid])
+                if let peripheral = peripherals.first {
+                    targetDeviceUUID = device.uuid
+                    connectedPeripheral = peripheral
+                    peripheral.delegate = self
+                    delegate?.heartRateMonitor(self, didChangeState: .connecting)
+                    centralManager.connect(peripheral, options: nil)
+                    return
+                }
+            }
+        }
+
+        // No saved devices or all failed, scan for new devices
+        isAutoConnecting = false
+        startScanning()
+    }
+
+    // Connect to a specific device by UUID
+    func connectToDevice(uuid: String) {
+        guard centralManager.state == .poweredOn else { return }
+
+        if let uuidObj = UUID(uuidString: uuid) {
+            let peripherals = centralManager.retrievePeripherals(withIdentifiers: [uuidObj])
+            if let peripheral = peripherals.first {
+                targetDeviceUUID = uuid
+                connectedPeripheral = peripheral
+                peripheral.delegate = self
+                delegate?.heartRateMonitor(self, didChangeState: .connecting)
+                centralManager.connect(peripheral, options: nil)
+            }
+        }
     }
 
     func startScanning() {
@@ -96,7 +160,10 @@ class HeartRateMonitor: NSObject {
 
 extension HeartRateMonitor: CBCentralManagerDelegate {
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
-        if central.state != .poweredOn {
+        if central.state == .poweredOn {
+            // Auto-connect when Bluetooth is ready
+            autoConnect()
+        } else {
             delegate?.heartRateMonitor(self, didChangeState: .disconnected)
         }
     }
@@ -110,6 +177,11 @@ extension HeartRateMonitor: CBCentralManagerDelegate {
     }
 
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
+        // Save device to DeviceManager
+        DeviceManager.shared.saveDevice(peripheral)
+
+        let deviceName = peripheral.name ?? "Unknown Device"
+        delegate?.heartRateMonitor(self, didConnectDevice: deviceName)
         delegate?.heartRateMonitor(self, didChangeState: .connected)
         peripheral.discoverServices([heartRateServiceUUID])
     }
@@ -119,7 +191,14 @@ extension HeartRateMonitor: CBCentralManagerDelegate {
             delegate?.heartRateMonitor(self, didFailWithError: error)
         }
         connectedPeripheral = nil
-        delegate?.heartRateMonitor(self, didChangeState: .disconnected)
+
+        // If auto-connecting and failed, try next device or scan
+        if isAutoConnecting {
+            isAutoConnecting = false
+            startScanning()
+        } else {
+            delegate?.heartRateMonitor(self, didChangeState: .disconnected)
+        }
     }
 
     func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
@@ -127,7 +206,7 @@ extension HeartRateMonitor: CBCentralManagerDelegate {
         heartRateCharacteristic = nil
         delegate?.heartRateMonitor(self, didChangeState: .disconnected)
 
-        if error != nil {
+        if error != nil && !isAutoConnecting {
             startScanning()
         }
     }

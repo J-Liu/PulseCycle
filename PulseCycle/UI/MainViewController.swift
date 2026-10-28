@@ -19,6 +19,9 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
     private let heartRateContainer = UIView()
     private let heartRateLabel = UILabel()
     private let connectionLabel = UILabel()
+    private let addButton = UIButton(type: .system)
+    private var isConnected = false
+    private var connectedDeviceName: String?
 
     private let opView = UIView()
     private let goButton = UIButton(type: .system)
@@ -59,7 +62,6 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
         setupUI()
         setupActions()
         updateUI()
-        heartRateMonitor.startScanning()
         impactGenerator.prepare()
         notificationGenerator.prepare()
 
@@ -254,6 +256,7 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
 
     @objc private func handleSettings() {
         let vc = SettingsViewController()
+        vc.heartRateMonitor = heartRateMonitor
         vc.onSave = { [weak self] in
             self?.setupEngine()
             self?.updateUI()
@@ -468,14 +471,21 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
         heartRateLabel.adjustsFontSizeToFitWidth = true
         heartRateLabel.translatesAutoresizingMaskIntoConstraints = false
 
-        connectionLabel.text = L("Not connected")
+        connectionLabel.text = L("Disconnected")
         connectionLabel.font = .systemFont(ofSize: 16)
         connectionLabel.textAlignment = .center
         connectionLabel.textColor = .systemGray
         connectionLabel.translatesAutoresizingMaskIntoConstraints = false
 
+        addButton.setTitle("+", for: .normal)
+        addButton.titleLabel?.font = .systemFont(ofSize: 48, weight: .medium)
+        addButton.setTitleColor(UIColor(red: 1.0, green: 0.6, blue: 0.4, alpha: 1.0), for: .normal)
+        addButton.addTarget(self, action: #selector(handleAddDevice), for: .touchUpInside)
+        addButton.translatesAutoresizingMaskIntoConstraints = false
+
         heartRateContainer.addSubview(heartRateLabel)
         heartRateContainer.addSubview(connectionLabel)
+        heartRateContainer.addSubview(addButton)
 
         NSLayoutConstraint.activate([
             heartRateContainer.topAnchor.constraint(equalTo: timerContainer!.bottomAnchor),
@@ -487,8 +497,18 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
             heartRateLabel.centerYAnchor.constraint(equalTo: heartRateContainer.centerYAnchor, constant: -20),
 
             connectionLabel.centerXAnchor.constraint(equalTo: heartRateContainer.centerXAnchor),
-            connectionLabel.topAnchor.constraint(equalTo: heartRateLabel.bottomAnchor, constant: 16)
+            connectionLabel.topAnchor.constraint(equalTo: heartRateLabel.bottomAnchor, constant: 16),
+
+            addButton.centerXAnchor.constraint(equalTo: heartRateContainer.centerXAnchor),
+            addButton.topAnchor.constraint(equalTo: connectionLabel.bottomAnchor, constant: 8),
+            addButton.widthAnchor.constraint(equalToConstant: 60),
+            addButton.heightAnchor.constraint(equalToConstant: 60)
         ])
+    }
+
+    @objc private func handleAddDevice() {
+        // Try to connect to default device first, then other saved devices, then scan
+        heartRateMonitor.autoConnect()
     }
 
     private func setupOpView() {
@@ -678,23 +698,44 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
 
             switch state {
             case .idle:
-                self.connectionLabel.text = L("Not connected")
+                self.connectionLabel.text = L("Disconnected")
+                self.addButton.isHidden = false
+                self.isConnected = false
             case .scanning:
                 self.connectionLabel.text = L("Scanning…")
+                self.addButton.isHidden = true
             case .connecting:
-                self.connectionLabel.text = L("Connecting…")
+                if let deviceName = monitor.connectedDeviceName {
+                    self.connectionLabel.text = "\(L("Connecting"))… \(deviceName)"
+                } else {
+                    self.connectionLabel.text = L("Connecting") + "…"
+                }
+                self.addButton.isHidden = true
             case .connected:
-                self.connectionLabel.text = L("Connected")
+                self.isConnected = true
+                self.addButton.isHidden = true
             case .disconnected:
                 self.connectionLabel.text = L("Disconnected")
                 self.heartRateLabel.text = "--"
+                self.addButton.isHidden = false
+                self.isConnected = false
+                self.connectedDeviceName = nil
             }
+        }
+    }
+
+    func heartRateMonitor(_ monitor: HeartRateMonitor, didConnectDevice name: String) {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            self.connectedDeviceName = name
+            self.connectionLabel.text = name
         }
     }
 
     func heartRateMonitor(_ monitor: HeartRateMonitor, didFailWithError error: Error) {
         DispatchQueue.main.async { [weak self] in
             self?.connectionLabel.text = L("Error")
+            self?.addButton.isHidden = false
         }
     }
 }

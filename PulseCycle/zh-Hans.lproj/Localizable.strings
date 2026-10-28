@@ -9,9 +9,17 @@
 "Not connected" = "未连接";
 "Scanning…" = "正在扫描…";
 "Connecting…" = "正在连接…";
+"Connecting" = "正在连接";
 "Connected" = "已连接";
 "Disconnected" = "已断开";
 "Error" = "错误";
+"Devices" = "设备";
+"Default" = "默认";
+"Set as Default" = "设为默认";
+"Remove" = "移除";
+"Scanning" = "扫描中";
+"Looking for heart rate devices..." = "正在搜索心率设备...";
+"Connect" = "连接";
 
 /* Timer Phases */
 "Warm Up" = "热身";

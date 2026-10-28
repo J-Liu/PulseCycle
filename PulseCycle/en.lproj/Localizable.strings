@@ -9,9 +9,17 @@
 "Not connected" = "Not connected";
 "Scanning…" = "Scanning…";
 "Connecting…" = "Connecting…";
+"Connecting" = "Connecting";
 "Connected" = "Connected";
 "Disconnected" = "Disconnected";
 "Error" = "Error";
+"Devices" = "Devices";
+"Default" = "Default";
+"Set as Default" = "Set as Default";
+"Remove" = "Remove";
+"Scanning" = "Scanning";
+"Looking for heart rate devices..." = "Looking for heart rate devices...";
+"Connect" = "Connect";
 
 /* Timer Phases */
 "Warm Up" = "Warm Up";

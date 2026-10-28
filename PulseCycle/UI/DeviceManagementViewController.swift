@@ -1,0 +1,146 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright 2026 Jia Liu
+// Licensed under AGPL-3.0-or-later with an additional permission
+// under Section 7. See LICENSE for details.
+
+import UIKit
+import CoreBluetooth
+
+class DeviceManagementViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+    private let tableView = UITableView(frame: .zero, style: .insetGrouped)
+    private let heartRateMonitor: HeartRateMonitor
+
+    init(heartRateMonitor: HeartRateMonitor) {
+        self.heartRateMonitor = heartRateMonitor
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        title = L("Devices")
+
+        navigationItem.rightBarButtonItem = UIBarButtonItem(
+            barButtonSystemItem: .add,
+            target: self,
+            action: #selector(addDevice)
+        )
+
+        tableView.delegate = self
+        tableView.dataSource = self
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(tableView)
+
+        NSLayoutConstraint.activate([
+            tableView.topAnchor.constraint(equalTo: view.topAnchor),
+            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(reloadData),
+            name: NSNotification.Name("DeviceListUpdated"),
+            object: nil
+        )
+    }
+
+    @objc private func reloadData() {
+        tableView.reloadData()
+    }
+
+    @objc private func addDevice() {
+        // Start scanning for new devices
+        heartRateMonitor.startScanning()
+
+        let alert = UIAlertController(
+            title: L("Scanning"),
+            message: L("Looking for heart rate devices..."),
+            preferredStyle: .alert
+        )
+
+        alert.addAction(UIAlertAction(title: L("Cancel"), style: .cancel) { [weak self] _ in
+            self?.heartRateMonitor.stopScanning()
+        })
+
+        present(alert, animated: true)
+    }
+
+    // MARK: - Table View Data Source
+
+    func numberOfSections(in tableView: UITableView) -> Int {
+        return 1
+    }
+
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return DeviceManager.shared.devices.count
+    }
+
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = UITableViewCell(style: .subtitle, reuseIdentifier: "DeviceCell")
+        let device = DeviceManager.shared.devices[indexPath.row]
+
+        cell.textLabel?.text = device.name
+
+        if device.uuid == DeviceManager.shared.defaultDeviceUUID {
+            cell.detailTextLabel?.text = L("Default")
+            cell.detailTextLabel?.textColor = .systemBlue
+        } else {
+            cell.detailTextLabel?.text = nil
+        }
+
+        return cell
+    }
+
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+
+        let device = DeviceManager.shared.devices[indexPath.row]
+        let alert = UIAlertController(
+            title: device.name,
+            message: nil,
+            preferredStyle: .actionSheet
+        )
+
+        if device.uuid != DeviceManager.shared.defaultDeviceUUID {
+            alert.addAction(UIAlertAction(title: L("Set as Default"), style: .default) { _ in
+                DeviceManager.shared.setDefaultDevice(uuid: device.uuid)
+                tableView.reloadData()
+            })
+        }
+
+        alert.addAction(UIAlertAction(title: L("Connect"), style: .default) { [weak self] _ in
+            self?.heartRateMonitor.connectToDevice(uuid: device.uuid)
+            self?.navigationController?.popViewController(animated: true)
+        })
+
+        alert.addAction(UIAlertAction(title: L("Remove"), style: .destructive) { _ in
+            DeviceManager.shared.removeDevice(at: indexPath.row)
+            tableView.reloadData()
+        })
+
+        alert.addAction(UIAlertAction(title: L("Cancel"), style: .cancel))
+
+        if let popover = alert.popoverPresentationController {
+            popover.sourceView = tableView
+            popover.sourceRect = tableView.cellForRow(at: indexPath)?.frame ?? .zero
+        }
+
+        present(alert, animated: true)
+    }
+
+    func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+        return true
+    }
+
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == .delete {
+            DeviceManager.shared.removeDevice(at: indexPath.row)
+            tableView.reloadData()
+        }
+    }
+}

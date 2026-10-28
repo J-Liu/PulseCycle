@@ -7,6 +7,7 @@ import UIKit
 
 class SettingsViewController: UIViewController {
     var onSave: (() -> Void)?
+    var heartRateMonitor: HeartRateMonitor?
 
     private let tableView = UITableView(frame: .zero, style: .insetGrouped)
     private var currentColorRow = 0
@@ -16,6 +17,7 @@ class SettingsViewController: UIViewController {
 
     private enum Section: Int, CaseIterable {
         case profile
+        case devices
         case sound
         case color
         case misc
@@ -59,6 +61,7 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         switch Section(rawValue: section) {
         case .profile: return 7
+        case .devices: return 1
         case .sound: return 4
         case .color: return 6
         case .misc: return 2
@@ -69,6 +72,7 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         switch Section(rawValue: section) {
         case .profile: return L("Profile")
+        case .devices: return L("Devices")
         case .sound: return L("Sound")
         case .color: return L("Color")
         case .misc: return L("Misc")
@@ -83,6 +87,8 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
         switch Section(rawValue: indexPath.section) {
         case .profile:
             configureProfileCell(cell, row: indexPath.row)
+        case .devices:
+            configureDeviceCell(cell, row: indexPath.row)
         case .sound:
             configureSoundCell(cell, row: indexPath.row)
         case .color:
@@ -159,6 +165,14 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
             return "\(minutes)m \(secs)s"
         }
         return "\(secs)s"
+    }
+
+    private func configureDeviceCell(_ cell: UITableViewCell, row: Int) {
+        cell.textLabel?.text = L("Devices")
+        let deviceCount = DeviceManager.shared.devices.count
+        cell.detailTextLabel?.text = deviceCount > 0 ? "\(deviceCount)" : nil
+        cell.accessoryType = .disclosureIndicator
+        cell.selectionStyle = .default
     }
 
     private func configureSoundCell(_ cell: UITableViewCell, row: Int) {
@@ -329,6 +343,8 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
             default:
                 break
             }
+        } else if indexPath.section == Section.devices.rawValue {
+            showDeviceManagement()
         } else if indexPath.section == Section.misc.rawValue && indexPath.row == 0 {
             showLanguagePicker()
         } else if indexPath.section == Section.color.rawValue {
@@ -367,6 +383,12 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
             self?.onSave?()
         })
         present(alert, animated: true)
+    }
+
+    private func showDeviceManagement() {
+        guard let heartRateMonitor = heartRateMonitor else { return }
+        let vc = DeviceManagementViewController(heartRateMonitor: heartRateMonitor)
+        navigationController?.pushViewController(vc, animated: true)
     }
 
     private func showLanguagePicker() {
