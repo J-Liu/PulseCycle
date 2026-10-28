@@ -72,7 +72,7 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         switch Section(rawValue: section) {
         case .profile: return L("Profile")
-        case .devices: return L("Devices")
+        case .devices: return L("HRM Devices")
         case .sound: return L("Sound")
         case .color: return L("Color")
         case .misc: return L("Misc")
@@ -168,9 +168,21 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
     }
 
     private func configureDeviceCell(_ cell: UITableViewCell, row: Int) {
-        cell.textLabel?.text = L("Devices")
+        cell.textLabel?.text = L("HRM Devices")
         let deviceCount = DeviceManager.shared.devices.count
-        cell.detailTextLabel?.text = deviceCount > 0 ? "\(deviceCount)" : nil
+
+        if deviceCount == 0 {
+            cell.detailTextLabel?.text = nil
+        } else if let defaultDevice = DeviceManager.shared.getDefaultDevice() {
+            if deviceCount == 1 {
+                cell.detailTextLabel?.text = defaultDevice.name
+            } else {
+                cell.detailTextLabel?.text = "\(defaultDevice.name) + \(deviceCount - 1) more"
+            }
+        } else {
+            cell.detailTextLabel?.text = "\(deviceCount) devices"
+        }
+
         cell.accessoryType = .disclosureIndicator
         cell.selectionStyle = .default
     }

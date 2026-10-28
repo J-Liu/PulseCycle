@@ -21,7 +21,7 @@ class DeviceManagementViewController: UIViewController, UITableViewDelegate, UIT
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = L("Devices")
+        title = L("HRM Devices")
 
         navigationItem.rightBarButtonItem = UIBarButtonItem(
             barButtonSystemItem: .add,
@@ -118,6 +118,7 @@ class DeviceManagementViewController: UIViewController, UITableViewDelegate, UIT
         let cell = UITableViewCell(style: .subtitle, reuseIdentifier: "DeviceCell")
         let device = DeviceManager.shared.devices[indexPath.row]
         let isConnected = heartRateMonitor.isConnectedDevice(uuid: device.uuid)
+        let isDefault = device.uuid == DeviceManager.shared.defaultDeviceUUID
 
         cell.textLabel?.text = device.name
 
@@ -126,12 +127,15 @@ class DeviceManagementViewController: UIViewController, UITableViewDelegate, UIT
         if isConnected {
             statusText = L("Connected")
             cell.detailTextLabel?.textColor = .systemGreen
-        } else if device.uuid == DeviceManager.shared.defaultDeviceUUID {
+        } else if isDefault {
             statusText = L("Default")
             cell.detailTextLabel?.textColor = .systemBlue
         }
 
         cell.detailTextLabel?.text = statusText.isEmpty ? nil : statusText
+
+        // Show checkmark for default device
+        cell.accessoryType = isDefault ? .checkmark : .none
 
         return cell
     }
