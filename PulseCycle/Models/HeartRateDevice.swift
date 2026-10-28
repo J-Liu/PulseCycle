@@ -50,6 +50,7 @@ class DeviceManager {
             if devices[index].name != name {
                 devices[index] = HeartRateDevice(uuid: uuid, name: name)
                 saveDevices()
+                NotificationCenter.default.post(name: NSNotification.Name("DeviceListUpdated"), object: nil)
             }
         } else {
             // Add new device
@@ -60,6 +61,8 @@ class DeviceManager {
             if devices.count == 1 {
                 setDefaultDevice(uuid: uuid)
             }
+
+            NotificationCenter.default.post(name: NSNotification.Name("DeviceListUpdated"), object: nil)
         }
     }
 
@@ -69,12 +72,13 @@ class DeviceManager {
         devices.remove(at: index)
         saveDevices()
 
-        // Post notification with removed device UUID
+        // Post notifications
         NotificationCenter.default.post(
             name: NSNotification.Name("DeviceRemoved"),
             object: nil,
             userInfo: ["uuid": device.uuid]
         )
+        NotificationCenter.default.post(name: NSNotification.Name("DeviceListUpdated"), object: nil)
 
         // If removed device was default, clear default
         if defaultDeviceUUID == device.uuid {

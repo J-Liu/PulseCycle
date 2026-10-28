@@ -45,6 +45,18 @@ class SettingsViewController: UIViewController {
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
+
+        // Listen for device list changes
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(reloadDevicesSection),
+            name: NSNotification.Name("DeviceListUpdated"),
+            object: nil
+        )
+    }
+
+    @objc private func reloadDevicesSection() {
+        tableView.reloadSections(IndexSet(integer: Section.devices.rawValue), with: .none)
     }
 
     @objc private func done() {
