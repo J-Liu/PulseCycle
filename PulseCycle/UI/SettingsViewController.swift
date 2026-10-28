@@ -56,7 +56,9 @@ class SettingsViewController: UIViewController {
     }
 
     @objc private func reloadDevicesSection() {
-        tableView.reloadSections(IndexSet(integer: Section.devices.rawValue), with: .none)
+        DispatchQueue.main.async { [weak self] in
+            self?.tableView.reloadSections(IndexSet(integer: Section.devices.rawValue), with: .none)
+        }
     }
 
     @objc private func done() {
