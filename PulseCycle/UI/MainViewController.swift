@@ -724,6 +724,7 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
             switch state {
             case .idle:
                 self.connectionLabel.text = L("Disconnected")
+                self.heartRateLabel.text = "--"
                 self.addButton.isHidden = false
                 self.isConnected = false
             case .scanning:
@@ -739,6 +740,11 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
             case .connected:
                 self.isConnected = true
                 self.addButton.isHidden = true
+                // Update connection label with device name
+                if let deviceName = monitor.connectedDeviceName {
+                    self.connectionLabel.text = deviceName
+                    self.connectedDeviceName = deviceName
+                }
             case .disconnected:
                 self.connectionLabel.text = L("Disconnected")
                 self.heartRateLabel.text = "--"
