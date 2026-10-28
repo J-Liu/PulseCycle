@@ -485,11 +485,12 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
 
         addButton.setTitle("+", for: .normal)
         addButton.titleLabel?.font = .systemFont(ofSize: 28, weight: .bold)
-        addButton.setTitleColor(.systemOrange, for: .normal)
+        addButton.setTitleColor(.systemYellow, for: .normal)
         addButton.translatesAutoresizingMaskIntoConstraints = false
 
         connectionStackView.axis = .horizontal
         connectionStackView.alignment = .center
+        connectionStackView.distribution = .equalCentering
         connectionStackView.spacing = 8
         connectionStackView.translatesAutoresizingMaskIntoConstraints = false
         connectionStackView.addArrangedSubview(connectionLabel)

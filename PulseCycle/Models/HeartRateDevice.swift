@@ -95,6 +95,7 @@ class DeviceManager {
     func setDefaultDevice(uuid: String) {
         defaultDeviceUUID = uuid
         UserDefaults.standard.set(uuid, forKey: defaultDeviceKey)
+        NotificationCenter.default.post(name: NSNotification.Name("DeviceListUpdated"), object: nil)
     }
 
     func getDefaultDevice() -> HeartRateDevice? {

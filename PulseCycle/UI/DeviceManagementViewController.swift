@@ -123,16 +123,12 @@ class DeviceManagementViewController: UIViewController, UITableViewDelegate, UIT
         cell.textLabel?.text = device.name
 
         // Build status text
-        var statusText = ""
         if isConnected {
-            statusText = L("Connected")
+            cell.detailTextLabel?.text = L("Connected")
             cell.detailTextLabel?.textColor = .systemGreen
-        } else if isDefault {
-            statusText = L("Default")
-            cell.detailTextLabel?.textColor = .systemBlue
+        } else {
+            cell.detailTextLabel?.text = nil
         }
-
-        cell.detailTextLabel?.text = statusText.isEmpty ? nil : statusText
 
         // Show checkmark for default device
         cell.accessoryType = isDefault ? .checkmark : .none
