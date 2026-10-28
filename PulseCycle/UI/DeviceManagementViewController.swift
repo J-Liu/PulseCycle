@@ -58,15 +58,19 @@ class DeviceManagementViewController: UIViewController, UITableViewDelegate, UIT
     }
 
     @objc private func reloadData() {
-        tableView.reloadData()
+        DispatchQueue.main.async { [weak self] in
+            self?.tableView.reloadData()
+        }
     }
 
     @objc private func handleDeviceConnected() {
-        // Dismiss scanning alert when device connects
-        if presentedViewController is UIAlertController {
-            dismiss(animated: true)
+        DispatchQueue.main.async { [weak self] in
+            // Dismiss scanning alert when device connects
+            if self?.presentedViewController is UIAlertController {
+                self?.dismiss(animated: true)
+            }
+            self?.tableView.reloadData()
         }
-        tableView.reloadData()
     }
 
     @objc private func addDevice() {
@@ -165,8 +169,13 @@ class DeviceManagementViewController: UIViewController, UITableViewDelegate, UIT
             if isConnected {
                 self?.heartRateMonitor.disconnect()
             }
-            DeviceManager.shared.removeDevice(at: indexPath.row)
-            self?.tableView.reloadData()
+            // Find current index by uuid to avoid stale indexPath
+            if let index = DeviceManager.shared.devices.firstIndex(where: { $0.uuid == device.uuid }) {
+                DeviceManager.shared.removeDevice(at: index)
+                DispatchQueue.main.async {
+                    self?.tableView.reloadData()
+                }
+            }
         })
 
         alert.addAction(UIAlertAction(title: L("Cancel"), style: .cancel))
@@ -190,7 +199,7 @@ class DeviceManagementViewController: UIViewController, UITableViewDelegate, UIT
                 heartRateMonitor.disconnect()
             }
             DeviceManager.shared.removeDevice(at: indexPath.row)
-            tableView.reloadData()
+            tableView.deleteRows(at: [indexPath], with: .automatic)
         }
     }
 }
