@@ -69,6 +69,13 @@ class DeviceManager {
         devices.remove(at: index)
         saveDevices()
 
+        // Post notification with removed device UUID
+        NotificationCenter.default.post(
+            name: NSNotification.Name("DeviceRemoved"),
+            object: nil,
+            userInfo: ["uuid": device.uuid]
+        )
+
         // If removed device was default, clear default
         if defaultDeviceUUID == device.uuid {
             defaultDeviceUUID = nil

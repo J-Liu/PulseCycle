@@ -19,6 +19,7 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
     private let heartRateContainer = UIView()
     private let heartRateLabel = UILabel()
     private let connectionLabel = UILabel()
+    private let connectionStackView = UIStackView()
     private let addButton = UIButton(type: .system)
     private var isConnected = false
     private var connectedDeviceName: String?
@@ -75,6 +76,12 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
             self,
             selector: #selector(handleEnterForeground),
             name: UIScene.willEnterForegroundNotification,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleDeviceRemoved),
+            name: NSNotification.Name("DeviceRemoved"),
             object: nil
         )
     }
@@ -473,7 +480,6 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
 
         connectionLabel.text = L("Disconnected")
         connectionLabel.font = .systemFont(ofSize: 16)
-        connectionLabel.textAlignment = .right
         connectionLabel.textColor = .systemGray
         connectionLabel.translatesAutoresizingMaskIntoConstraints = false
 
@@ -483,9 +489,15 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
         addButton.addTarget(self, action: #selector(handleAddDevice), for: .touchUpInside)
         addButton.translatesAutoresizingMaskIntoConstraints = false
 
+        connectionStackView.axis = .horizontal
+        connectionStackView.alignment = .center
+        connectionStackView.spacing = 8
+        connectionStackView.translatesAutoresizingMaskIntoConstraints = false
+        connectionStackView.addArrangedSubview(connectionLabel)
+        connectionStackView.addArrangedSubview(addButton)
+
         heartRateContainer.addSubview(heartRateLabel)
-        heartRateContainer.addSubview(connectionLabel)
-        heartRateContainer.addSubview(addButton)
+        heartRateContainer.addSubview(connectionStackView)
 
         NSLayoutConstraint.activate([
             heartRateContainer.topAnchor.constraint(equalTo: timerContainer!.bottomAnchor),
@@ -496,19 +508,27 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
             heartRateLabel.centerXAnchor.constraint(equalTo: heartRateContainer.centerXAnchor),
             heartRateLabel.centerYAnchor.constraint(equalTo: heartRateContainer.centerYAnchor, constant: -20),
 
-            connectionLabel.trailingAnchor.constraint(equalTo: heartRateContainer.centerXAnchor, constant: -8),
-            connectionLabel.topAnchor.constraint(equalTo: heartRateLabel.bottomAnchor, constant: 16),
-
-            addButton.leadingAnchor.constraint(equalTo: heartRateContainer.centerXAnchor, constant: 8),
-            addButton.centerYAnchor.constraint(equalTo: connectionLabel.centerYAnchor),
-            addButton.widthAnchor.constraint(equalToConstant: 44),
-            addButton.heightAnchor.constraint(equalToConstant: 44)
+            connectionStackView.centerXAnchor.constraint(equalTo: heartRateContainer.centerXAnchor),
+            connectionStackView.topAnchor.constraint(equalTo: heartRateLabel.bottomAnchor, constant: 16)
         ])
     }
 
     @objc private func handleAddDevice() {
         // Try to connect to default device first, then other saved devices, then scan
         heartRateMonitor.autoConnect()
+    }
+
+    @objc private func handleDeviceRemoved(_ notification: Notification) {
+        guard let removedUUID = notification.userInfo?["uuid"] as? String else { return }
+
+        // Check if removed device is currently connected
+        if heartRateMonitor.isConnectedDevice(uuid: removedUUID) {
+            // Update UI to show disconnected state
+            connectionLabel.text = L("Disconnected")
+            heartRateLabel.text = "--"
+            addButton.isHidden = false
+            connectedDeviceName = nil
+        }
     }
 
     private func setupOpView() {
