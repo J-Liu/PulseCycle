@@ -150,6 +150,7 @@ class HeartRateMonitor: NSObject {
                 // No heart rate data for 3 seconds, show disconnected state
                 DispatchQueue.main.async {
                     self.delegate?.heartRateMonitor(self, didChangeState: .disconnected)
+                    NotificationCenter.default.post(name: NSNotification.Name("HeartRateMonitorStateChanged"), object: nil)
                 }
             }
         }
