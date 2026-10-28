@@ -484,9 +484,8 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
         connectionLabel.translatesAutoresizingMaskIntoConstraints = false
 
         addButton.setTitle("+", for: .normal)
-        addButton.titleLabel?.font = .systemFont(ofSize: 24, weight: .medium)
-        addButton.setTitleColor(UIColor(red: 1.0, green: 0.6, blue: 0.4, alpha: 1.0), for: .normal)
-        addButton.addTarget(self, action: #selector(handleAddDevice), for: .touchUpInside)
+        addButton.titleLabel?.font = .systemFont(ofSize: 28, weight: .bold)
+        addButton.setTitleColor(.systemOrange, for: .normal)
         addButton.translatesAutoresizingMaskIntoConstraints = false
 
         connectionStackView.axis = .horizontal
@@ -495,6 +494,11 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
         connectionStackView.translatesAutoresizingMaskIntoConstraints = false
         connectionStackView.addArrangedSubview(connectionLabel)
         connectionStackView.addArrangedSubview(addButton)
+
+        // Make entire stack view tappable
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleAddDevice))
+        connectionStackView.isUserInteractionEnabled = true
+        connectionStackView.addGestureRecognizer(tapGesture)
 
         heartRateContainer.addSubview(heartRateLabel)
         heartRateContainer.addSubview(connectionStackView)
