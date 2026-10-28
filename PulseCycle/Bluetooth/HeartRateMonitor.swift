@@ -52,6 +52,11 @@ class HeartRateMonitor: NSObject {
 
         isAutoConnecting = true
 
+        // Disconnect previous device if connected
+        if let currentPeripheral = connectedPeripheral {
+            centralManager.cancelPeripheralConnection(currentPeripheral)
+        }
+
         // Try default device first
         if let defaultDevice = DeviceManager.shared.getDefaultDevice(),
            let uuid = UUID(uuidString: defaultDevice.uuid) {
@@ -90,6 +95,11 @@ class HeartRateMonitor: NSObject {
     // Connect to a specific device by UUID
     func connectToDevice(uuid: String) {
         guard centralManager.state == .poweredOn else { return }
+
+        // Disconnect previous device if connected
+        if let currentPeripheral = connectedPeripheral {
+            centralManager.cancelPeripheralConnection(currentPeripheral)
+        }
 
         if let uuidObj = UUID(uuidString: uuid) {
             let peripherals = centralManager.retrievePeripherals(withIdentifiers: [uuidObj])
@@ -210,6 +220,12 @@ extension HeartRateMonitor: CBCentralManagerDelegate {
 
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String: Any], rssi RSSI: NSNumber) {
         stopScanning()
+
+        // Disconnect previous device if connected
+        if let currentPeripheral = connectedPeripheral {
+            central.cancelPeripheralConnection(currentPeripheral)
+        }
+
         connectedPeripheral = peripheral
         peripheral.delegate = self
         delegate?.heartRateMonitor(self, didChangeState: .connecting)
