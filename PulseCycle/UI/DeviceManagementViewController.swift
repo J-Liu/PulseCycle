@@ -51,13 +51,21 @@ class DeviceManagementViewController: UIViewController, UITableViewDelegate, UIT
         // Listen for connection state changes
         NotificationCenter.default.addObserver(
             self,
-            selector: #selector(reloadData),
+            selector: #selector(handleDeviceConnected),
             name: NSNotification.Name("HeartRateMonitorStateChanged"),
             object: nil
         )
     }
 
     @objc private func reloadData() {
+        tableView.reloadData()
+    }
+
+    @objc private func handleDeviceConnected() {
+        // Dismiss scanning alert when device connects
+        if presentedViewController is UIAlertController {
+            dismiss(animated: true)
+        }
         tableView.reloadData()
     }
 
@@ -154,6 +162,9 @@ class DeviceManagementViewController: UIViewController, UITableViewDelegate, UIT
         }
 
         alert.addAction(UIAlertAction(title: L("Remove"), style: .destructive) { [weak self] _ in
+            if isConnected {
+                self?.heartRateMonitor.disconnect()
+            }
             DeviceManager.shared.removeDevice(at: indexPath.row)
             self?.tableView.reloadData()
         })
@@ -174,6 +185,10 @@ class DeviceManagementViewController: UIViewController, UITableViewDelegate, UIT
 
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
+            let device = DeviceManager.shared.devices[indexPath.row]
+            if heartRateMonitor.isConnectedDevice(uuid: device.uuid) {
+                heartRateMonitor.disconnect()
+            }
             DeviceManager.shared.removeDevice(at: indexPath.row)
             tableView.reloadData()
         }

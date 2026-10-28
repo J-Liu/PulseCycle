@@ -143,12 +143,14 @@ class HeartRateMonitor: NSObject {
     private func startConnectionTimeout() {
         connectionTimeoutTimer?.cancel()
         let timer = DispatchSource.makeTimerSource(queue: queue)
-        timer.schedule(deadline: .now() + 10)
+        timer.schedule(deadline: .now() + 3)
         timer.setEventHandler { [weak self] in
             guard let self = self else { return }
             if self.connectedPeripheral != nil {
-                // No heart rate data for 10 seconds, consider disconnected
-                self.disconnect()
+                // No heart rate data for 3 seconds, show disconnected state
+                DispatchQueue.main.async {
+                    self.delegate?.heartRateMonitor(self, didChangeState: .disconnected)
+                }
             }
         }
         timer.resume()
@@ -286,6 +288,14 @@ extension HeartRateMonitor: CBPeripheralDelegate {
 
         if let data = characteristic.value, let bpm = parseHeartRate(data) {
             resetConnectionTimeout()
+            // If peripheral still exists, we're still connected
+            if connectedPeripheral != nil {
+                let deviceName = connectedPeripheral?.name ?? "Unknown Device"
+                DispatchQueue.main.async {
+                    self.delegate?.heartRateMonitor(self, didConnectDevice: deviceName)
+                    self.delegate?.heartRateMonitor(self, didChangeState: .connected)
+                }
+            }
             delegate?.heartRateMonitor(self, didUpdateHeartRate: bpm)
         }
     }
