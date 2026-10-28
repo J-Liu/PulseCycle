@@ -127,6 +127,14 @@ class HeartRateMonitor: NSObject {
         delegate?.heartRateMonitor(self, didChangeState: .disconnected)
     }
 
+    func isConnectedDevice(uuid: String) -> Bool {
+        return connectedPeripheral?.identifier.uuidString == uuid
+    }
+
+    func getConnectedDeviceUUID() -> String? {
+        return connectedPeripheral?.identifier.uuidString
+    }
+
     private func startScanTimeout() {
         let timer = DispatchSource.makeTimerSource(queue: queue)
         timer.schedule(deadline: .now() + 30)
@@ -183,6 +191,7 @@ extension HeartRateMonitor: CBCentralManagerDelegate {
         let deviceName = peripheral.name ?? "Unknown Device"
         delegate?.heartRateMonitor(self, didConnectDevice: deviceName)
         delegate?.heartRateMonitor(self, didChangeState: .connected)
+        NotificationCenter.default.post(name: NSNotification.Name("HeartRateMonitorStateChanged"), object: nil)
         peripheral.discoverServices([heartRateServiceUUID])
     }
 
@@ -205,6 +214,7 @@ extension HeartRateMonitor: CBCentralManagerDelegate {
         connectedPeripheral = nil
         heartRateCharacteristic = nil
         delegate?.heartRateMonitor(self, didChangeState: .disconnected)
+        NotificationCenter.default.post(name: NSNotification.Name("HeartRateMonitorStateChanged"), object: nil)
 
         if error != nil && !isAutoConnecting {
             startScanning()

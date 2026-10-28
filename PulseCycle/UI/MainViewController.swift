@@ -473,12 +473,12 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
 
         connectionLabel.text = L("Disconnected")
         connectionLabel.font = .systemFont(ofSize: 16)
-        connectionLabel.textAlignment = .center
+        connectionLabel.textAlignment = .right
         connectionLabel.textColor = .systemGray
         connectionLabel.translatesAutoresizingMaskIntoConstraints = false
 
         addButton.setTitle("+", for: .normal)
-        addButton.titleLabel?.font = .systemFont(ofSize: 48, weight: .medium)
+        addButton.titleLabel?.font = .systemFont(ofSize: 24, weight: .medium)
         addButton.setTitleColor(UIColor(red: 1.0, green: 0.6, blue: 0.4, alpha: 1.0), for: .normal)
         addButton.addTarget(self, action: #selector(handleAddDevice), for: .touchUpInside)
         addButton.translatesAutoresizingMaskIntoConstraints = false
@@ -496,13 +496,13 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
             heartRateLabel.centerXAnchor.constraint(equalTo: heartRateContainer.centerXAnchor),
             heartRateLabel.centerYAnchor.constraint(equalTo: heartRateContainer.centerYAnchor, constant: -20),
 
-            connectionLabel.centerXAnchor.constraint(equalTo: heartRateContainer.centerXAnchor),
+            connectionLabel.trailingAnchor.constraint(equalTo: heartRateContainer.centerXAnchor, constant: -8),
             connectionLabel.topAnchor.constraint(equalTo: heartRateLabel.bottomAnchor, constant: 16),
 
-            addButton.centerXAnchor.constraint(equalTo: heartRateContainer.centerXAnchor),
-            addButton.topAnchor.constraint(equalTo: connectionLabel.bottomAnchor, constant: 8),
-            addButton.widthAnchor.constraint(equalToConstant: 60),
-            addButton.heightAnchor.constraint(equalToConstant: 60)
+            addButton.leadingAnchor.constraint(equalTo: heartRateContainer.centerXAnchor, constant: 8),
+            addButton.centerYAnchor.constraint(equalTo: connectionLabel.centerYAnchor),
+            addButton.widthAnchor.constraint(equalToConstant: 44),
+            addButton.heightAnchor.constraint(equalToConstant: 44)
         ])
     }
 

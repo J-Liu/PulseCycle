@@ -47,6 +47,14 @@ class DeviceManagementViewController: UIViewController, UITableViewDelegate, UIT
             name: NSNotification.Name("DeviceListUpdated"),
             object: nil
         )
+
+        // Listen for connection state changes
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(reloadData),
+            name: NSNotification.Name("HeartRateMonitorStateChanged"),
+            object: nil
+        )
     }
 
     @objc private func reloadData() {
@@ -83,15 +91,21 @@ class DeviceManagementViewController: UIViewController, UITableViewDelegate, UIT
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = UITableViewCell(style: .subtitle, reuseIdentifier: "DeviceCell")
         let device = DeviceManager.shared.devices[indexPath.row]
+        let isConnected = heartRateMonitor.isConnectedDevice(uuid: device.uuid)
 
         cell.textLabel?.text = device.name
 
-        if device.uuid == DeviceManager.shared.defaultDeviceUUID {
-            cell.detailTextLabel?.text = L("Default")
+        // Build status text
+        var statusText = ""
+        if isConnected {
+            statusText = L("Connected")
+            cell.detailTextLabel?.textColor = .systemGreen
+        } else if device.uuid == DeviceManager.shared.defaultDeviceUUID {
+            statusText = L("Default")
             cell.detailTextLabel?.textColor = .systemBlue
-        } else {
-            cell.detailTextLabel?.text = nil
         }
+
+        cell.detailTextLabel?.text = statusText.isEmpty ? nil : statusText
 
         return cell
     }
@@ -100,11 +114,23 @@ class DeviceManagementViewController: UIViewController, UITableViewDelegate, UIT
         tableView.deselectRow(at: indexPath, animated: true)
 
         let device = DeviceManager.shared.devices[indexPath.row]
+        let isConnected = heartRateMonitor.isConnectedDevice(uuid: device.uuid)
         let alert = UIAlertController(
             title: device.name,
             message: nil,
             preferredStyle: .actionSheet
         )
+
+        if !isConnected {
+            alert.addAction(UIAlertAction(title: L("Connect"), style: .default) { [weak self] _ in
+                self?.heartRateMonitor.connectToDevice(uuid: device.uuid)
+                self?.navigationController?.popViewController(animated: true)
+            })
+        } else {
+            alert.addAction(UIAlertAction(title: L("Disconnect"), style: .default) { [weak self] _ in
+                self?.heartRateMonitor.disconnect()
+            })
+        }
 
         if device.uuid != DeviceManager.shared.defaultDeviceUUID {
             alert.addAction(UIAlertAction(title: L("Set as Default"), style: .default) { _ in
@@ -113,14 +139,9 @@ class DeviceManagementViewController: UIViewController, UITableViewDelegate, UIT
             })
         }
 
-        alert.addAction(UIAlertAction(title: L("Connect"), style: .default) { [weak self] _ in
-            self?.heartRateMonitor.connectToDevice(uuid: device.uuid)
-            self?.navigationController?.popViewController(animated: true)
-        })
-
-        alert.addAction(UIAlertAction(title: L("Remove"), style: .destructive) { _ in
+        alert.addAction(UIAlertAction(title: L("Remove"), style: .destructive) { [weak self] _ in
             DeviceManager.shared.removeDevice(at: indexPath.row)
-            tableView.reloadData()
+            self?.tableView.reloadData()
         })
 
         alert.addAction(UIAlertAction(title: L("Cancel"), style: .cancel))

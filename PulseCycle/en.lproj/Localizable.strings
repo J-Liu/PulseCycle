@@ -20,6 +20,7 @@
 "Scanning" = "Scanning";
 "Looking for heart rate devices..." = "Looking for heart rate devices...";
 "Connect" = "Connect";
+"Disconnect" = "Disconnect";
 
 /* Timer Phases */
 "Warm Up" = "Warm Up";

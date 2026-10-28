@@ -20,6 +20,7 @@
 "Scanning" = "扫描中";
 "Looking for heart rate devices..." = "正在搜索心率设备...";
 "Connect" = "连接";
+"Disconnect" = "断开";
 
 /* Timer Phases */
 "Warm Up" = "热身";
