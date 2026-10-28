@@ -62,8 +62,21 @@ class DeviceManagementViewController: UIViewController, UITableViewDelegate, UIT
     }
 
     @objc private func addDevice() {
-        // Start scanning for new devices
-        heartRateMonitor.startScanning()
+        // Start scanning for new devices with timeout handler
+        weak var scanningAlert: UIAlertController?
+
+        heartRateMonitor.startScanning { [weak self] in
+            // Timeout handler - dismiss alert and show timeout message
+            scanningAlert?.dismiss(animated: true) {
+                let timeoutAlert = UIAlertController(
+                    title: L("Scan Timeout"),
+                    message: L("No heart rate devices found. Please make sure your device is powered on and nearby."),
+                    preferredStyle: .alert
+                )
+                timeoutAlert.addAction(UIAlertAction(title: L("OK"), style: .default))
+                self?.present(timeoutAlert, animated: true)
+            }
+        }
 
         let alert = UIAlertController(
             title: L("Scanning"),
@@ -75,6 +88,7 @@ class DeviceManagementViewController: UIViewController, UITableViewDelegate, UIT
             self?.heartRateMonitor.stopScanning()
         })
 
+        scanningAlert = alert
         present(alert, animated: true)
     }
 

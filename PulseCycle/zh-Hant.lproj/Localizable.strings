@@ -21,6 +21,8 @@
 "Looking for heart rate devices..." = "正在搜尋心率裝置...";
 "Connect" = "連線";
 "Disconnect" = "斷線";
+"Scan Timeout" = "掃描逾時";
+"No heart rate devices found. Please make sure your device is powered on and nearby." = "未找到心率裝置。請確保裝置已開啟且在附近。";
 
 /* Timer Phases */
 "Warm Up" = "熱身";

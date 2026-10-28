@@ -32,8 +32,10 @@ class HeartRateMonitor: NSObject {
     private let heartRateMeasurementUUID = CBUUID(string: "2A37")
 
     private var scanTimer: DispatchSourceTimer?
+    private var connectionTimeoutTimer: DispatchSourceTimer?
     private var targetDeviceUUID: String?
     private var isAutoConnecting = false
+    private var scanTimeoutHandler: (() -> Void)?
 
     var connectedDeviceName: String? {
         return connectedPeripheral?.name
@@ -101,12 +103,13 @@ class HeartRateMonitor: NSObject {
         }
     }
 
-    func startScanning() {
+    func startScanning(timeoutHandler: (() -> Void)? = nil) {
         guard centralManager.state == .poweredOn else {
             delegate?.heartRateMonitor(self, didChangeState: .disconnected)
             return
         }
 
+        scanTimeoutHandler = timeoutHandler
         delegate?.heartRateMonitor(self, didChangeState: .scanning)
         centralManager.scanForPeripherals(withServices: [heartRateServiceUUID], options: nil)
         startScanTimeout()
@@ -119,6 +122,8 @@ class HeartRateMonitor: NSObject {
     }
 
     func disconnect() {
+        connectionTimeoutTimer?.cancel()
+        connectionTimeoutTimer = nil
         if let peripheral = connectedPeripheral {
             centralManager.cancelPeripheralConnection(peripheral)
         }
@@ -135,6 +140,26 @@ class HeartRateMonitor: NSObject {
         return connectedPeripheral?.identifier.uuidString
     }
 
+    private func startConnectionTimeout() {
+        connectionTimeoutTimer?.cancel()
+        let timer = DispatchSource.makeTimerSource(queue: queue)
+        timer.schedule(deadline: .now() + 10)
+        timer.setEventHandler { [weak self] in
+            guard let self = self else { return }
+            if self.connectedPeripheral != nil {
+                // No heart rate data for 10 seconds, consider disconnected
+                self.disconnect()
+            }
+        }
+        timer.resume()
+        connectionTimeoutTimer = timer
+    }
+
+    private func resetConnectionTimeout() {
+        connectionTimeoutTimer?.cancel()
+        startConnectionTimeout()
+    }
+
     private func startScanTimeout() {
         let timer = DispatchSource.makeTimerSource(queue: queue)
         timer.schedule(deadline: .now() + 30)
@@ -143,6 +168,10 @@ class HeartRateMonitor: NSObject {
             self.stopScanning()
             if self.connectedPeripheral == nil {
                 self.delegate?.heartRateMonitor(self, didChangeState: .disconnected)
+                DispatchQueue.main.async {
+                    self.scanTimeoutHandler?()
+                    self.scanTimeoutHandler = nil
+                }
             }
         }
         timer.resume()
@@ -192,6 +221,7 @@ extension HeartRateMonitor: CBCentralManagerDelegate {
         delegate?.heartRateMonitor(self, didConnectDevice: deviceName)
         delegate?.heartRateMonitor(self, didChangeState: .connected)
         NotificationCenter.default.post(name: NSNotification.Name("HeartRateMonitorStateChanged"), object: nil)
+        startConnectionTimeout()
         peripheral.discoverServices([heartRateServiceUUID])
     }
 
@@ -211,6 +241,8 @@ extension HeartRateMonitor: CBCentralManagerDelegate {
     }
 
     func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
+        connectionTimeoutTimer?.cancel()
+        connectionTimeoutTimer = nil
         connectedPeripheral = nil
         heartRateCharacteristic = nil
         delegate?.heartRateMonitor(self, didChangeState: .disconnected)
@@ -253,6 +285,7 @@ extension HeartRateMonitor: CBPeripheralDelegate {
         }
 
         if let data = characteristic.value, let bpm = parseHeartRate(data) {
+            resetConnectionTimeout()
             delegate?.heartRateMonitor(self, didUpdateHeartRate: bpm)
         }
     }

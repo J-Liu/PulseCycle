@@ -21,6 +21,8 @@
 "Looking for heart rate devices..." = "Looking for heart rate devices...";
 "Connect" = "Connect";
 "Disconnect" = "Disconnect";
+"Scan Timeout" = "Scan Timeout";
+"No heart rate devices found. Please make sure your device is powered on and nearby." = "No heart rate devices found. Please make sure your device is powered on and nearby.";
 
 /* Timer Phases */
 "Warm Up" = "Warm Up";
