@@ -158,6 +158,8 @@ class HeartRateMonitor: NSObject {
             guard let self = self else { return }
             if self.connectedPeripheral != nil {
                 // No heart rate data for 3 seconds, show disconnected state
+                self.connectedPeripheral = nil
+                self.heartRateCharacteristic = nil
                 DispatchQueue.main.async {
                     self.delegate?.heartRateMonitor(self, didChangeState: .disconnected)
                     NotificationCenter.default.post(name: NSNotification.Name("HeartRateMonitorStateChanged"), object: nil)
