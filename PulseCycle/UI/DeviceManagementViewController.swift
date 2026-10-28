@@ -158,13 +158,6 @@ class DeviceManagementViewController: UIViewController, UITableViewDelegate, UIT
             })
         }
 
-        if device.uuid != DeviceManager.shared.defaultDeviceUUID {
-            alert.addAction(UIAlertAction(title: L("Set as Default"), style: .default) { _ in
-                DeviceManager.shared.setDefaultDevice(uuid: device.uuid)
-                tableView.reloadData()
-            })
-        }
-
         alert.addAction(UIAlertAction(title: L("Remove"), style: .destructive) { [weak self] _ in
             if isConnected {
                 self?.heartRateMonitor.disconnect()

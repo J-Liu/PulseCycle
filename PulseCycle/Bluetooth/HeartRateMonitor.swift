@@ -235,8 +235,9 @@ extension HeartRateMonitor: CBCentralManagerDelegate {
     }
 
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
-        // Save device to DeviceManager
+        // Save device to DeviceManager and set as default
         DeviceManager.shared.saveDevice(peripheral)
+        DeviceManager.shared.setDefaultDevice(uuid: peripheral.identifier.uuidString)
 
         let deviceName = peripheral.name ?? "Unknown Device"
         delegate?.heartRateMonitor(self, didConnectDevice: deviceName)
