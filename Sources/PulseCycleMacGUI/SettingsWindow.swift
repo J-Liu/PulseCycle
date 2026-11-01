@@ -318,14 +318,20 @@ final class SettingsWindow: NSWindow {
         tableView.allowsMultipleSelection = false
         tableView.allowsEmptySelection = true
         tableView.tag = 100
+        tableView.style = .inset
 
         let column = NSTableColumn(identifier: NSUserInterfaceItemIdentifier("device"))
-        column.title = ""
+        column.width = 300
+        column.resizingMask = .autoresizingMask
         tableView.addTableColumn(column)
         tableView.headerView = nil
 
         scrollView.documentView = tableView
         devicesTableView = tableView
+
+        // Set height for scroll view
+        let heightConstraint = scrollView.heightAnchor.constraint(greaterThanOrEqualToConstant: 150)
+        heightConstraint.isActive = true
 
         stack.addArrangedSubview(scrollView)
 
@@ -337,6 +343,7 @@ final class SettingsWindow: NSWindow {
         deviceRemoveButton = NSButton(title: L("Remove"), target: self, action: #selector(removeDevice(_:)))
         deviceRemoveButton?.bezelStyle = .rounded
         deviceRemoveButton?.widthAnchor.constraint(equalToConstant: 80).isActive = true
+        deviceRemoveButton?.isEnabled = false
 
         let buttonRow = NSStackView(views: [addButton, deviceRemoveButton!])
         buttonRow.orientation = .horizontal

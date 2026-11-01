@@ -305,15 +305,19 @@ final class MainViewController: NSViewController {
         heartRateLabel.translatesAutoresizingMaskIntoConstraints = false
         heartRateContainer.addSubview(heartRateLabel)
 
-        connectionLabel = NSTextField(labelWithString: L("main.heartRate.disconnected"))
-        connectionLabel.font = NSFont.systemFont(ofSize: 16)
+        connectionLabel = NSTextField(labelWithString: L("Disconnected"))
+        connectionLabel.font = .systemFont(ofSize: 16)
         connectionLabel.textColor = .secondaryLabelColor
         connectionLabel.alignment = .center
         connectionLabel.translatesAutoresizingMaskIntoConstraints = false
 
-        // Add button (+)
-        addButton = NSButton(title: "+", target: self, action: #selector(heartRateTapped))
-        addButton.font = NSFont.systemFont(ofSize: 24, weight: .bold)
+        // Make connection label clickable
+        let labelClick = NSClickGestureRecognizer(target: self, action: #selector(connectionLabelTapped))
+        connectionLabel.addGestureRecognizer(labelClick)
+
+        // Add button (+) - shown when disconnected
+        addButton = NSButton(title: "+", target: self, action: #selector(addButtonTapped))
+        addButton.font = .systemFont(ofSize: 24, weight: .bold)
         addButton.bezelStyle = .inline
         addButton.isBordered = false
         addButton.title = "+"
@@ -328,10 +332,6 @@ final class MainViewController: NSViewController {
         connectionStack.translatesAutoresizingMaskIntoConstraints = false
         heartRateContainer.addSubview(connectionStack)
 
-        // Click to connect on the container
-        let containerClick = NSClickGestureRecognizer(target: self, action: #selector(heartRateTapped))
-        heartRateContainer.addGestureRecognizer(containerClick)
-
         NSLayoutConstraint.activate([
             heartRateContainer.topAnchor.constraint(equalTo: timerContainer.bottomAnchor),
             heartRateContainer.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -344,6 +344,19 @@ final class MainViewController: NSViewController {
             connectionStack.centerXAnchor.constraint(equalTo: heartRateContainer.centerXAnchor),
             connectionStack.topAnchor.constraint(equalTo: heartRateLabel.bottomAnchor, constant: 16),
         ])
+    }
+
+    @objc private func connectionLabelTapped() {
+        // Click on device name to disconnect
+        let monitor = heartRateMonitor
+        if monitor.connectedDeviceName != nil {
+            monitor.disconnect()
+        }
+    }
+
+    @objc private func addButtonTapped() {
+        // "+" button triggers auto-connect
+        heartRateMonitor.autoConnect()
     }
 
     // MARK: - Actions
@@ -392,10 +405,6 @@ final class MainViewController: NSViewController {
 
     @objc private func profileTapped() {
         showProfileSelector()
-    }
-
-    @objc private func heartRateTapped() {
-        heartRateMonitor.autoConnect()
     }
 
     private func showProfileSelector() {
