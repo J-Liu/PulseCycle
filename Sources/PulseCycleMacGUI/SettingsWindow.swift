@@ -302,14 +302,12 @@ final class SettingsWindow: NSWindow {
     // MARK: - Devices Tab
 
     private func createDevicesTab() -> NSView {
-        let container = NSView()
-        container.translatesAutoresizingMaskIntoConstraints = false
+        let stack = makeVerticalStack()
 
         // Title
         let titleLabel = NSTextField(labelWithString: L("HRM Devices"))
         titleLabel.font = .systemFont(ofSize: 16, weight: .semibold)
-        titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        container.addSubview(titleLabel)
+        stack.addArrangedSubview(titleLabel)
 
         // Device list container
         let listContainer = NSView()
@@ -318,7 +316,6 @@ final class SettingsWindow: NSWindow {
         listContainer.layer?.borderColor = NSColor.separatorColor.cgColor
         listContainer.layer?.cornerRadius = 6
         listContainer.translatesAutoresizingMaskIntoConstraints = false
-        container.addSubview(listContainer)
 
         devicesStackView = NSStackView()
         devicesStackView?.orientation = .vertical
@@ -332,40 +329,25 @@ final class SettingsWindow: NSWindow {
             devicesStackView!.topAnchor.constraint(equalTo: listContainer.topAnchor),
             devicesStackView!.leadingAnchor.constraint(equalTo: listContainer.leadingAnchor),
             devicesStackView!.trailingAnchor.constraint(equalTo: listContainer.trailingAnchor),
-            devicesStackView!.bottomAnchor.constraint(lessThanOrEqualTo: listContainer.bottomAnchor)
+            devicesStackView!.bottomAnchor.constraint(lessThanOrEqualTo: listContainer.bottomAnchor),
+            listContainer.heightAnchor.constraint(greaterThanOrEqualToConstant: 100)
         ])
+
+        stack.addArrangedSubview(listContainer)
 
         // Buttons
         let addButton = NSButton(title: L("Add"), target: self, action: #selector(addDevice(_:)))
         addButton.bezelStyle = .rounded
-        addButton.translatesAutoresizingMaskIntoConstraints = false
+        addButton.widthAnchor.constraint(equalToConstant: 80).isActive = true
 
         let removeButton = NSButton(title: L("Remove"), target: self, action: #selector(removeDevice(_:)))
         removeButton.bezelStyle = .rounded
-        removeButton.translatesAutoresizingMaskIntoConstraints = false
+        removeButton.widthAnchor.constraint(equalToConstant: 80).isActive = true
 
-        let buttonStack = NSStackView(views: [addButton, removeButton])
-        buttonStack.orientation = .horizontal
-        buttonStack.spacing = 16
-        buttonStack.translatesAutoresizingMaskIntoConstraints = false
-        container.addSubview(buttonStack)
-
-        NSLayoutConstraint.activate([
-            titleLabel.topAnchor.constraint(equalTo: container.topAnchor, constant: 20),
-            titleLabel.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 20),
-
-            listContainer.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 12),
-            listContainer.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 20),
-            listContainer.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -20),
-            listContainer.heightAnchor.constraint(greaterThanOrEqualToConstant: 100),
-
-            buttonStack.topAnchor.constraint(equalTo: listContainer.bottomAnchor, constant: 16),
-            buttonStack.centerXAnchor.constraint(equalTo: container.centerXAnchor),
-            buttonStack.bottomAnchor.constraint(lessThanOrEqualTo: container.bottomAnchor, constant: -20),
-
-            addButton.widthAnchor.constraint(equalToConstant: 80),
-            removeButton.widthAnchor.constraint(equalToConstant: 80)
-        ])
+        let buttonRow = NSStackView(views: [addButton, removeButton])
+        buttonRow.orientation = .horizontal
+        buttonRow.spacing = 16
+        stack.addArrangedSubview(buttonRow)
 
         // Listen for device list updates
         NotificationCenter.default.addObserver(
@@ -385,7 +367,7 @@ final class SettingsWindow: NSWindow {
         // Initial load
         reloadDeviceList()
 
-        return container
+        return wrapInTopAlignedContainer(stack)
     }
 
     @objc private func reloadDeviceList() {
