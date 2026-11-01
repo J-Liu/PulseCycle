@@ -79,8 +79,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         let screenFrame = NSScreen.main?.visibleFrame ?? .zero
-        let width: CGFloat = 800
-        let height: CGFloat = 600
+        let width: CGFloat = 600
+        let height: CGFloat = 850
         let x = screenFrame.midX - width / 2
         let y = screenFrame.midY - height / 2
         let frame = NSRect(x: x, y: y, width: width, height: height)
@@ -93,7 +93,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         )
 
         newWindow.title = "PulseCycle"
-        newWindow.minSize = NSSize(width: 600, height: 400)
+        newWindow.minSize = NSSize(width: 500, height: 600)
         newWindow.isReleasedWhenClosed = false
         newWindow.contentViewController = MainViewController()
 

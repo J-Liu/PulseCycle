@@ -43,7 +43,7 @@ final class MainViewController: NSViewController {
     // MARK: - Lifecycle
 
     override func loadView() {
-        view = NSView(frame: NSRect(x: 0, y: 0, width: 800, height: 600))
+        view = NSView(frame: NSRect(x: 0, y: 0, width: 600, height: 850))
         view.wantsLayer = true
     }
 
@@ -179,7 +179,7 @@ final class MainViewController: NSViewController {
 
         // Go button - larger, red background, white text, white border
         goButton = NSButton(title: L("main.button.go"), target: self, action: #selector(goTapped))
-        goButton.bezelStyle = .regularSquare
+        goButton.isBordered = false
         goButton.font = NSFont.systemFont(ofSize: 28, weight: .bold)
         goButton.contentTintColor = .white
         goButton.wantsLayer = true
@@ -192,7 +192,7 @@ final class MainViewController: NSViewController {
 
         // Settings button - left side
         settingsButton = NSButton(title: L("main.button.settings"), target: self, action: #selector(settingsTapped))
-        settingsButton.bezelStyle = .regularSquare
+        settingsButton.isBordered = false
         settingsButton.font = NSFont.systemFont(ofSize: 20, weight: .bold)
         settingsButton.contentTintColor = .white
         settingsButton.wantsLayer = true
@@ -205,7 +205,7 @@ final class MainViewController: NSViewController {
 
         // Reset button - right side
         resetButton = NSButton(title: L("main.button.reset"), target: self, action: #selector(resetTapped))
-        resetButton.bezelStyle = .regularSquare
+        resetButton.isBordered = false
         resetButton.font = NSFont.systemFont(ofSize: 20, weight: .bold)
         resetButton.contentTintColor = .white
         resetButton.wantsLayer = true
