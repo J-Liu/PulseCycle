@@ -198,6 +198,8 @@ final class MainViewController: NSViewController {
             timerLabel.stringValue = "00:00"
             roundLabel.stringValue = String(format: L("main.round"), 0)
             phaseLabel.stringValue = L("main.timer.ready")
+            // Default color for ready state
+            timerLabel.textColor = NSColor(hex: currentProfile.prepareColor) ?? .labelColor
             return
         }
 
@@ -208,11 +210,21 @@ final class MainViewController: NSViewController {
         roundLabel.stringValue = String(format: L("main.round"), engine.currentRound)
 
         switch engine.phase {
-        case .warmUp: phaseLabel.stringValue = "WARM UP"
-        case .work: phaseLabel.stringValue = L("main.timer.work")
-        case .rest: phaseLabel.stringValue = L("main.timer.rest")
-        case .coolDown: phaseLabel.stringValue = "COOL DOWN"
-        case .finished: phaseLabel.stringValue = "FINISHED"
+        case .warmUp:
+            phaseLabel.stringValue = "WARM UP"
+            timerLabel.textColor = NSColor(hex: currentProfile.warmUpColor) ?? .labelColor
+        case .work:
+            phaseLabel.stringValue = L("main.timer.work")
+            timerLabel.textColor = NSColor(hex: currentProfile.workColor) ?? .labelColor
+        case .rest:
+            phaseLabel.stringValue = L("main.timer.rest")
+            timerLabel.textColor = NSColor(hex: currentProfile.restColor) ?? .labelColor
+        case .coolDown:
+            phaseLabel.stringValue = "COOL DOWN"
+            timerLabel.textColor = NSColor(hex: currentProfile.coolDownColor) ?? .labelColor
+        case .finished:
+            phaseLabel.stringValue = "FINISHED"
+            timerLabel.textColor = .labelColor
         }
     }
 }
