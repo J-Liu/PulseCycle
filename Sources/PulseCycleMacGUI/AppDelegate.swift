@@ -276,8 +276,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if settingsWindow == nil {
             settingsWindow = SettingsWindow()
         }
+        // Disable config tabs if timer is running
+        let allowConfig = (window?.contentViewController as? MainViewController)?.canEditSettings ?? true
+        settingsWindow?.setConfigTabsEnabled(allowConfig)
         settingsWindow?.selectTab(withIdentifier: "about")
         settingsWindow?.makeKeyAndOrderFront(nil)
+    }
+
+    // MARK: - Menu Validation
+
+    func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
+        if menuItem.action == #selector(showSettings) {
+            // Disable Settings menu when timer is running
+            return (window?.contentViewController as? MainViewController)?.canEditSettings ?? true
+        }
+        return true
     }
 
     @objc private func manualCheckForUpdates() {

@@ -7,25 +7,36 @@ import PulseCycleCore
 /// Custom button with solid red background
 class RedButton: NSButton {
     override func draw(_ dirtyRect: NSRect) {
-        // Draw red background
-        NSColor.systemRed.setFill()
+        let isEnabled = self.isEnabled
+
+        // Draw background (red or gray when disabled)
+        if isEnabled {
+            NSColor.systemRed.setFill()
+        } else {
+            NSColor.systemGray.withAlphaComponent(0.5).setFill()
+        }
         bounds.fill()
 
-        // Draw white border
-        NSColor.white.setStroke()
+        // Draw border (white or gray when disabled)
+        if isEnabled {
+            NSColor.white.setStroke()
+        } else {
+            NSColor.gray.setStroke()
+        }
         let cornerRadius: CGFloat = layer?.cornerRadius ?? 10
         let borderPath = NSBezierPath(roundedRect: bounds.insetBy(dx: 1, dy: 1), xRadius: cornerRadius, yRadius: cornerRadius)
         borderPath.lineWidth = 2
         borderPath.stroke()
 
-        // Draw title with white color
+        // Draw title (white or gray when disabled)
         let titleStr = title
         if !titleStr.isEmpty {
             let style = NSMutableParagraphStyle()
             style.alignment = .center
 
+            let textColor: NSColor = isEnabled ? .white : .gray.withAlphaComponent(0.6)
             let attrs: [NSAttributedString.Key: Any] = [
-                .foregroundColor: NSColor.white,
+                .foregroundColor: textColor,
                 .font: font ?? NSFont.systemFont(ofSize: 20, weight: .bold),
                 .paragraphStyle: style
             ]
@@ -405,6 +416,12 @@ final class MainViewController: NSViewController {
         } else {
             goButton.title = L("main.button.resume")
         }
+        updateSettingsButton()
+    }
+
+    private func updateSettingsButton() {
+        settingsButton.isEnabled = canEditSettings
+        settingsButton.needsDisplay = true
     }
 
     private func formatTime(_ seconds: Int) -> String {
