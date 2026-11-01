@@ -230,7 +230,7 @@ final class SettingsWindow: NSWindow {
         let stack = makeVerticalStack()
         let profile = ProfileManager.shared.currentProfile
 
-        // Profile name
+        // Profile name - still use text field
         let nameField = NSTextField()
         nameField.stringValue = profile.name
         nameField.placeholderString = L("settings.profileName")
@@ -239,53 +239,38 @@ final class SettingsWindow: NSWindow {
         nameField.widthAnchor.constraint(equalToConstant: controlWidth).isActive = true
         stack.addArrangedSubview(makeRow(label: L("settings.profileName"), control: nameField))
 
-        // Rounds
-        let roundsField = NSTextField()
-        roundsField.stringValue = String(profile.rounds)
-        roundsField.placeholderString = "4"
-        roundsField.target = self
-        roundsField.action = #selector(roundsChanged(_:))
-        roundsField.widthAnchor.constraint(equalToConstant: 60).isActive = true
-        stack.addArrangedSubview(makeRow(label: L("settings.rounds"), control: roundsField))
+        // Rounds - button to open picker
+        let roundsButton = NSButton(title: "\(profile.rounds)", target: self, action: #selector(showRoundsPicker(_:)))
+        roundsButton.bezelStyle = .rounded
+        roundsButton.widthAnchor.constraint(equalToConstant: 80).isActive = true
+        stack.addArrangedSubview(makeRow(label: L("settings.rounds"), control: roundsButton))
 
-        // Work time
-        let workField = NSTextField()
-        workField.stringValue = formatTime(profile.workSeconds)
-        workField.placeholderString = "2m 0s"
-        workField.target = self
-        workField.action = #selector(workTimeChanged(_:))
-        workField.widthAnchor.constraint(equalToConstant: controlWidth).isActive = true
-        stack.addArrangedSubview(makeRow(label: L("settings.work"), control: workField))
+        // Work time - button to open picker
+        let workButton = NSButton(title: formatTime(profile.workSeconds), target: self, action: #selector(showWorkPicker(_:)))
+        workButton.bezelStyle = .rounded
+        workButton.widthAnchor.constraint(equalToConstant: 100).isActive = true
+        stack.addArrangedSubview(makeRow(label: L("settings.work"), control: workButton))
 
-        // Rest time
-        let restField = NSTextField()
-        restField.stringValue = formatTime(profile.restSeconds)
-        restField.placeholderString = "1m 0s"
-        restField.target = self
-        restField.action = #selector(restTimeChanged(_:))
-        restField.widthAnchor.constraint(equalToConstant: controlWidth).isActive = true
-        stack.addArrangedSubview(makeRow(label: L("settings.rest"), control: restField))
+        // Rest time - button to open picker
+        let restButton = NSButton(title: formatTime(profile.restSeconds), target: self, action: #selector(showRestPicker(_:)))
+        restButton.bezelStyle = .rounded
+        restButton.widthAnchor.constraint(equalToConstant: 100).isActive = true
+        stack.addArrangedSubview(makeRow(label: L("settings.rest"), control: restButton))
 
-        // Prepare time
-        let prepareField = NSTextField()
-        prepareField.stringValue = "\(profile.prepareTime)s"
-        prepareField.placeholderString = "5s"
-        prepareField.target = self
-        prepareField.action = #selector(prepareTimeChanged(_:))
-        prepareField.widthAnchor.constraint(equalToConstant: 60).isActive = true
-        stack.addArrangedSubview(makeRow(label: L("settings.prepareTime"), control: prepareField))
+        // Prepare time - button to open picker
+        let prepareButton = NSButton(title: "\(profile.prepareTime)s", target: self, action: #selector(showPreparePicker(_:)))
+        prepareButton.bezelStyle = .rounded
+        prepareButton.widthAnchor.constraint(equalToConstant: 80).isActive = true
+        stack.addArrangedSubview(makeRow(label: L("settings.prepareTime"), control: prepareButton))
 
         // Warm-up
         let warmUpCheckbox = NSButton(checkboxWithTitle: "", target: self, action: #selector(warmUpEnabledChanged(_:)))
         warmUpCheckbox.state = profile.warmUpEnabled ? .on : .off
-        let warmUpField = NSTextField()
-        warmUpField.stringValue = formatTime(profile.warmUpSeconds)
-        warmUpField.placeholderString = "3m 0s"
-        warmUpField.target = self
-        warmUpField.action = #selector(warmUpTimeChanged(_:))
-        warmUpField.widthAnchor.constraint(equalToConstant: controlWidth).isActive = true
-        warmUpField.isEnabled = profile.warmUpEnabled
-        let warmUpRow = NSStackView(views: [warmUpCheckbox, warmUpField])
+        let warmUpButton = NSButton(title: formatTime(profile.warmUpSeconds), target: self, action: #selector(showWarmUpPicker(_:)))
+        warmUpButton.bezelStyle = .rounded
+        warmUpButton.widthAnchor.constraint(equalToConstant: 100).isActive = true
+        warmUpButton.isEnabled = profile.warmUpEnabled
+        let warmUpRow = NSStackView(views: [warmUpCheckbox, warmUpButton])
         warmUpRow.orientation = .horizontal
         warmUpRow.spacing = 8
         stack.addArrangedSubview(makeRow(label: L("settings.warmUp"), control: warmUpRow))
@@ -293,14 +278,11 @@ final class SettingsWindow: NSWindow {
         // Cool-down
         let coolDownCheckbox = NSButton(checkboxWithTitle: "", target: self, action: #selector(coolDownEnabledChanged(_:)))
         coolDownCheckbox.state = profile.coolDownEnabled ? .on : .off
-        let coolDownField = NSTextField()
-        coolDownField.stringValue = formatTime(profile.coolDownSeconds)
-        coolDownField.placeholderString = "3m 0s"
-        coolDownField.target = self
-        coolDownField.action = #selector(coolDownTimeChanged(_:))
-        coolDownField.widthAnchor.constraint(equalToConstant: controlWidth).isActive = true
-        coolDownField.isEnabled = profile.coolDownEnabled
-        let coolDownRow = NSStackView(views: [coolDownCheckbox, coolDownField])
+        let coolDownButton = NSButton(title: formatTime(profile.coolDownSeconds), target: self, action: #selector(showCoolDownPicker(_:)))
+        coolDownButton.bezelStyle = .rounded
+        coolDownButton.widthAnchor.constraint(equalToConstant: 100).isActive = true
+        coolDownButton.isEnabled = profile.coolDownEnabled
+        let coolDownRow = NSStackView(views: [coolDownCheckbox, coolDownButton])
         coolDownRow.orientation = .horizontal
         coolDownRow.spacing = 8
         stack.addArrangedSubview(makeRow(label: L("settings.coolDown"), control: coolDownRow))
@@ -498,80 +480,114 @@ final class SettingsWindow: NSWindow {
         var profile = ProfileManager.shared.currentProfile
         profile.name = sender.stringValue
         ProfileManager.shared.updateProfile(profile)
+        NotificationCenter.default.post(name: .profileChanged, object: nil)
     }
 
-    @objc private func roundsChanged(_ sender: NSTextField) {
-        var profile = ProfileManager.shared.currentProfile
-        profile.rounds = max(1, Int(sender.stringValue) ?? profile.rounds)
-        ProfileManager.shared.updateProfile(profile)
+    // MARK: - Picker Actions
+
+    private func showPicker(_ picker: PickerViewController) {
+        let sheet = NSWindow(contentViewController: picker)
+        sheet.styleMask = [.titled, .closable]
+        sheet.title = picker.title ?? ""
+        beginSheet(sheet) { _ in }
     }
 
-    private func parseTime(_ string: String) -> Int {
-        var total = 0
-        let pattern = "(\\d+)\\s*([ms]?)"
-        guard let regex = try? NSRegularExpression(pattern: pattern) else { return 0 }
-
-        let matches = regex.matches(in: string, range: NSRange(string.startIndex..., in: string))
-        for match in matches {
-            guard let valueRange = Range(match.range(at: 1), in: string),
-                  let unitRange = Range(match.range(at: 2), in: string) else { continue }
-            let value = Int(string[valueRange]) ?? 0
-            let unit = String(string[unitRange])
-            if unit == "m" {
-                total += value * 60
-            } else {
-                total += value
-            }
+    @objc private func showRoundsPicker(_ sender: NSButton) {
+        let profile = ProfileManager.shared.currentProfile
+        let picker = PickerViewController(title: L("settings.rounds"), values: Array(1...99), currentValue: profile.rounds) { [weak self] value in
+            var p = ProfileManager.shared.currentProfile
+            p.rounds = value
+            ProfileManager.shared.updateProfile(p)
+            self?.recreateTabs()
+            self?.tabView.selectTabViewItem(withIdentifier: "profile")
+            NotificationCenter.default.post(name: .profileChanged, object: nil)
         }
-        return max(0, total)
+        showPicker(picker)
     }
 
-    @objc private func workTimeChanged(_ sender: NSTextField) {
-        var profile = ProfileManager.shared.currentProfile
-        profile.workSeconds = parseTime(sender.stringValue)
-        ProfileManager.shared.updateProfile(profile)
+    @objc private func showWorkPicker(_ sender: NSButton) {
+        let profile = ProfileManager.shared.currentProfile
+        let picker = PickerViewController(title: L("settings.work"), currentValue: profile.workSeconds, maxMinutes: 60) { [weak self] value in
+            var p = ProfileManager.shared.currentProfile
+            p.workSeconds = value
+            ProfileManager.shared.updateProfile(p)
+            self?.recreateTabs()
+            self?.tabView.selectTabViewItem(withIdentifier: "profile")
+            NotificationCenter.default.post(name: .profileChanged, object: nil)
+        }
+        showPicker(picker)
     }
 
-    @objc private func restTimeChanged(_ sender: NSTextField) {
-        var profile = ProfileManager.shared.currentProfile
-        profile.restSeconds = parseTime(sender.stringValue)
-        ProfileManager.shared.updateProfile(profile)
+    @objc private func showRestPicker(_ sender: NSButton) {
+        let profile = ProfileManager.shared.currentProfile
+        let picker = PickerViewController(title: L("settings.rest"), currentValue: profile.restSeconds, maxMinutes: 60) { [weak self] value in
+            var p = ProfileManager.shared.currentProfile
+            p.restSeconds = value
+            ProfileManager.shared.updateProfile(p)
+            self?.recreateTabs()
+            self?.tabView.selectTabViewItem(withIdentifier: "profile")
+            NotificationCenter.default.post(name: .profileChanged, object: nil)
+        }
+        showPicker(picker)
     }
 
-    @objc private func prepareTimeChanged(_ sender: NSTextField) {
-        var profile = ProfileManager.shared.currentProfile
-        profile.prepareTime = max(0, Int(sender.stringValue.replacingOccurrences(of: "s", with: "")) ?? profile.prepareTime)
-        ProfileManager.shared.updateProfile(profile)
+    @objc private func showPreparePicker(_ sender: NSButton) {
+        let profile = ProfileManager.shared.currentProfile
+        let picker = PickerViewController(title: L("settings.prepareTime"), values: Array(0...300), currentValue: profile.prepareTime) { [weak self] value in
+            var p = ProfileManager.shared.currentProfile
+            p.prepareTime = value
+            ProfileManager.shared.updateProfile(p)
+            self?.recreateTabs()
+            self?.tabView.selectTabViewItem(withIdentifier: "profile")
+            NotificationCenter.default.post(name: .profileChanged, object: nil)
+        }
+        showPicker(picker)
     }
+
+    @objc private func showWarmUpPicker(_ sender: NSButton) {
+        let profile = ProfileManager.shared.currentProfile
+        let picker = PickerViewController(title: L("settings.warmUp"), currentValue: profile.warmUpSeconds, maxMinutes: 30) { [weak self] value in
+            var p = ProfileManager.shared.currentProfile
+            p.warmUpSeconds = value
+            ProfileManager.shared.updateProfile(p)
+            self?.recreateTabs()
+            self?.tabView.selectTabViewItem(withIdentifier: "profile")
+            NotificationCenter.default.post(name: .profileChanged, object: nil)
+        }
+        showPicker(picker)
+    }
+
+    @objc private func showCoolDownPicker(_ sender: NSButton) {
+        let profile = ProfileManager.shared.currentProfile
+        let picker = PickerViewController(title: L("settings.coolDown"), currentValue: profile.coolDownSeconds, maxMinutes: 30) { [weak self] value in
+            var p = ProfileManager.shared.currentProfile
+            p.coolDownSeconds = value
+            ProfileManager.shared.updateProfile(p)
+            self?.recreateTabs()
+            self?.tabView.selectTabViewItem(withIdentifier: "profile")
+            NotificationCenter.default.post(name: .profileChanged, object: nil)
+        }
+        showPicker(picker)
+    }
+
+    // MARK: - Checkbox Actions
 
     @objc private func warmUpEnabledChanged(_ sender: NSButton) {
         var profile = ProfileManager.shared.currentProfile
         profile.warmUpEnabled = sender.state == .on
         ProfileManager.shared.updateProfile(profile)
-        // Rebuild tab to update field state
         recreateTabs()
         tabView.selectTabViewItem(withIdentifier: "profile")
-    }
-
-    @objc private func warmUpTimeChanged(_ sender: NSTextField) {
-        var profile = ProfileManager.shared.currentProfile
-        profile.warmUpSeconds = parseTime(sender.stringValue)
-        ProfileManager.shared.updateProfile(profile)
+        NotificationCenter.default.post(name: .profileChanged, object: nil)
     }
 
     @objc private func coolDownEnabledChanged(_ sender: NSButton) {
         var profile = ProfileManager.shared.currentProfile
         profile.coolDownEnabled = sender.state == .on
         ProfileManager.shared.updateProfile(profile)
-        // Rebuild tab to update field state
         recreateTabs()
         tabView.selectTabViewItem(withIdentifier: "profile")
-    }
-
-    @objc private func coolDownTimeChanged(_ sender: NSTextField) {
-        var profile = ProfileManager.shared.currentProfile
-        profile.coolDownSeconds = parseTime(sender.stringValue)
-        ProfileManager.shared.updateProfile(profile)
+        NotificationCenter.default.post(name: .profileChanged, object: nil)
     }
 
     // MARK: - Actions - Sound
