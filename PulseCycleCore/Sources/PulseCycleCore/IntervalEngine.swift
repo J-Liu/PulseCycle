@@ -1,11 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// Copyright 2026 Jia Liu
-// Licensed under AGPL-3.0-or-later with an additional permission
-// under Section 7. See LICENSE for details.
+// Copyright © 2026 Jia Liu
 
 import Foundation
 
-protocol IntervalEngineDelegate: AnyObject {
+public protocol IntervalEngineDelegate: AnyObject {
     func engineDidUpdateState(_ engine: IntervalEngine)
     func engineDidTransitionToPhase(_ engine: IntervalEngine, phase: IntervalPhase)
     func engineDidEndPhase(_ engine: IntervalEngine, phase: IntervalPhase)
@@ -14,15 +12,15 @@ protocol IntervalEngineDelegate: AnyObject {
     func engineDidFinish(_ engine: IntervalEngine)
 }
 
-class IntervalEngine {
+public class IntervalEngine {
     private let config: WorkoutConfig
-    weak var delegate: IntervalEngineDelegate?
+    public weak var delegate: IntervalEngineDelegate?
 
-    private(set) var phase: IntervalPhase = .warmUp
-    private(set) var remainingSeconds: Int
-    private(set) var currentRound: Int = 0
-    private(set) var totalElapsedSeconds: Int = 0
-    let totalDuration: Int
+    public private(set) var phase: IntervalPhase = .warmUp
+    public private(set) var remainingSeconds: Int
+    public private(set) var currentRound: Int = 0
+    public private(set) var totalElapsedSeconds: Int = 0
+    public let totalDuration: Int
 
     private var timer: Timer?
     private var isRunning = false
@@ -31,12 +29,12 @@ class IntervalEngine {
     private var phaseSequence: [PhaseItem] = []
     private var currentPhaseIndex: Int = 0
 
-    var currentPhaseItem: PhaseItem? {
+    public var currentPhaseItem: PhaseItem? {
         guard currentPhaseIndex < phaseSequence.count else { return nil }
         return phaseSequence[currentPhaseIndex]
     }
 
-    init(config: WorkoutConfig) {
+    public init(config: WorkoutConfig) {
         self.config = config
         self.remainingSeconds = config.warmUpSeconds
         self.totalDuration = config.warmUpSeconds +
@@ -44,7 +42,7 @@ class IntervalEngine {
             config.restSeconds + config.coolDownSeconds
     }
 
-    func start() {
+    public func start() {
         guard !isRunning else { return }
 
         // Build phase sequence on first start
@@ -70,18 +68,18 @@ class IntervalEngine {
         scheduleTimer()
     }
 
-    func pause() {
+    public func pause() {
         guard isRunning else { return }
         isRunning = false
         timer?.invalidate()
         timer = nil
     }
 
-    func resume() {
+    public func resume() {
         start()
     }
 
-    func reset() {
+    public func reset() {
         pause()
         phaseSequence = []
         currentPhaseIndex = 0
@@ -98,7 +96,7 @@ class IntervalEngine {
         }
     }
 
-    func tick() {
+    public func tick() {
         guard phase != .finished else { return }
 
         if remainingSeconds > 1 {

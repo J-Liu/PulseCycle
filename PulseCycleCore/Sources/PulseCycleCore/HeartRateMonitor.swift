@@ -1,18 +1,16 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// Copyright 2026 Jia Liu
-// Licensed under AGPL-3.0-or-later with an additional permission
-// under Section 7. See LICENSE for details.
+// Copyright © 2026 Jia Liu
 
 import CoreBluetooth
 
-protocol HeartRateMonitorDelegate: AnyObject {
+public protocol HeartRateMonitorDelegate: AnyObject {
     func heartRateMonitor(_ monitor: HeartRateMonitor, didUpdateHeartRate bpm: Int)
     func heartRateMonitor(_ monitor: HeartRateMonitor, didChangeState state: HeartRateMonitorState)
     func heartRateMonitor(_ monitor: HeartRateMonitor, didFailWithError error: Error)
     func heartRateMonitor(_ monitor: HeartRateMonitor, didConnectDevice name: String)
 }
 
-enum HeartRateMonitorState {
+public enum HeartRateMonitorState {
     case idle
     case scanning
     case connecting
@@ -20,8 +18,8 @@ enum HeartRateMonitorState {
     case disconnected
 }
 
-class HeartRateMonitor: NSObject {
-    weak var delegate: HeartRateMonitorDelegate?
+public class HeartRateMonitor: NSObject {
+    public weak var delegate: HeartRateMonitorDelegate?
 
     private var centralManager: CBCentralManager!
     private var connectedPeripheral: CBPeripheral?
@@ -37,17 +35,17 @@ class HeartRateMonitor: NSObject {
     private var isAutoConnecting = false
     private var scanTimeoutHandler: (() -> Void)?
 
-    var connectedDeviceName: String? {
+    public var connectedDeviceName: String? {
         return connectedPeripheral?.name
     }
 
-    override init() {
+    public override init() {
         super.init()
         centralManager = CBCentralManager(delegate: self, queue: queue)
     }
 
     // Auto-connect to default device or try other saved devices
-    func autoConnect() {
+    public func autoConnect() {
         guard centralManager.state == .poweredOn else { return }
 
         isAutoConnecting = true
@@ -93,7 +91,7 @@ class HeartRateMonitor: NSObject {
     }
 
     // Connect to a specific device by UUID
-    func connectToDevice(uuid: String) {
+    public func connectToDevice(uuid: String) {
         guard centralManager.state == .poweredOn else { return }
 
         // Disconnect previous device if connected
@@ -113,7 +111,7 @@ class HeartRateMonitor: NSObject {
         }
     }
 
-    func startScanning(timeoutHandler: (() -> Void)? = nil) {
+    public func startScanning(timeoutHandler: (() -> Void)? = nil) {
         guard centralManager.state == .poweredOn else {
             delegate?.heartRateMonitor(self, didChangeState: .disconnected)
             return
@@ -125,13 +123,13 @@ class HeartRateMonitor: NSObject {
         startScanTimeout()
     }
 
-    func stopScanning() {
+    public func stopScanning() {
         centralManager.stopScan()
         scanTimer?.cancel()
         scanTimer = nil
     }
 
-    func disconnect() {
+    public func disconnect() {
         connectionTimeoutTimer?.cancel()
         connectionTimeoutTimer = nil
         if let peripheral = connectedPeripheral {
@@ -142,11 +140,11 @@ class HeartRateMonitor: NSObject {
         delegate?.heartRateMonitor(self, didChangeState: .disconnected)
     }
 
-    func isConnectedDevice(uuid: String) -> Bool {
+    public func isConnectedDevice(uuid: String) -> Bool {
         return connectedPeripheral?.identifier.uuidString == uuid
     }
 
-    func getConnectedDeviceUUID() -> String? {
+    public func getConnectedDeviceUUID() -> String? {
         return connectedPeripheral?.identifier.uuidString
     }
 
@@ -211,7 +209,7 @@ class HeartRateMonitor: NSObject {
 }
 
 extension HeartRateMonitor: CBCentralManagerDelegate {
-    func centralManagerDidUpdateState(_ central: CBCentralManager) {
+    public func centralManagerDidUpdateState(_ central: CBCentralManager) {
         if central.state == .poweredOn {
             // Auto-connect when Bluetooth is ready
             autoConnect()
@@ -220,7 +218,7 @@ extension HeartRateMonitor: CBCentralManagerDelegate {
         }
     }
 
-    func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String: Any], rssi RSSI: NSNumber) {
+    public func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String: Any], rssi RSSI: NSNumber) {
         stopScanning()
 
         // Disconnect previous device if connected
@@ -234,7 +232,7 @@ extension HeartRateMonitor: CBCentralManagerDelegate {
         central.connect(peripheral, options: nil)
     }
 
-    func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
+    public func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
         // Save device to DeviceManager and set as default
         DeviceManager.shared.saveDevice(peripheral)
         DeviceManager.shared.setDefaultDevice(uuid: peripheral.identifier.uuidString)
@@ -247,7 +245,7 @@ extension HeartRateMonitor: CBCentralManagerDelegate {
         peripheral.discoverServices([heartRateServiceUUID])
     }
 
-    func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
+    public func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
         if let error = error {
             delegate?.heartRateMonitor(self, didFailWithError: error)
         }
@@ -262,7 +260,7 @@ extension HeartRateMonitor: CBCentralManagerDelegate {
         }
     }
 
-    func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
+    public func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
         connectionTimeoutTimer?.cancel()
         connectionTimeoutTimer = nil
         connectedPeripheral = nil
@@ -277,7 +275,7 @@ extension HeartRateMonitor: CBCentralManagerDelegate {
 }
 
 extension HeartRateMonitor: CBPeripheralDelegate {
-    func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
+    public func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
         guard error == nil else {
             delegate?.heartRateMonitor(self, didFailWithError: error!)
             return
@@ -288,7 +286,7 @@ extension HeartRateMonitor: CBPeripheralDelegate {
         }
     }
 
-    func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
+    public func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
         guard error == nil else {
             delegate?.heartRateMonitor(self, didFailWithError: error!)
             return
@@ -300,7 +298,7 @@ extension HeartRateMonitor: CBPeripheralDelegate {
         }
     }
 
-    func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
+    public func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
         guard error == nil else {
             delegate?.heartRateMonitor(self, didFailWithError: error!)
             return

@@ -1,28 +1,26 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// Copyright 2026 Jia Liu
-// Licensed under AGPL-3.0-or-later with an additional permission
-// under Section 7. See LICENSE for details.
+// Copyright © 2026 Jia Liu
 
 import Foundation
 import CoreBluetooth
 
-struct HeartRateDevice: Codable, Equatable {
-    let uuid: String
-    let name: String
+public struct HeartRateDevice: Codable, Equatable {
+    public let uuid: String
+    public let name: String
 
-    var identifier: UUID {
+    public var identifier: UUID {
         UUID(uuidString: uuid) ?? UUID()
     }
 }
 
-class DeviceManager {
-    static let shared = DeviceManager()
+public class DeviceManager {
+    public static let shared = DeviceManager()
 
     private let devicesKey = "saved_heart_rate_devices"
     private let defaultDeviceKey = "default_heart_rate_device"
 
-    private(set) var devices: [HeartRateDevice] = []
-    private(set) var defaultDeviceUUID: String?
+    public private(set) var devices: [HeartRateDevice] = []
+    public private(set) var defaultDeviceUUID: String?
 
     private init() {
         loadDevices()
@@ -40,7 +38,7 @@ class DeviceManager {
         defaultDeviceUUID = UserDefaults.standard.string(forKey: defaultDeviceKey)
     }
 
-    func saveDevice(_ peripheral: CBPeripheral) {
+    public func saveDevice(_ peripheral: CBPeripheral) {
         let uuid = peripheral.identifier.uuidString
         let name = peripheral.name ?? "Unknown Device"
 
@@ -66,7 +64,7 @@ class DeviceManager {
         }
     }
 
-    func removeDevice(at index: Int) {
+    public func removeDevice(at index: Int) {
         guard index < devices.count else { return }
         let device = devices[index]
         devices.remove(at: index)
@@ -92,18 +90,18 @@ class DeviceManager {
         }
     }
 
-    func setDefaultDevice(uuid: String) {
+    public func setDefaultDevice(uuid: String) {
         defaultDeviceUUID = uuid
         UserDefaults.standard.set(uuid, forKey: defaultDeviceKey)
         NotificationCenter.default.post(name: NSNotification.Name("DeviceListUpdated"), object: nil)
     }
 
-    func getDefaultDevice() -> HeartRateDevice? {
+    public func getDefaultDevice() -> HeartRateDevice? {
         guard let uuid = defaultDeviceUUID else { return nil }
         return devices.first { $0.uuid == uuid }
     }
 
-    func getDevice(byUUID uuid: String) -> HeartRateDevice? {
+    public func getDevice(byUUID uuid: String) -> HeartRateDevice? {
         return devices.first { $0.uuid == uuid }
     }
 

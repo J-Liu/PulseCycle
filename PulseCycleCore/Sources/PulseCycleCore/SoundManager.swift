@@ -1,17 +1,15 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// Copyright 2026 Jia Liu
-// Licensed under AGPL-3.0-or-later with an additional permission
-// under Section 7. See LICENSE for details.
+// Copyright © 2026 Jia Liu
 
 import AVFoundation
 
-class SoundManager {
-    static let shared = SoundManager()
+public class SoundManager {
+    public static let shared = SoundManager()
 
     private var audioPlayers: [String: AVAudioPlayer] = [:]
 
     // Available sounds
-    static let availableSounds = [
+    public static let availableSounds = [
         "boxing-bell-1",
         "boxing-bell-2",
         "boxing-bell-3",
@@ -36,7 +34,7 @@ class SoundManager {
         }
     }
 
-    func playSound(_ soundName: String) {
+    public func playSound(_ soundName: String) {
         guard let player = audioPlayers[soundName] else {
             print("Sound not found: \(soundName)")
             return
@@ -46,19 +44,19 @@ class SoundManager {
         player.play()
     }
 
-    func playCountdownBeep() {
+    public func playCountdownBeep() {
         playSound("countdown_beep")
     }
 
-    func playPhaseStartSound() {
+    public func playPhaseStartSound() {
         playSound("boxing-bell-1")
     }
 
-    func playPreRoundWarningSound() {
+    public func playPreRoundWarningSound() {
         playSound("boxing-bell-2")
     }
 
-    func playRoundEndSound() {
+    public func playRoundEndSound() {
         playSound("boxing-bell-3")
     }
 }
