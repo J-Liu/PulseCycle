@@ -7,6 +7,7 @@ import Sparkle
 /// Application delegate that shows the primary window and configures updates.
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private var window: NSWindow?
+    private var settingsWindow: SettingsWindow?
 
     /// Standard Sparkle updater controller
     lazy var updaterController = SPUStandardUpdaterController(
@@ -144,6 +145,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         menu.addItem(.separator())
 
+        let preferencesItem = NSMenuItem(
+            title: "Settings...",
+            action: #selector(showSettings),
+            keyEquivalent: ","
+        )
+        preferencesItem.target = self
+        menu.addItem(preferencesItem)
+
+        menu.addItem(.separator())
+
         let hideItem = NSMenuItem(
             title: "Hide \(appName)",
             action: #selector(NSApplication.hide(_:)),
@@ -249,10 +260,26 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         updaterController.updater.checkForUpdates()
     }
 
+    @objc private func showSettings() {
+        if settingsWindow == nil {
+            settingsWindow = SettingsWindow()
+        }
+        settingsWindow?.makeKeyAndOrderFront(nil)
+    }
+
     // MARK: - NSApplicationDelegate
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
         return UserDefaults.standard.bool(forKey: "settings.quitOnClose")
+    }
+
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        if flag {
+            window?.makeKeyAndOrderFront(nil)
+        } else {
+            createMainWindow()
+        }
+        return true
     }
 
     func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {
