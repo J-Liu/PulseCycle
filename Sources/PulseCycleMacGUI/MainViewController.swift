@@ -2,6 +2,7 @@
 // Copyright © 2026 Jia Liu
 
 import AppKit
+import PulseCycleCore
 
 /// Main view controller for the timer display.
 final class MainViewController: NSViewController {
@@ -11,10 +12,17 @@ final class MainViewController: NSViewController {
     private var timerLabel: NSTextField!
     private var roundLabel: NSTextField!
     private var phaseLabel: NSTextField!
+    private var profileLabel: NSTextField!
 
     private var startButton: NSButton!
     private var pauseButton: NSButton!
     private var resetButton: NSButton!
+    private var profileButton: NSButton!
+
+    // MARK: - State
+
+    private var engine: IntervalEngine?
+    private var currentProfile: WorkoutProfile { ProfileManager.shared.currentProfile }
 
     // MARK: - Lifecycle
 
@@ -26,11 +34,25 @@ final class MainViewController: NSViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
+        updateUI()
     }
 
     // MARK: - Setup
 
     private func setupUI() {
+        // Profile label
+        profileLabel = NSTextField(labelWithString: "Amateur Boxing")
+        profileLabel.font = NSFont.systemFont(ofSize: 16, weight: .medium)
+        profileLabel.alignment = .center
+        profileLabel.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(profileLabel)
+
+        // Profile button
+        profileButton = NSButton(title: "Profile", target: self, action: #selector(profileTapped))
+        profileButton.bezelStyle = .rounded
+        profileButton.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(profileButton)
+
         // Timer display
         timerLabel = NSTextField(labelWithString: "00:00")
         timerLabel.font = NSFont.monospacedDigitSystemFont(ofSize: 72, weight: .bold)
@@ -57,6 +79,9 @@ final class MainViewController: NSViewController {
         pauseButton = NSButton(title: "Pause", target: self, action: #selector(pauseTapped))
         resetButton = NSButton(title: "Reset", target: self, action: #selector(resetTapped))
 
+        startButton.bezelStyle = .rounded
+        pauseButton.bezelStyle = .rounded
+        resetButton.bezelStyle = .rounded
         pauseButton.isEnabled = false
 
         let buttonStack = NSStackView(views: [startButton, pauseButton, resetButton])
@@ -67,11 +92,17 @@ final class MainViewController: NSViewController {
 
         // Layout
         NSLayoutConstraint.activate([
+            profileLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            profileLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 20),
+
+            profileButton.centerYAnchor.constraint(equalTo: profileLabel.centerYAnchor),
+            profileButton.leadingAnchor.constraint(equalTo: profileLabel.trailingAnchor, constant: 12),
+
             timerLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            timerLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: 50),
+            timerLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: 30),
 
             roundLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            roundLabel.topAnchor.constraint(equalTo: timerLabel.bottomAnchor, constant: 20),
+            roundLabel.topAnchor.constraint(equalTo: timerLabel.bottomAnchor, constant: 16),
 
             phaseLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             phaseLabel.topAnchor.constraint(equalTo: roundLabel.bottomAnchor, constant: 8),
@@ -84,17 +115,121 @@ final class MainViewController: NSViewController {
     // MARK: - Actions
 
     @objc private func startTapped() {
+        if engine == nil {
+            let config = WorkoutConfig(
+                warmUpSeconds: currentProfile.warmUpSeconds,
+                workSeconds: currentProfile.workSeconds,
+                restSeconds: currentProfile.restSeconds,
+                rounds: currentProfile.rounds,
+                coolDownSeconds: currentProfile.coolDownSeconds
+            )
+            engine = IntervalEngine(config: config)
+            engine?.delegate = self
+        }
+        engine?.start()
         startButton.isEnabled = false
         pauseButton.isEnabled = true
     }
 
     @objc private func pauseTapped() {
+        engine?.pause()
         startButton.isEnabled = true
         pauseButton.isEnabled = false
     }
 
     @objc private func resetTapped() {
+        engine?.reset()
+        engine = nil
         startButton.isEnabled = true
         pauseButton.isEnabled = false
+        updateUI()
+    }
+
+    @objc private func profileTapped() {
+        showProfileSelector()
+    }
+
+    private func showProfileSelector() {
+        let menu = NSMenu()
+        let profiles = ProfileManager.shared.profiles
+        let currentIndex = ProfileManager.shared.currentProfileIndex
+
+        for (index, profile) in profiles.enumerated() {
+            let item = NSMenuItem(title: profile.name, action: #selector(selectProfile(_:)), keyEquivalent: "")
+            item.tag = index
+            item.state = index == currentIndex ? .on : .off
+            item.target = self
+            menu.addItem(item)
+        }
+
+        let point = NSPoint(x: profileButton.bounds.minX, y: profileButton.bounds.maxY + 4)
+        menu.popUp(positioning: nil, at: point, in: profileButton)
+    }
+
+    @objc private func selectProfile(_ item: NSMenuItem) {
+        ProfileManager.shared.selectProfile(at: item.tag)
+        engine = nil
+        profileLabel.stringValue = currentProfile.name
+        updateUI()
+    }
+
+    // MARK: - UI Updates
+
+    private func updateUI() {
+        profileLabel.stringValue = currentProfile.name
+
+        guard let engine = engine else {
+            timerLabel.stringValue = "00:00"
+            roundLabel.stringValue = "Round 0"
+            phaseLabel.stringValue = "READY"
+            return
+        }
+
+        let minutes = engine.remainingSeconds / 60
+        let seconds = engine.remainingSeconds % 60
+        timerLabel.stringValue = String(format: "%02d:%02d", minutes, seconds)
+
+        roundLabel.stringValue = "Round \(engine.currentRound)"
+
+        switch engine.phase {
+        case .warmUp: phaseLabel.stringValue = "WARM UP"
+        case .work: phaseLabel.stringValue = "WORK"
+        case .rest: phaseLabel.stringValue = "REST"
+        case .coolDown: phaseLabel.stringValue = "COOL DOWN"
+        case .finished: phaseLabel.stringValue = "FINISHED"
+        }
+    }
+}
+
+// MARK: - IntervalEngineDelegate
+
+extension MainViewController: IntervalEngineDelegate {
+    func engineDidUpdateState(_ engine: IntervalEngine) {
+        DispatchQueue.main.async { [weak self] in
+            self?.updateUI()
+        }
+    }
+
+    func engineDidTransitionToPhase(_ engine: IntervalEngine, phase: IntervalPhase) {}
+
+    func engineDidEndPhase(_ engine: IntervalEngine, phase: IntervalPhase) {}
+
+    func engineDidPlaySound(_ engine: IntervalEngine, sound: String) {
+        DispatchQueue.main.async {
+            SoundManager.shared.playSound(sound)
+        }
+    }
+
+    func engineDidSpeak(_ engine: IntervalEngine, text: String) {
+        DispatchQueue.main.async {
+            VoiceManager.shared.speak(text)
+        }
+    }
+
+    func engineDidFinish(_ engine: IntervalEngine) {
+        DispatchQueue.main.async { [weak self] in
+            self?.startButton.isEnabled = false
+            self?.pauseButton.isEnabled = false
+        }
     }
 }
