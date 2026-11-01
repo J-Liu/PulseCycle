@@ -31,7 +31,9 @@
 	<key>SUEnableInstallerLauncherService</key>
 	<true/>
 	<key>SUFeedURL</key>
-	<string>https://pulsecycle.app/appcast.xml</string>
+	<string>https://J-Liu.github.io/PulseCycle/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+    <string>VOFGw5JIsHX9ow0D8Wj6X8a59Qkkinqo+QBa+53vUU8=</string>
 	<key>NSBluetoothAlwaysUsageDescription</key>
 	<string>PulseCycle uses Bluetooth to connect to heart rate monitors.</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
