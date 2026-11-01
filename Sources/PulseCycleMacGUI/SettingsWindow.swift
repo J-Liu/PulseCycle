@@ -16,8 +16,6 @@ final class SettingsWindow: NSWindow {
     private var colorsTab: NSView!
     private var aboutTab: NSView!
     private var languagePopup: NSPopUpButton!
-    private var devicesStackView: NSStackView?
-    private var deviceCheckboxes: [NSButton] = []
 
     // Layout constants
     private let labelWidth: CGFloat = 140
@@ -301,50 +299,46 @@ final class SettingsWindow: NSWindow {
 
     // MARK: - Devices Tab
 
+    private var devicesTableView: NSTableView?
+    private var deviceRemoveButton: NSButton?
+    private var scanningAlert: NSAlert?
+
     private func createDevicesTab() -> NSView {
         let stack = makeVerticalStack()
 
-        // Title
-        let titleLabel = NSTextField(labelWithString: L("HRM Devices"))
-        titleLabel.font = .systemFont(ofSize: 16, weight: .semibold)
-        stack.addArrangedSubview(titleLabel)
+        // Device list table
+        let scrollView = NSScrollView()
+        scrollView.hasVerticalScroller = true
+        scrollView.borderType = .bezelBorder
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
 
-        // Device list container
-        let listContainer = NSView()
-        listContainer.wantsLayer = true
-        listContainer.layer?.borderWidth = 1
-        listContainer.layer?.borderColor = NSColor.separatorColor.cgColor
-        listContainer.layer?.cornerRadius = 6
-        listContainer.translatesAutoresizingMaskIntoConstraints = false
+        let tableView = NSTableView()
+        tableView.dataSource = self
+        tableView.delegate = self
+        tableView.allowsMultipleSelection = false
+        tableView.allowsEmptySelection = true
+        tableView.tag = 100
 
-        devicesStackView = NSStackView()
-        devicesStackView?.orientation = .vertical
-        devicesStackView?.alignment = .leading
-        devicesStackView?.spacing = 4
-        devicesStackView?.edgeInsets = NSEdgeInsets(top: 8, left: 12, bottom: 8, right: 12)
-        devicesStackView?.translatesAutoresizingMaskIntoConstraints = false
-        listContainer.addSubview(devicesStackView!)
+        let column = NSTableColumn(identifier: NSUserInterfaceItemIdentifier("device"))
+        column.title = ""
+        tableView.addTableColumn(column)
+        tableView.headerView = nil
 
-        NSLayoutConstraint.activate([
-            devicesStackView!.topAnchor.constraint(equalTo: listContainer.topAnchor),
-            devicesStackView!.leadingAnchor.constraint(equalTo: listContainer.leadingAnchor),
-            devicesStackView!.trailingAnchor.constraint(equalTo: listContainer.trailingAnchor),
-            devicesStackView!.bottomAnchor.constraint(lessThanOrEqualTo: listContainer.bottomAnchor),
-            listContainer.heightAnchor.constraint(greaterThanOrEqualToConstant: 100)
-        ])
+        scrollView.documentView = tableView
+        devicesTableView = tableView
 
-        stack.addArrangedSubview(listContainer)
+        stack.addArrangedSubview(scrollView)
 
         // Buttons
         let addButton = NSButton(title: L("Add"), target: self, action: #selector(addDevice(_:)))
         addButton.bezelStyle = .rounded
         addButton.widthAnchor.constraint(equalToConstant: 80).isActive = true
 
-        let removeButton = NSButton(title: L("Remove"), target: self, action: #selector(removeDevice(_:)))
-        removeButton.bezelStyle = .rounded
-        removeButton.widthAnchor.constraint(equalToConstant: 80).isActive = true
+        deviceRemoveButton = NSButton(title: L("Remove"), target: self, action: #selector(removeDevice(_:)))
+        deviceRemoveButton?.bezelStyle = .rounded
+        deviceRemoveButton?.widthAnchor.constraint(equalToConstant: 80).isActive = true
 
-        let buttonRow = NSStackView(views: [addButton, removeButton])
+        let buttonRow = NSStackView(views: [addButton, deviceRemoveButton!])
         buttonRow.orientation = .horizontal
         buttonRow.spacing = 16
         stack.addArrangedSubview(buttonRow)
@@ -372,49 +366,31 @@ final class SettingsWindow: NSWindow {
 
     @objc private func reloadDeviceList() {
         DispatchQueue.main.async { [weak self] in
-            self?.updateDevicesList()
+            self?.devicesTableView?.reloadData()
+            self?.updateRemoveButtonState()
         }
     }
 
     @objc private func handleMonitorStateChanged() {
         DispatchQueue.main.async { [weak self] in
-            self?.updateDevicesList()
+            self?.devicesTableView?.reloadData()
+            self?.updateRemoveButtonState()
+
+            // Close scanning alert when connected
+            if let alert = self?.scanningAlert {
+                let monitor = MainViewController.sharedHeartRateMonitor
+                if monitor.isConnectedDevice(uuid: monitor.getConnectedDeviceUUID() ?? "") {
+                    alert.window.sheetParent?.endSheet(alert.window)
+                    self?.scanningAlert = nil
+                }
+            }
         }
     }
 
-    private func updateDevicesList() {
-        guard let stackView = devicesStackView else { return }
-
-        // Clear existing views
-        stackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
-        deviceCheckboxes.removeAll()
-
-        let devices = DeviceManager.shared.devices
+    private func updateRemoveButtonState() {
         let monitor = MainViewController.sharedHeartRateMonitor
-
-        for device in devices {
-            let isConnected = monitor.isConnectedDevice(uuid: device.uuid)
-
-            let checkbox = NSButton(checkboxWithTitle: device.name, target: self, action: #selector(deviceCheckboxChanged(_:)))
-            checkbox.state = isConnected ? .on : .off
-            checkbox.identifier = NSUserInterfaceItemIdentifier(device.uuid)
-            checkbox.translatesAutoresizingMaskIntoConstraints = false
-            stackView.addArrangedSubview(checkbox)
-            deviceCheckboxes.append(checkbox)
-        }
-    }
-
-    @objc private func deviceCheckboxChanged(_ sender: NSButton) {
-        guard let uuid = sender.identifier?.rawValue else { return }
-        let monitor = MainViewController.sharedHeartRateMonitor
-
-        if sender.state == .on {
-            // Connect to this device, disconnect others
-            monitor.connectToDevice(uuid: uuid)
-        } else {
-            // Disconnect this device
-            monitor.disconnect()
-        }
+        let hasConnectedDevice = DeviceManager.shared.devices.contains { monitor.isConnectedDevice(uuid: $0.uuid) }
+        deviceRemoveButton?.isEnabled = hasConnectedDevice
     }
 
     @objc private func addDevice(_ sender: NSButton) {
@@ -423,6 +399,9 @@ final class SettingsWindow: NSWindow {
             // Timeout handler
             DispatchQueue.main.async {
                 guard let self = self else { return }
+                self.scanningAlert?.window.sheetParent?.endSheet(self.scanningAlert!.window)
+                self.scanningAlert = nil
+
                 let alert = NSAlert()
                 alert.messageText = L("Scan Timeout")
                 alert.informativeText = L("No heart rate devices found. Please make sure your device is powered on and nearby.")
@@ -437,7 +416,9 @@ final class SettingsWindow: NSWindow {
         alert.informativeText = L("Looking for heart rate devices...")
         alert.alertStyle = .informational
         alert.addButton(withTitle: L("Cancel"))
-        alert.beginSheetModal(for: self) { response in
+        scanningAlert = alert
+        alert.beginSheetModal(for: self) { [weak self] response in
+            self?.scanningAlert = nil
             if response == .alertFirstButtonReturn {
                 monitor.stopScanning()
             }
@@ -461,9 +442,24 @@ final class SettingsWindow: NSWindow {
         }
 
         // Auto-connect to another device if available
-        let remainingDevices = DeviceManager.shared.devices
-        if let firstDevice = remainingDevices.first {
-            monitor.connectToDevice(uuid: firstDevice.uuid)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            let remainingDevices = DeviceManager.shared.devices
+            if let firstDevice = remainingDevices.first {
+                monitor.connectToDevice(uuid: firstDevice.uuid)
+            }
+        }
+    }
+
+    // Device table row click handler
+    private func handleDeviceRowClick(_ row: Int) {
+        guard row >= 0, row < DeviceManager.shared.devices.count else { return }
+        let device = DeviceManager.shared.devices[row]
+        let monitor = MainViewController.sharedHeartRateMonitor
+
+        if monitor.isConnectedDevice(uuid: device.uuid) {
+            monitor.disconnect()
+        } else {
+            monitor.connectToDevice(uuid: device.uuid)
         }
     }
 
@@ -897,6 +893,64 @@ extension NSColor {
         let r = Int(rgbColor.redComponent * 255)
         let g = Int(rgbColor.greenComponent * 255)
         let b = Int(rgbColor.blueComponent * 255)
-        return String(format: "#%02X%02X%02B", r, g, b)
+        return String(format: "#%02X%02X%02X", r, g, b)
+    }
+}
+
+// MARK: - NSTableViewDataSource & Delegate for Devices
+
+extension SettingsWindow: NSTableViewDataSource, NSTableViewDelegate {
+    func numberOfRows(in tableView: NSTableView) -> Int {
+        guard tableView.tag == 100 else { return 0 }
+        return DeviceManager.shared.devices.count
+    }
+
+    func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
+        guard tableView.tag == 100, row < DeviceManager.shared.devices.count else { return nil }
+
+        let device = DeviceManager.shared.devices[row]
+        let monitor = MainViewController.sharedHeartRateMonitor
+        let isConnected = monitor.isConnectedDevice(uuid: device.uuid)
+
+        let cell = NSTableCellView()
+
+        // Checkbox
+        let checkbox = NSButton(checkboxWithTitle: device.name, target: nil, action: nil)
+        checkbox.state = isConnected ? .on : .off
+        checkbox.target = self
+        checkbox.action = #selector(deviceCheckboxChanged(_:))
+        checkbox.identifier = NSUserInterfaceItemIdentifier(device.uuid)
+        checkbox.translatesAutoresizingMaskIntoConstraints = false
+        cell.addSubview(checkbox)
+
+        NSLayoutConstraint.activate([
+            checkbox.leadingAnchor.constraint(equalTo: cell.leadingAnchor, constant: 4),
+            checkbox.centerYAnchor.constraint(equalTo: cell.centerYAnchor)
+        ])
+
+        return cell
+    }
+
+    func tableView(_ tableView: NSTableView, heightOfRow row: Int) -> CGFloat {
+        return 24
+    }
+
+    func tableView(_ tableView: NSTableView, shouldSelectRow row: Int) -> Bool {
+        // Don't select, just handle click
+        handleDeviceRowClick(row)
+        return false
+    }
+
+    @objc private func deviceCheckboxChanged(_ sender: NSButton) {
+        guard let uuid = sender.identifier?.rawValue else { return }
+        let monitor = MainViewController.sharedHeartRateMonitor
+
+        if sender.state == .on {
+            // Connect to this device
+            monitor.connectToDevice(uuid: uuid)
+        } else {
+            // Disconnect
+            monitor.disconnect()
+        }
     }
 }
