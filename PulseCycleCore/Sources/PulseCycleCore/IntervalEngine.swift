@@ -121,7 +121,6 @@ public class IntervalEngine {
     }
 
     private func advancePhase() {
-        let endedPhase = phase
         let endedPhaseItem = currentPhaseItem
 
         // Play end sound if configured

@@ -1,6 +1,6 @@
 # PulseCycle
 
-A HIIT (High-Intensity Interval Training) interval timer with real-time heart rate monitoring for iOS.
+A HIIT (High-Intensity Interval Training) interval timer with real-time heart rate monitoring for iOS and macOS.
 
 ## Features
 
@@ -11,27 +11,71 @@ A HIIT (High-Intensity Interval Training) interval timer with real-time heart ra
   - Rounds, work/rest duration, warning timing
   - Start/end/warning sounds
   - Color themes for different phases
-  - Voice input support
+  - Voice announcements
 
-## Requirements
+## Platforms
 
-- iOS 18.6+
-- Xcode 27.1+
-- Bluetooth LE heart rate monitor (optional)
+- **iOS**: Requires iOS 15+ (Xcode project)
+- **macOS**: Requires macOS 13+ (Swift Package Manager)
 
 ## Building
+
+### iOS
 
 Build from command line:
 
 ```bash
-./build.sh
+./build-ios.sh
 ```
 
 Install to connected device:
 
 ```bash
-./install.sh
+./install-ios.sh
 ```
+
+Or open `PulseCycle.xcodeproj` in Xcode and build from there.
+
+### macOS
+
+Build release app:
+
+```bash
+./build.sh
+```
+
+Run the app:
+
+```bash
+open PulseCycle.app
+```
+
+## Development
+
+### Project Structure
+
+```
+PulseCycle/
+├── PulseCycleCore/           # Shared framework (iOS + macOS)
+│   └── Sources/PulseCycleCore/
+│       ├── IntervalEngine.swift    # Timer logic
+│       ├── HeartRateMonitor.swift  # Bluetooth heart rate
+│       ├── WorkoutProfile.swift    # Profile management
+│       └── ...
+├── PulseCycle/               # iOS app
+│   ├── UI/                   # iOS UIKit views
+│   └── iOS/                  # iOS-specific code
+├── Sources/PulseCycleMacGUI/ # macOS app (AppKit)
+└── Resources/                # macOS resources
+```
+
+### Adding PulseCycleCore to iOS
+
+In Xcode:
+1. File → Add Package Dependencies
+2. Click "Add Local..."
+3. Select the `PulseCycleCore` folder
+4. Add to the PulseCycle target
 
 ## Usage
 
@@ -48,4 +92,4 @@ Licensed under AGPL-3.0-or-later with additional permissions. See [LICENSE](LICE
 
 ## Copyright
 
-Copyright 2026 Jia Liu
+Copyright © 2026 Jia Liu
