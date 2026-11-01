@@ -420,8 +420,11 @@ final class MainViewController: NSViewController {
     }
 
     private func updateSettingsButton() {
-        settingsButton.isEnabled = canEditSettings
+        let enabled = canEditSettings
+        settingsButton.isEnabled = enabled
         settingsButton.needsDisplay = true
+        // Update menu item state
+        (NSApp.delegate as? AppDelegate)?.updateSettingsMenuItem(enabled: enabled)
     }
 
     private func formatTime(_ seconds: Int) -> String {

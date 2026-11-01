@@ -8,6 +8,7 @@ import Sparkle
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private var window: NSWindow?
     private var settingsWindow: SettingsWindow?
+    private var settingsMenuItem: NSMenuItem?
 
     /// Standard Sparkle updater controller
     lazy var updaterController = SPUStandardUpdaterController(
@@ -171,6 +172,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             keyEquivalent: ","
         )
         preferencesItem.target = self
+        settingsMenuItem = preferencesItem
         menu.addItem(preferencesItem)
 
         menu.addItem(.separator())
@@ -283,27 +285,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         settingsWindow?.makeKeyAndOrderFront(nil)
     }
 
-    // MARK: - Menu Validation
-
-    func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
-        if menuItem.action == #selector(showSettings) {
-            // Disable Settings menu when timer is running
-            return (window?.contentViewController as? MainViewController)?.canEditSettings ?? true
-        }
-        return true
-    }
-
     @objc private func manualCheckForUpdates() {
         updaterController.updater.checkForUpdates()
     }
 
     @objc func showSettings() {
-        // Check if timer is running from main view controller
-        var allowConfig = true
-        if let mainVC = window?.contentViewController as? MainViewController {
-            allowConfig = mainVC.canEditSettings
+        // Only open settings if allowed
+        guard (window?.contentViewController as? MainViewController)?.canEditSettings ?? true else {
+            return
         }
-        openSettings(allowConfigTabs: allowConfig)
+        openSettings(allowConfigTabs: true)
+    }
+
+    func updateSettingsMenuItem(enabled: Bool) {
+        settingsMenuItem?.isEnabled = enabled
     }
 
     func openSettingsWindow(allowConfigTabs: Bool) {
