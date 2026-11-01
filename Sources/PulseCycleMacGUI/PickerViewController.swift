@@ -22,6 +22,7 @@ class PickerViewController: NSViewController {
     private var singleTableView: NSTableView?
     private var minutesTableView: NSTableView?
     private var secondsTableView: NSTableView?
+    private var contentView: NSView?
 
     // Single column initializer
     init(title: String, values: [Int], currentValue: Int, completion: @escaping (Int) -> Void) {
@@ -91,18 +92,16 @@ class PickerViewController: NSViewController {
         buttonStack.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(buttonStack)
 
-        let scrollViewTop = view.subviews.first(where: { $0 is NSScrollView })
-
         NSLayoutConstraint.activate([
             titleLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 16),
             titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             titleLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
 
-            scrollViewTop!.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 12),
-            scrollViewTop!.leadingAnchor.constraint(greaterThanOrEqualTo: view.leadingAnchor, constant: 16),
-            scrollViewTop!.trailingAnchor.constraint(lessThanOrEqualTo: view.trailingAnchor, constant: -16),
-            scrollViewTop!.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            scrollViewTop!.bottomAnchor.constraint(equalTo: buttonStack.topAnchor, constant: -12),
+            contentView!.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 12),
+            contentView!.leadingAnchor.constraint(greaterThanOrEqualTo: view.leadingAnchor, constant: 16),
+            contentView!.trailingAnchor.constraint(lessThanOrEqualTo: view.trailingAnchor, constant: -16),
+            contentView!.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            contentView!.bottomAnchor.constraint(equalTo: buttonStack.topAnchor, constant: -12),
 
             buttonStack.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -16),
             buttonStack.centerXAnchor.constraint(equalTo: view.centerXAnchor),
@@ -118,6 +117,7 @@ class PickerViewController: NSViewController {
         scrollView.borderType = .bezelBorder
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(scrollView)
+        contentView = scrollView
 
         let tableView = NSTableView()
         tableView.dataSource = self
@@ -146,6 +146,7 @@ class PickerViewController: NSViewController {
         containerStack.spacing = 4
         containerStack.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(containerStack)
+        contentView = containerStack
 
         // Minutes column
         let minContainer = NSView()
