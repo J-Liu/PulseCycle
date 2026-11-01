@@ -273,7 +273,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: - Actions
 
     @objc private func showAbout() {
-        NSApp.orderFrontStandardAboutPanel(nil)
+        if settingsWindow == nil {
+            settingsWindow = SettingsWindow()
+        }
+        settingsWindow?.selectTab(withIdentifier: "about")
+        settingsWindow?.makeKeyAndOrderFront(nil)
     }
 
     @objc private func manualCheckForUpdates() {
@@ -283,6 +287,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     @objc private func showSettings() {
         if settingsWindow == nil {
             settingsWindow = SettingsWindow()
+        }
+        // If currently on About tab, switch to General tab
+        if settingsWindow?.currentTabIdentifier == "about" {
+            settingsWindow?.selectTab(withIdentifier: "general")
         }
         settingsWindow?.makeKeyAndOrderFront(nil)
     }

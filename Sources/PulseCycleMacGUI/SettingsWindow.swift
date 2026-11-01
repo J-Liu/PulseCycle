@@ -12,6 +12,11 @@ final class SettingsWindow: NSWindow {
     private var aboutTab: NSView!
     private var languagePopup: NSPopUpButton!
 
+    /// Current tab identifier
+    var currentTabIdentifier: String? {
+        return tabView.selectedTabViewItem?.identifier as? String
+    }
+
     // Layout constants
     private let labelWidth: CGFloat = 140
     private let controlWidth: CGFloat = 200
