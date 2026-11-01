@@ -311,23 +311,29 @@ final class SettingsWindow: NSWindow {
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         container.addSubview(titleLabel)
 
-        // Device list (stack view with checkboxes)
-        let scrollView = NSScrollView()
-        scrollView.hasVerticalScroller = true
-        scrollView.borderType = .bezelBorder
-        scrollView.translatesAutoresizingMaskIntoConstraints = false
-        container.addSubview(scrollView)
-
-        let clipView = NSClipView()
-        scrollView.contentView = clipView
+        // Device list container
+        let listContainer = NSView()
+        listContainer.wantsLayer = true
+        listContainer.layer?.borderWidth = 1
+        listContainer.layer?.borderColor = NSColor.separatorColor.cgColor
+        listContainer.layer?.cornerRadius = 6
+        listContainer.translatesAutoresizingMaskIntoConstraints = false
+        container.addSubview(listContainer)
 
         devicesStackView = NSStackView()
         devicesStackView?.orientation = .vertical
         devicesStackView?.alignment = .leading
-        devicesStackView?.spacing = 8
-        devicesStackView?.edgeInsets = NSEdgeInsets(top: 8, left: 8, bottom: 8, right: 8)
+        devicesStackView?.spacing = 4
+        devicesStackView?.edgeInsets = NSEdgeInsets(top: 8, left: 12, bottom: 8, right: 12)
         devicesStackView?.translatesAutoresizingMaskIntoConstraints = false
-        clipView.documentView = devicesStackView
+        listContainer.addSubview(devicesStackView!)
+
+        NSLayoutConstraint.activate([
+            devicesStackView!.topAnchor.constraint(equalTo: listContainer.topAnchor),
+            devicesStackView!.leadingAnchor.constraint(equalTo: listContainer.leadingAnchor),
+            devicesStackView!.trailingAnchor.constraint(equalTo: listContainer.trailingAnchor),
+            devicesStackView!.bottomAnchor.constraint(lessThanOrEqualTo: listContainer.bottomAnchor)
+        ])
 
         // Buttons
         let addButton = NSButton(title: L("Add"), target: self, action: #selector(addDevice(_:)))
@@ -345,17 +351,17 @@ final class SettingsWindow: NSWindow {
         container.addSubview(buttonStack)
 
         NSLayoutConstraint.activate([
-            titleLabel.topAnchor.constraint(equalTo: container.topAnchor, constant: 16),
-            titleLabel.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 16),
+            titleLabel.topAnchor.constraint(equalTo: container.topAnchor, constant: 20),
+            titleLabel.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 20),
 
-            scrollView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 12),
-            scrollView.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 16),
-            scrollView.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -16),
-            scrollView.bottomAnchor.constraint(equalTo: buttonStack.topAnchor, constant: -12),
-            scrollView.heightAnchor.constraint(equalToConstant: 200),
+            listContainer.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 12),
+            listContainer.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 20),
+            listContainer.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -20),
+            listContainer.heightAnchor.constraint(greaterThanOrEqualToConstant: 100),
 
-            buttonStack.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -16),
+            buttonStack.topAnchor.constraint(equalTo: listContainer.bottomAnchor, constant: 16),
             buttonStack.centerXAnchor.constraint(equalTo: container.centerXAnchor),
+            buttonStack.bottomAnchor.constraint(lessThanOrEqualTo: container.bottomAnchor, constant: -20),
 
             addButton.widthAnchor.constraint(equalToConstant: 80),
             removeButton.widthAnchor.constraint(equalToConstant: 80)
