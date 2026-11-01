@@ -133,6 +133,11 @@ class PickerViewController: NSViewController {
         scrollView.documentView = tableView
         singleTableView = tableView
 
+        NSLayoutConstraint.activate([
+            scrollView.widthAnchor.constraint(equalToConstant: 180),
+            scrollView.heightAnchor.constraint(equalToConstant: 280)
+        ])
+
         // Scroll to initial selection
         DispatchQueue.main.async {
             tableView.selectRowIndexes(IndexSet(integer: self.initialSingleIndex), byExtendingSelection: false)
@@ -290,7 +295,10 @@ extension PickerViewController: NSTableViewDataSource, NSTableViewDelegate {
     }
 
     func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
-        let cell = NSTextField(labelWithString: "")
+        let cell = NSTextField(frame: NSRect(x: 0, y: 0, width: tableView.tableColumns[0].width, height: tableView.rowHeight))
+        cell.isEditable = false
+        cell.isBordered = false
+        cell.drawsBackground = false
         cell.alignment = .center
         cell.font = .systemFont(ofSize: 14)
 
