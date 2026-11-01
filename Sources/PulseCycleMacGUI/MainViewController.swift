@@ -179,11 +179,14 @@ final class MainViewController: NSViewController {
 
         // Go button - larger, red background, white text, white border
         goButton = NSButton(title: L("main.button.go"), target: self, action: #selector(goTapped))
-        goButton.isBordered = false
+        goButton.bezelStyle = .rounded
+        goButton.isBordered = true
         goButton.font = NSFont.systemFont(ofSize: 28, weight: .bold)
+        if let cell = goButton.cell as? NSButtonCell {
+            cell.backgroundColor = .systemRed
+        }
         goButton.contentTintColor = .white
         goButton.wantsLayer = true
-        goButton.layer?.backgroundColor = NSColor.systemRed.cgColor
         goButton.layer?.cornerRadius = 12
         goButton.layer?.borderWidth = 2
         goButton.layer?.borderColor = NSColor.white.cgColor
@@ -192,11 +195,14 @@ final class MainViewController: NSViewController {
 
         // Settings button - left side
         settingsButton = NSButton(title: L("main.button.settings"), target: self, action: #selector(settingsTapped))
-        settingsButton.isBordered = false
+        settingsButton.bezelStyle = .rounded
+        settingsButton.isBordered = true
         settingsButton.font = NSFont.systemFont(ofSize: 20, weight: .bold)
+        if let cell = settingsButton.cell as? NSButtonCell {
+            cell.backgroundColor = .systemRed
+        }
         settingsButton.contentTintColor = .white
         settingsButton.wantsLayer = true
-        settingsButton.layer?.backgroundColor = NSColor.systemRed.cgColor
         settingsButton.layer?.cornerRadius = 10
         settingsButton.layer?.borderWidth = 2
         settingsButton.layer?.borderColor = NSColor.white.cgColor
@@ -205,11 +211,14 @@ final class MainViewController: NSViewController {
 
         // Reset button - right side
         resetButton = NSButton(title: L("main.button.reset"), target: self, action: #selector(resetTapped))
-        resetButton.isBordered = false
+        resetButton.bezelStyle = .rounded
+        resetButton.isBordered = true
         resetButton.font = NSFont.systemFont(ofSize: 20, weight: .bold)
+        if let cell = resetButton.cell as? NSButtonCell {
+            cell.backgroundColor = .systemRed
+        }
         resetButton.contentTintColor = .white
         resetButton.wantsLayer = true
-        resetButton.layer?.backgroundColor = NSColor.systemRed.cgColor
         resetButton.layer?.cornerRadius = 10
         resetButton.layer?.borderWidth = 2
         resetButton.layer?.borderColor = NSColor.white.cgColor
