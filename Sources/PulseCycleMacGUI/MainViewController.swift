@@ -17,19 +17,18 @@ final class MainViewController: NSViewController {
     private var restTimeLabel: NSTextField!
     private var headerView: NSView!
 
-    // Timer area
+    // Timer container (upper 65%)
+    private var timerContainer: NSView!
     private var timerLabel: NSTextField!
     private var roundLabel: NSTextField!
+    private var buttonsView: NSView!
+    private var goButton: NSButton!
+    private var resetButton: NSButton!
 
-    // Heart rate area
+    // Heart rate container (lower 35%)
     private var heartRateContainer: NSView!
     private var heartRateLabel: NSTextField!
     private var connectionLabel: NSTextField!
-
-    // Buttons
-    private var startButton: NSButton!
-    private var pauseButton: NSButton!
-    private var resetButton: NSButton!
 
     // MARK: - State
 
@@ -37,6 +36,8 @@ final class MainViewController: NSViewController {
     private var currentProfile: WorkoutProfile { ProfileManager.shared.currentProfile }
     private let heartRateMonitor = HeartRateMonitor()
     private var isProfileListPresented = false
+    private var isRunning = false
+    private var hasReset = true
 
     // MARK: - Lifecycle
 
@@ -55,34 +56,49 @@ final class MainViewController: NSViewController {
     // MARK: - Setup
 
     private func setupUI() {
+        setupTimerContainer()
         setupHeaderView()
         setupTimerArea()
-        setupHeartRateArea()
         setupButtons()
+        setupHeartRateArea()
+    }
+
+    private func setupTimerContainer() {
+        timerContainer = NSView()
+        timerContainer.wantsLayer = true
+        timerContainer.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(timerContainer)
+
+        NSLayoutConstraint.activate([
+            timerContainer.topAnchor.constraint(equalTo: view.topAnchor),
+            timerContainer.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            timerContainer.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            timerContainer.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: 0.65),
+        ])
     }
 
     private func setupHeaderView() {
         headerView = NSView()
         headerView.wantsLayer = true
         headerView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(headerView)
+        timerContainer.addSubview(headerView)
 
         // Work label and time
         workLabel = NSTextField(labelWithString: L("main.work"))
-        workLabel.font = NSFont.systemFont(ofSize: 18, weight: .bold)
+        workLabel.font = NSFont.systemFont(ofSize: 20, weight: .bold)
         workLabel.alignment = .left
         workLabel.translatesAutoresizingMaskIntoConstraints = false
         headerView.addSubview(workLabel)
 
         workTimeLabel = NSTextField(labelWithString: "2:00")
-        workTimeLabel.font = NSFont.monospacedDigitSystemFont(ofSize: 18, weight: .bold)
+        workTimeLabel.font = NSFont.monospacedDigitSystemFont(ofSize: 20, weight: .bold)
         workTimeLabel.alignment = .left
         workTimeLabel.translatesAutoresizingMaskIntoConstraints = false
         headerView.addSubview(workTimeLabel)
 
         // Profile label with dropdown indicator
         profileLabel = NSTextField(labelWithString: "Amateur Boxing ▼")
-        profileLabel.font = NSFont.systemFont(ofSize: 20, weight: .bold)
+        profileLabel.font = NSFont.systemFont(ofSize: 22, weight: .bold)
         profileLabel.alignment = .center
         profileLabel.translatesAutoresizingMaskIntoConstraints = false
         profileLabel.isSelectable = false
@@ -95,36 +111,36 @@ final class MainViewController: NSViewController {
 
         // Rest label and time
         restLabel = NSTextField(labelWithString: L("main.rest"))
-        restLabel.font = NSFont.systemFont(ofSize: 18, weight: .bold)
+        restLabel.font = NSFont.systemFont(ofSize: 20, weight: .bold)
         restLabel.alignment = .right
         restLabel.translatesAutoresizingMaskIntoConstraints = false
         headerView.addSubview(restLabel)
 
         restTimeLabel = NSTextField(labelWithString: "1:00")
-        restTimeLabel.font = NSFont.monospacedDigitSystemFont(ofSize: 18, weight: .bold)
+        restTimeLabel.font = NSFont.monospacedDigitSystemFont(ofSize: 20, weight: .bold)
         restTimeLabel.alignment = .right
         restTimeLabel.translatesAutoresizingMaskIntoConstraints = false
         headerView.addSubview(restTimeLabel)
 
         NSLayoutConstraint.activate([
-            headerView.topAnchor.constraint(equalTo: view.topAnchor),
-            headerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            headerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            headerView.heightAnchor.constraint(equalToConstant: 80),
+            headerView.topAnchor.constraint(equalTo: timerContainer.topAnchor, constant: 48),
+            headerView.leadingAnchor.constraint(equalTo: timerContainer.leadingAnchor, constant: 32),
+            headerView.trailingAnchor.constraint(equalTo: timerContainer.trailingAnchor, constant: -32),
+            headerView.heightAnchor.constraint(equalToConstant: 60),
 
-            workLabel.leadingAnchor.constraint(equalTo: headerView.leadingAnchor, constant: 32),
-            workLabel.topAnchor.constraint(equalTo: headerView.topAnchor, constant: 16),
+            workLabel.leadingAnchor.constraint(equalTo: headerView.leadingAnchor),
+            workLabel.topAnchor.constraint(equalTo: headerView.topAnchor, constant: 8),
 
-            workTimeLabel.leadingAnchor.constraint(equalTo: headerView.leadingAnchor, constant: 32),
+            workTimeLabel.leadingAnchor.constraint(equalTo: headerView.leadingAnchor),
             workTimeLabel.topAnchor.constraint(equalTo: workLabel.bottomAnchor, constant: 4),
 
             profileLabel.centerXAnchor.constraint(equalTo: headerView.centerXAnchor),
             profileLabel.centerYAnchor.constraint(equalTo: headerView.centerYAnchor),
 
-            restLabel.trailingAnchor.constraint(equalTo: headerView.trailingAnchor, constant: -32),
-            restLabel.topAnchor.constraint(equalTo: headerView.topAnchor, constant: 16),
+            restLabel.trailingAnchor.constraint(equalTo: headerView.trailingAnchor),
+            restLabel.topAnchor.constraint(equalTo: headerView.topAnchor, constant: 8),
 
-            restTimeLabel.trailingAnchor.constraint(equalTo: headerView.trailingAnchor, constant: -32),
+            restTimeLabel.trailingAnchor.constraint(equalTo: headerView.trailingAnchor),
             restTimeLabel.topAnchor.constraint(equalTo: restLabel.bottomAnchor, constant: 4),
         ])
     }
@@ -132,24 +148,75 @@ final class MainViewController: NSViewController {
     private func setupTimerArea() {
         // Timer display
         timerLabel = NSTextField(labelWithString: "00:00")
-        timerLabel.font = NSFont.monospacedDigitSystemFont(ofSize: 120, weight: .bold)
+        timerLabel.font = NSFont.monospacedDigitSystemFont(ofSize: 140, weight: .bold)
         timerLabel.alignment = .center
         timerLabel.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(timerLabel)
+        timerContainer.addSubview(timerLabel)
 
         // Round label
         roundLabel = NSTextField(labelWithString: "")
         roundLabel.font = NSFont.systemFont(ofSize: 24, weight: .bold)
         roundLabel.alignment = .center
         roundLabel.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(roundLabel)
+        timerContainer.addSubview(roundLabel)
 
         NSLayoutConstraint.activate([
-            timerLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            timerLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -20),
+            timerLabel.centerXAnchor.constraint(equalTo: timerContainer.centerXAnchor),
+            timerLabel.centerYAnchor.constraint(equalTo: timerContainer.centerYAnchor, constant: -20),
+            timerLabel.leadingAnchor.constraint(lessThanOrEqualTo: timerContainer.leadingAnchor, constant: 16),
+            timerLabel.trailingAnchor.constraint(lessThanOrEqualTo: timerContainer.trailingAnchor, constant: -16),
 
-            roundLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            roundLabel.centerXAnchor.constraint(equalTo: timerContainer.centerXAnchor),
             roundLabel.topAnchor.constraint(equalTo: timerLabel.bottomAnchor, constant: 20),
+        ])
+    }
+
+    private func setupButtons() {
+        buttonsView = NSView()
+        buttonsView.translatesAutoresizingMaskIntoConstraints = false
+        timerContainer.addSubview(buttonsView)
+
+        // Go button - larger, red background, white text, white border
+        goButton = NSButton(title: L("main.button.go"), target: self, action: #selector(goTapped))
+        goButton.bezelStyle = .regularSquare
+        goButton.font = NSFont.systemFont(ofSize: 28, weight: .bold)
+        goButton.contentTintColor = .white
+        goButton.wantsLayer = true
+        goButton.layer?.backgroundColor = NSColor.systemRed.cgColor
+        goButton.layer?.cornerRadius = 12
+        goButton.layer?.borderWidth = 2
+        goButton.layer?.borderColor = NSColor.white.cgColor
+        goButton.translatesAutoresizingMaskIntoConstraints = false
+        buttonsView.addSubview(goButton)
+
+        // Reset button - smaller
+        resetButton = NSButton(title: L("main.button.reset"), target: self, action: #selector(resetTapped))
+        resetButton.bezelStyle = .regularSquare
+        resetButton.font = NSFont.systemFont(ofSize: 20, weight: .bold)
+        resetButton.contentTintColor = .white
+        resetButton.wantsLayer = true
+        resetButton.layer?.backgroundColor = NSColor.systemRed.cgColor
+        resetButton.layer?.cornerRadius = 10
+        resetButton.layer?.borderWidth = 2
+        resetButton.layer?.borderColor = NSColor.white.cgColor
+        resetButton.translatesAutoresizingMaskIntoConstraints = false
+        buttonsView.addSubview(resetButton)
+
+        NSLayoutConstraint.activate([
+            buttonsView.leadingAnchor.constraint(equalTo: timerContainer.leadingAnchor),
+            buttonsView.trailingAnchor.constraint(equalTo: timerContainer.trailingAnchor),
+            buttonsView.bottomAnchor.constraint(equalTo: timerContainer.bottomAnchor),
+            buttonsView.heightAnchor.constraint(equalToConstant: 120),
+
+            goButton.centerXAnchor.constraint(equalTo: buttonsView.centerXAnchor),
+            goButton.topAnchor.constraint(equalTo: buttonsView.topAnchor, constant: 12),
+            goButton.widthAnchor.constraint(equalToConstant: 140),
+            goButton.heightAnchor.constraint(equalToConstant: 56),
+
+            resetButton.trailingAnchor.constraint(equalTo: buttonsView.trailingAnchor, constant: -24),
+            resetButton.centerYAnchor.constraint(equalTo: goButton.centerYAnchor),
+            resetButton.widthAnchor.constraint(equalToConstant: 100),
+            resetButton.heightAnchor.constraint(equalToConstant: 48),
         ])
     }
 
@@ -160,7 +227,7 @@ final class MainViewController: NSViewController {
         view.addSubview(heartRateContainer)
 
         heartRateLabel = NSTextField(labelWithString: "--")
-        heartRateLabel.font = NSFont.monospacedDigitSystemFont(ofSize: 100, weight: .bold)
+        heartRateLabel.font = NSFont.monospacedDigitSystemFont(ofSize: 140, weight: .bold)
         heartRateLabel.alignment = .center
         heartRateLabel.translatesAutoresizingMaskIntoConstraints = false
         heartRateContainer.addSubview(heartRateLabel)
@@ -177,10 +244,10 @@ final class MainViewController: NSViewController {
         heartRateContainer.addGestureRecognizer(containerClick)
 
         NSLayoutConstraint.activate([
+            heartRateContainer.topAnchor.constraint(equalTo: timerContainer.bottomAnchor),
             heartRateContainer.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             heartRateContainer.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             heartRateContainer.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            heartRateContainer.topAnchor.constraint(equalTo: roundLabel.bottomAnchor, constant: 20),
 
             heartRateLabel.centerXAnchor.constraint(equalTo: heartRateContainer.centerXAnchor),
             heartRateLabel.centerYAnchor.constraint(equalTo: heartRateContainer.centerYAnchor, constant: -20),
@@ -190,64 +257,43 @@ final class MainViewController: NSViewController {
         ])
     }
 
-    private func setupButtons() {
-        startButton = NSButton(title: L("main.button.start"), target: self, action: #selector(startTapped))
-        pauseButton = NSButton(title: L("main.button.pause"), target: self, action: #selector(pauseTapped))
-        resetButton = NSButton(title: L("main.button.reset"), target: self, action: #selector(resetTapped))
-
-        startButton.bezelStyle = .regularSquare
-        pauseButton.bezelStyle = .regularSquare
-        resetButton.bezelStyle = .regularSquare
-
-        startButton.font = NSFont.systemFont(ofSize: 20, weight: .bold)
-        pauseButton.font = NSFont.systemFont(ofSize: 20, weight: .bold)
-        resetButton.font = NSFont.systemFont(ofSize: 20, weight: .bold)
-
-        pauseButton.isEnabled = false
-
-        let buttonStack = NSStackView(views: [resetButton, startButton, pauseButton])
-        buttonStack.orientation = .horizontal
-        buttonStack.spacing = 20
-        buttonStack.translatesAutoresizingMaskIntoConstraints = false
-        heartRateContainer.addSubview(buttonStack)
-
-        NSLayoutConstraint.activate([
-            buttonStack.centerXAnchor.constraint(equalTo: heartRateContainer.centerXAnchor),
-            buttonStack.bottomAnchor.constraint(equalTo: heartRateContainer.bottomAnchor, constant: -20),
-        ])
-    }
-
     // MARK: - Actions
 
-    @objc private func startTapped() {
-        if engine == nil {
-            let config = WorkoutConfig(
-                warmUpSeconds: currentProfile.warmUpEnabled ? currentProfile.warmUpSeconds : 0,
-                workSeconds: currentProfile.workSeconds,
-                restSeconds: currentProfile.restSeconds,
-                rounds: currentProfile.rounds,
-                coolDownSeconds: currentProfile.coolDownEnabled ? currentProfile.coolDownSeconds : 0
-            )
-            engine = IntervalEngine(config: config)
-            engine?.delegate = self
+    @objc private func goTapped() {
+        // If workout finished, reset and start
+        if engine?.phase == .finished {
+            resetTapped()
         }
-        engine?.start()
-        startButton.isEnabled = false
-        pauseButton.isEnabled = true
-    }
 
-    @objc private func pauseTapped() {
-        engine?.pause()
-        startButton.isEnabled = true
-        pauseButton.isEnabled = false
+        if isRunning {
+            engine?.pause()
+            isRunning = false
+        } else {
+            if engine == nil {
+                let config = WorkoutConfig(
+                    warmUpSeconds: currentProfile.warmUpEnabled ? currentProfile.warmUpSeconds : 0,
+                    workSeconds: currentProfile.workSeconds,
+                    restSeconds: currentProfile.restSeconds,
+                    rounds: currentProfile.rounds,
+                    coolDownSeconds: currentProfile.coolDownEnabled ? currentProfile.coolDownSeconds : 0
+                )
+                engine = IntervalEngine(config: config)
+                engine?.delegate = self
+            }
+            engine?.start()
+            isRunning = true
+            hasReset = false
+        }
+        updateGoButton()
     }
 
     @objc private func resetTapped() {
         engine?.reset()
         engine = nil
-        startButton.isEnabled = true
-        pauseButton.isEnabled = false
+        isRunning = false
+        hasReset = true
         updateUI()
+        updateGoButton()
     }
 
     @objc private func profileTapped() {
@@ -277,7 +323,6 @@ final class MainViewController: NSViewController {
         let point = NSPoint(x: profileLabel.bounds.midX, y: profileLabel.bounds.minY - 4)
         menu.popUp(positioning: nil, at: point, in: profileLabel)
 
-        // After menu closes
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
             self?.isProfileListPresented = false
             self?.updateProfileArrow()
@@ -287,12 +332,27 @@ final class MainViewController: NSViewController {
     @objc private func selectProfile(_ item: NSMenuItem) {
         ProfileManager.shared.selectProfile(at: item.tag)
         engine = nil
+        isRunning = false
+        hasReset = true
         updateUI()
+        updateGoButton()
     }
 
     private func updateProfileArrow() {
         let arrow = isProfileListPresented ? "▲" : "▼"
         profileLabel.stringValue = "\(currentProfile.name) \(arrow)"
+    }
+
+    private func updateGoButton() {
+        if isRunning {
+            goButton.title = L("main.button.pause")
+        } else if engine?.phase == .finished {
+            goButton.title = L("main.button.go")
+        } else if hasReset {
+            goButton.title = L("main.button.go")
+        } else {
+            goButton.title = L("main.button.resume")
+        }
     }
 
     private func formatTime(_ seconds: Int) -> String {
@@ -332,37 +392,29 @@ final class MainViewController: NSViewController {
     }
 
     private func updateBackgroundColor(for phase: IntervalPhase?) {
-        let headerColor: NSColor
-        let mainColor: NSColor
-        let heartRateColor: NSColor
+        let timerColor: NSColor
 
         if let phase = phase {
             switch phase {
             case .warmUp:
-                headerColor = NSColor(hex: currentProfile.warmUpColor) ?? .controlBackgroundColor
-                mainColor = headerColor
+                timerColor = NSColor(hex: currentProfile.warmUpColor) ?? .controlBackgroundColor
             case .work:
-                headerColor = NSColor(hex: currentProfile.workColor) ?? .controlBackgroundColor
-                mainColor = headerColor
+                timerColor = NSColor(hex: currentProfile.workColor) ?? .controlBackgroundColor
             case .rest:
-                headerColor = NSColor(hex: currentProfile.restColor) ?? .controlBackgroundColor
-                mainColor = headerColor
+                timerColor = NSColor(hex: currentProfile.restColor) ?? .controlBackgroundColor
             case .coolDown:
-                headerColor = NSColor(hex: currentProfile.coolDownColor) ?? .controlBackgroundColor
-                mainColor = headerColor
+                timerColor = NSColor(hex: currentProfile.coolDownColor) ?? .controlBackgroundColor
             case .finished:
-                headerColor = .controlBackgroundColor
-                mainColor = .controlBackgroundColor
+                timerColor = .controlBackgroundColor
             }
         } else {
-            headerColor = NSColor(hex: currentProfile.prepareColor) ?? .controlBackgroundColor
-            mainColor = headerColor
+            timerColor = NSColor(hex: currentProfile.prepareColor) ?? .controlBackgroundColor
         }
 
-        heartRateColor = NSColor(hex: currentProfile.heartRateColor) ?? NSColor(red: 1.0, green: 0.5, blue: 0.5, alpha: 0.1)
+        let heartRateColor = NSColor(hex: currentProfile.heartRateColor) ?? NSColor(red: 1.0, green: 0.5, blue: 0.5, alpha: 0.1)
 
-        headerView.layer?.backgroundColor = mainColor.cgColor
-        view.layer?.backgroundColor = mainColor.cgColor
+        headerView.layer?.backgroundColor = timerColor.cgColor
+        timerContainer.layer?.backgroundColor = timerColor.cgColor
         heartRateContainer.layer?.backgroundColor = heartRateColor.cgColor
     }
 }
@@ -394,8 +446,9 @@ extension MainViewController: IntervalEngineDelegate {
 
     func engineDidFinish(_ engine: IntervalEngine) {
         DispatchQueue.main.async { [weak self] in
-            self?.startButton.isEnabled = false
-            self?.pauseButton.isEnabled = false
+            self?.isRunning = false
+            self?.updateUI()
+            self?.updateGoButton()
         }
     }
 }
