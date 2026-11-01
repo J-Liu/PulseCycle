@@ -75,10 +75,15 @@ func L(_ key: String) -> String {
 
 private let localizedStrings: [AppLanguage: [String: String]] = [
     .english: [
-        // Settings
+        // Settings tabs
         "settings.title": "Settings",
         "settings.tab.general": "General",
+        "settings.tab.profile": "Profile",
+        "settings.tab.sound": "Sound",
+        "settings.tab.colors": "Colors",
         "settings.tab.about": "About",
+
+        // General
         "settings.language": "Language:",
         "settings.language.system": "System Default",
         "settings.language.english": "English",
@@ -86,6 +91,8 @@ private let localizedStrings: [AppLanguage: [String: String]] = [
         "settings.language.traditionalChinese": "Traditional Chinese",
         "settings.quitOnClose": "Close Window:",
         "settings.quitOnClose.checkbox": "Quit when closing window",
+        "settings.voiceOutput": "Voice Output:",
+        "settings.voiceOutput.checkbox": "Enable voice announcements",
         "settings.updateCheck": "Auto Update Check:",
         "settings.updateCheck.now": "Check Now",
         "settings.updateCheck.never": "Never",
@@ -93,10 +100,34 @@ private let localizedStrings: [AppLanguage: [String: String]] = [
         "settings.updateCheck.daily": "Daily",
         "settings.updateCheck.weekly": "Weekly",
         "settings.updateCheck.monthly": "Monthly",
+
+        // Profile
+        "settings.profileName": "Profile Name:",
+        "settings.rounds": "Rounds:",
+        "settings.work": "Work Time:",
+        "settings.rest": "Rest Time:",
+        "settings.prepareTime": "Prepare Time:",
+        "settings.warmUp": "Warm-up:",
+        "settings.coolDown": "Cool-down:",
+
+        // Sound
+        "settings.sound.prepareCounting": "Prepare counting sound",
+        "settings.sound.start": "Start sound",
+        "settings.sound.endingNotify": "Ending notify sound",
+        "settings.sound.end": "End sound",
+
+        // Colors
+        "settings.color.work": "Work",
+        "settings.color.rest": "Rest",
+        "settings.color.heartRate": "Heart Rate",
+        "settings.color.prepare": "Prepare",
+        "settings.color.warmUp": "Warm Up",
+        "settings.color.coolDown": "Cool Down",
+        "settings.color.reset": "Reset",
+
+        // About
         "settings.about.version": "Version",
         "settings.about.copyright": "Copyright © 2026 Jia Liu",
-        "settings.button.add": "Add",
-        "settings.button.remove": "Remove",
 
         // Main Window
         "main.timer.ready": "READY",
@@ -107,9 +138,6 @@ private let localizedStrings: [AppLanguage: [String: String]] = [
         "main.button.pause": "Pause",
         "main.button.reset": "Reset",
         "main.profile.select": "Select Profile",
-        "main.heartRate": "Heart Rate: %d BPM",
-        "main.heartRate.connecting": "Heart Rate: Connecting...",
-        "main.heartRate.disconnected": "Heart Rate: Disconnected",
 
         // Menu
         "menu.about": "About %@",
@@ -130,10 +158,15 @@ private let localizedStrings: [AppLanguage: [String: String]] = [
     ],
 
     .simplifiedChinese: [
-        // Settings
+        // Settings tabs
         "settings.title": "设置",
         "settings.tab.general": "通用",
+        "settings.tab.profile": "配置",
+        "settings.tab.sound": "声音",
+        "settings.tab.colors": "颜色",
         "settings.tab.about": "关于",
+
+        // General
         "settings.language": "语言：",
         "settings.language.system": "系统默认",
         "settings.language.english": "English",
@@ -141,6 +174,8 @@ private let localizedStrings: [AppLanguage: [String: String]] = [
         "settings.language.traditionalChinese": "繁體中文",
         "settings.quitOnClose": "关闭窗口：",
         "settings.quitOnClose.checkbox": "关闭窗口时退出应用",
+        "settings.voiceOutput": "语音输出：",
+        "settings.voiceOutput.checkbox": "启用语音播报",
         "settings.updateCheck": "自动检查更新：",
         "settings.updateCheck.now": "立即检查",
         "settings.updateCheck.never": "从不",
@@ -148,10 +183,34 @@ private let localizedStrings: [AppLanguage: [String: String]] = [
         "settings.updateCheck.daily": "每天",
         "settings.updateCheck.weekly": "每周",
         "settings.updateCheck.monthly": "每月",
+
+        // Profile
+        "settings.profileName": "配置名称：",
+        "settings.rounds": "回合数：",
+        "settings.work": "训练时间：",
+        "settings.rest": "休息时间：",
+        "settings.prepareTime": "准备时间：",
+        "settings.warmUp": "热身：",
+        "settings.coolDown": "放松：",
+
+        // Sound
+        "settings.sound.prepareCounting": "准备倒计时声音",
+        "settings.sound.start": "开始声音",
+        "settings.sound.endingNotify": "即将结束提示音",
+        "settings.sound.end": "结束声音",
+
+        // Colors
+        "settings.color.work": "训练",
+        "settings.color.rest": "休息",
+        "settings.color.heartRate": "心率",
+        "settings.color.prepare": "准备",
+        "settings.color.warmUp": "热身",
+        "settings.color.coolDown": "放松",
+        "settings.color.reset": "重置",
+
+        // About
         "settings.about.version": "版本",
         "settings.about.copyright": "版权所有 © 2026 Jia Liu",
-        "settings.button.add": "添加",
-        "settings.button.remove": "移除",
 
         // Main Window
         "main.timer.ready": "准备",
@@ -162,9 +221,6 @@ private let localizedStrings: [AppLanguage: [String: String]] = [
         "main.button.pause": "暂停",
         "main.button.reset": "重置",
         "main.profile.select": "选择配置",
-        "main.heartRate": "心率：%d BPM",
-        "main.heartRate.connecting": "心率：连接中...",
-        "main.heartRate.disconnected": "心率：未连接",
 
         // Menu
         "menu.about": "关于 %@",
@@ -185,10 +241,15 @@ private let localizedStrings: [AppLanguage: [String: String]] = [
     ],
 
     .traditionalChinese: [
-        // Settings
+        // Settings tabs
         "settings.title": "設定",
         "settings.tab.general": "一般",
+        "settings.tab.profile": "設定檔",
+        "settings.tab.sound": "聲音",
+        "settings.tab.colors": "顏色",
         "settings.tab.about": "關於",
+
+        // General
         "settings.language": "語言：",
         "settings.language.system": "系統預設",
         "settings.language.english": "English",
@@ -196,6 +257,8 @@ private let localizedStrings: [AppLanguage: [String: String]] = [
         "settings.language.traditionalChinese": "繁體中文",
         "settings.quitOnClose": "關閉視窗：",
         "settings.quitOnClose.checkbox": "關閉視窗時退出應用程式",
+        "settings.voiceOutput": "語音輸出：",
+        "settings.voiceOutput.checkbox": "啟用語音播報",
         "settings.updateCheck": "自動檢查更新：",
         "settings.updateCheck.now": "立即檢查",
         "settings.updateCheck.never": "從不",
@@ -203,10 +266,34 @@ private let localizedStrings: [AppLanguage: [String: String]] = [
         "settings.updateCheck.daily": "每天",
         "settings.updateCheck.weekly": "每週",
         "settings.updateCheck.monthly": "每月",
+
+        // Profile
+        "settings.profileName": "設定檔名稱：",
+        "settings.rounds": "回合數：",
+        "settings.work": "訓練時間：",
+        "settings.rest": "休息時間：",
+        "settings.prepareTime": "準備時間：",
+        "settings.warmUp": "熱身：",
+        "settings.coolDown": "放鬆：",
+
+        // Sound
+        "settings.sound.prepareCounting": "準備倒數聲音",
+        "settings.sound.start": "開始聲音",
+        "settings.sound.endingNotify": "即將結束提示音",
+        "settings.sound.end": "結束聲音",
+
+        // Colors
+        "settings.color.work": "訓練",
+        "settings.color.rest": "休息",
+        "settings.color.heartRate": "心率",
+        "settings.color.prepare": "準備",
+        "settings.color.warmUp": "熱身",
+        "settings.color.coolDown": "放鬆",
+        "settings.color.reset": "重設",
+
+        // About
         "settings.about.version": "版本",
         "settings.about.copyright": "版權所有 © 2026 Jia Liu",
-        "settings.button.add": "新增",
-        "settings.button.remove": "移除",
 
         // Main Window
         "main.timer.ready": "準備",
@@ -217,9 +304,6 @@ private let localizedStrings: [AppLanguage: [String: String]] = [
         "main.button.pause": "暫停",
         "main.button.reset": "重設",
         "main.profile.select": "選擇設定檔",
-        "main.heartRate": "心率：%d BPM",
-        "main.heartRate.connecting": "心率：連線中...",
-        "main.heartRate.disconnected": "心率：未連線",
 
         // Menu
         "menu.about": "關於 %@",

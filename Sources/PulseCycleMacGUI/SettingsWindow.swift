@@ -3,19 +3,18 @@
 
 import AppKit
 import Sparkle
+import PulseCycleCore
 
-/// Settings window with tabs for General and About.
+/// Settings window with tabs for General, Profile, Sound, Colors, and About.
 final class SettingsWindow: NSWindow {
 
     private var tabView: NSTabView!
     private var generalTab: NSView!
+    private var profileTab: NSView!
+    private var soundTab: NSView!
+    private var colorsTab: NSView!
     private var aboutTab: NSView!
     private var languagePopup: NSPopUpButton!
-
-    /// Current tab identifier
-    var currentTabIdentifier: String? {
-        return tabView.selectedTabViewItem?.identifier as? String
-    }
 
     // Layout constants
     private let labelWidth: CGFloat = 140
@@ -24,8 +23,8 @@ final class SettingsWindow: NSWindow {
 
     init() {
         let screenFrame = NSScreen.main?.visibleFrame ?? .zero
-        let width: CGFloat = 450
-        let height: CGFloat = 400
+        let width: CGFloat = 500
+        let height: CGFloat = 450
         let x = screenFrame.midX - width / 2
         let y = screenFrame.midY - height / 2
         let frame = NSRect(x: x, y: y, width: width, height: height)
@@ -39,7 +38,7 @@ final class SettingsWindow: NSWindow {
 
         self.title = L("settings.title")
         self.isReleasedWhenClosed = false
-        self.minSize = NSSize(width: 400, height: 300)
+        self.minSize = NSSize(width: 450, height: 400)
 
         setupUI()
         setupKeyHandlers()
@@ -73,6 +72,24 @@ final class SettingsWindow: NSWindow {
         generalItem.label = L("settings.tab.general")
         generalItem.view = generalTab
         tabView.addTabViewItem(generalItem)
+
+        profileTab = createProfileTab()
+        let profileItem = NSTabViewItem(identifier: "profile")
+        profileItem.label = L("settings.tab.profile")
+        profileItem.view = profileTab
+        tabView.addTabViewItem(profileItem)
+
+        soundTab = createSoundTab()
+        let soundItem = NSTabViewItem(identifier: "sound")
+        soundItem.label = L("settings.tab.sound")
+        soundItem.view = soundTab
+        tabView.addTabViewItem(soundItem)
+
+        colorsTab = createColorsTab()
+        let colorsItem = NSTabViewItem(identifier: "colors")
+        colorsItem.label = L("settings.tab.colors")
+        colorsItem.view = colorsTab
+        tabView.addTabViewItem(colorsItem)
 
         aboutTab = createAboutTab()
         let aboutItem = NSTabViewItem(identifier: "about")
@@ -126,6 +143,15 @@ final class SettingsWindow: NSWindow {
         return stack
     }
 
+    private func formatTime(_ seconds: Int) -> String {
+        let minutes = seconds / 60
+        let secs = seconds % 60
+        if minutes > 0 {
+            return "\(minutes)m \(secs)s"
+        }
+        return "\(secs)s"
+    }
+
     // MARK: - General Tab
 
     private func createGeneralTab() -> NSView {
@@ -150,6 +176,11 @@ final class SettingsWindow: NSWindow {
         let quitOnCloseCheckbox = NSButton(checkboxWithTitle: L("settings.quitOnClose.checkbox"), target: self, action: #selector(quitOnCloseChanged(_:)))
         quitOnCloseCheckbox.state = UserDefaults.standard.bool(forKey: "settings.quitOnClose") ? .on : .off
         stack.addArrangedSubview(makeRow(label: L("settings.quitOnClose"), control: quitOnCloseCheckbox))
+
+        // Row: Voice output
+        let voiceOutputCheckbox = NSButton(checkboxWithTitle: L("settings.voiceOutput.checkbox"), target: self, action: #selector(voiceOutputChanged(_:)))
+        voiceOutputCheckbox.state = ProfileManager.shared.currentProfile.voiceOutputEnabled ? .on : .off
+        stack.addArrangedSubview(makeRow(label: L("settings.voiceOutput"), control: voiceOutputCheckbox))
 
         // Row: Update check frequency
         let updateCheckPopup = NSPopUpButton()
@@ -188,6 +219,155 @@ final class SettingsWindow: NSWindow {
         updateCheckRow.orientation = .horizontal
         updateCheckRow.spacing = 8
         stack.addArrangedSubview(makeRow(label: L("settings.updateCheck"), control: updateCheckRow))
+
+        return wrapInTopAlignedContainer(stack)
+    }
+
+    // MARK: - Profile Tab
+
+    private func createProfileTab() -> NSView {
+        let stack = makeVerticalStack()
+        let profile = ProfileManager.shared.currentProfile
+
+        // Profile name
+        let nameField = NSTextField()
+        nameField.stringValue = profile.name
+        nameField.placeholderString = L("settings.profileName")
+        nameField.target = self
+        nameField.action = #selector(profileNameChanged(_:))
+        nameField.widthAnchor.constraint(equalToConstant: controlWidth).isActive = true
+        stack.addArrangedSubview(makeRow(label: L("settings.profileName"), control: nameField))
+
+        // Rounds
+        let roundsField = NSTextField()
+        roundsField.stringValue = String(profile.rounds)
+        roundsField.placeholderString = "4"
+        roundsField.target = self
+        roundsField.action = #selector(roundsChanged(_:))
+        roundsField.widthAnchor.constraint(equalToConstant: 60).isActive = true
+        stack.addArrangedSubview(makeRow(label: L("settings.rounds"), control: roundsField))
+
+        // Work time
+        let workField = NSTextField()
+        workField.stringValue = formatTime(profile.workSeconds)
+        workField.placeholderString = "2m 0s"
+        workField.target = self
+        workField.action = #selector(workTimeChanged(_:))
+        workField.widthAnchor.constraint(equalToConstant: controlWidth).isActive = true
+        stack.addArrangedSubview(makeRow(label: L("settings.work"), control: workField))
+
+        // Rest time
+        let restField = NSTextField()
+        restField.stringValue = formatTime(profile.restSeconds)
+        restField.placeholderString = "1m 0s"
+        restField.target = self
+        restField.action = #selector(restTimeChanged(_:))
+        restField.widthAnchor.constraint(equalToConstant: controlWidth).isActive = true
+        stack.addArrangedSubview(makeRow(label: L("settings.rest"), control: restField))
+
+        // Prepare time
+        let prepareField = NSTextField()
+        prepareField.stringValue = "\(profile.prepareTime)s"
+        prepareField.placeholderString = "5s"
+        prepareField.target = self
+        prepareField.action = #selector(prepareTimeChanged(_:))
+        prepareField.widthAnchor.constraint(equalToConstant: 60).isActive = true
+        stack.addArrangedSubview(makeRow(label: L("settings.prepareTime"), control: prepareField))
+
+        // Warm-up
+        let warmUpCheckbox = NSButton(checkboxWithTitle: "", target: self, action: #selector(warmUpEnabledChanged(_:)))
+        warmUpCheckbox.state = profile.warmUpEnabled ? .on : .off
+        let warmUpField = NSTextField()
+        warmUpField.stringValue = formatTime(profile.warmUpSeconds)
+        warmUpField.placeholderString = "3m 0s"
+        warmUpField.target = self
+        warmUpField.action = #selector(warmUpTimeChanged(_:))
+        warmUpField.widthAnchor.constraint(equalToConstant: controlWidth).isActive = true
+        warmUpField.isEnabled = profile.warmUpEnabled
+        let warmUpRow = NSStackView(views: [warmUpCheckbox, warmUpField])
+        warmUpRow.orientation = .horizontal
+        warmUpRow.spacing = 8
+        stack.addArrangedSubview(makeRow(label: L("settings.warmUp"), control: warmUpRow))
+
+        // Cool-down
+        let coolDownCheckbox = NSButton(checkboxWithTitle: "", target: self, action: #selector(coolDownEnabledChanged(_:)))
+        coolDownCheckbox.state = profile.coolDownEnabled ? .on : .off
+        let coolDownField = NSTextField()
+        coolDownField.stringValue = formatTime(profile.coolDownSeconds)
+        coolDownField.placeholderString = "3m 0s"
+        coolDownField.target = self
+        coolDownField.action = #selector(coolDownTimeChanged(_:))
+        coolDownField.widthAnchor.constraint(equalToConstant: controlWidth).isActive = true
+        coolDownField.isEnabled = profile.coolDownEnabled
+        let coolDownRow = NSStackView(views: [coolDownCheckbox, coolDownField])
+        coolDownRow.orientation = .horizontal
+        coolDownRow.spacing = 8
+        stack.addArrangedSubview(makeRow(label: L("settings.coolDown"), control: coolDownRow))
+
+        return wrapInTopAlignedContainer(stack)
+    }
+
+    // MARK: - Sound Tab
+
+    private func createSoundTab() -> NSView {
+        let stack = makeVerticalStack()
+        let profile = ProfileManager.shared.currentProfile
+
+        // Prepare counting sound
+        let prepareCountingCheckbox = NSButton(checkboxWithTitle: L("settings.sound.prepareCounting"), target: self, action: #selector(prepareCountingSoundChanged(_:)))
+        prepareCountingCheckbox.state = profile.prepareCountingSoundEnabled ? .on : .off
+        stack.addArrangedSubview(makeRow(label: "", control: prepareCountingCheckbox))
+
+        // Start sound
+        let startSoundCheckbox = NSButton(checkboxWithTitle: L("settings.sound.start"), target: self, action: #selector(startSoundChanged(_:)))
+        startSoundCheckbox.state = profile.startSoundEnabled ? .on : .off
+        stack.addArrangedSubview(makeRow(label: "", control: startSoundCheckbox))
+
+        // Ending notify sound
+        let endingNotifyCheckbox = NSButton(checkboxWithTitle: L("settings.sound.endingNotify"), target: self, action: #selector(endingNotifySoundChanged(_:)))
+        endingNotifyCheckbox.state = profile.endingNotifySoundEnabled ? .on : .off
+        stack.addArrangedSubview(makeRow(label: "", control: endingNotifyCheckbox))
+
+        // End sound
+        let endSoundCheckbox = NSButton(checkboxWithTitle: L("settings.sound.end"), target: self, action: #selector(endSoundChanged(_:)))
+        endSoundCheckbox.state = profile.endSoundEnabled ? .on : .off
+        stack.addArrangedSubview(makeRow(label: "", control: endSoundCheckbox))
+
+        return wrapInTopAlignedContainer(stack)
+    }
+
+    // MARK: - Colors Tab
+
+    private func createColorsTab() -> NSView {
+        let stack = makeVerticalStack()
+        let profile = ProfileManager.shared.currentProfile
+
+        let colorItems: [(String, String)] = [
+            (L("settings.color.work"), profile.workColor),
+            (L("settings.color.rest"), profile.restColor),
+            (L("settings.color.heartRate"), profile.heartRateColor),
+            (L("settings.color.prepare"), profile.prepareColor),
+            (L("settings.color.warmUp"), profile.warmUpColor),
+            (L("settings.color.coolDown"), profile.coolDownColor)
+        ]
+
+        for (index, item) in colorItems.enumerated() {
+            let colorWell = NSColorWell()
+            colorWell.color = NSColor(hex: item.1) ?? .white
+            colorWell.target = self
+            colorWell.action = #selector(colorChanged(_:))
+            colorWell.tag = index
+            colorWell.widthAnchor.constraint(equalToConstant: 44).isActive = true
+
+            let resetButton = NSButton(title: L("settings.color.reset"), target: self, action: #selector(resetColor(_:)))
+            resetButton.tag = index
+            resetButton.bezelStyle = .rounded
+
+            let colorRow = NSStackView(views: [colorWell, resetButton])
+            colorRow.orientation = .horizontal
+            colorRow.spacing = 8
+            stack.addArrangedSubview(makeRow(label: item.0, control: colorRow))
+        }
 
         return wrapInTopAlignedContainer(stack)
     }
@@ -282,7 +462,7 @@ final class SettingsWindow: NSWindow {
         }
     }
 
-    // MARK: - Actions
+    // MARK: - Actions - General
 
     @objc private func languageChanged(_ sender: NSPopUpButton) {
         guard let selected = sender.selectedItem?.representedObject as? AppLanguage else { return }
@@ -292,6 +472,12 @@ final class SettingsWindow: NSWindow {
     @objc private func quitOnCloseChanged(_ sender: NSButton) {
         let quitOnClose = sender.state == .on
         UserDefaults.standard.set(quitOnClose, forKey: "settings.quitOnClose")
+    }
+
+    @objc private func voiceOutputChanged(_ sender: NSButton) {
+        var profile = ProfileManager.shared.currentProfile
+        profile.voiceOutputEnabled = sender.state == .on
+        ProfileManager.shared.updateProfile(profile)
     }
 
     @objc private func updateCheckFrequencyChanged(_ sender: NSPopUpButton) {
@@ -305,6 +491,152 @@ final class SettingsWindow: NSWindow {
         }
     }
 
+    // MARK: - Actions - Profile
+
+    @objc private func profileNameChanged(_ sender: NSTextField) {
+        var profile = ProfileManager.shared.currentProfile
+        profile.name = sender.stringValue
+        ProfileManager.shared.updateProfile(profile)
+    }
+
+    @objc private func roundsChanged(_ sender: NSTextField) {
+        var profile = ProfileManager.shared.currentProfile
+        profile.rounds = max(1, Int(sender.stringValue) ?? profile.rounds)
+        ProfileManager.shared.updateProfile(profile)
+    }
+
+    private func parseTime(_ string: String) -> Int {
+        var total = 0
+        let pattern = "(\\d+)\\s*([ms]?)"
+        guard let regex = try? NSRegularExpression(pattern: pattern) else { return 0 }
+
+        let matches = regex.matches(in: string, range: NSRange(string.startIndex..., in: string))
+        for match in matches {
+            guard let valueRange = Range(match.range(at: 1), in: string),
+                  let unitRange = Range(match.range(at: 2), in: string) else { continue }
+            let value = Int(string[valueRange]) ?? 0
+            let unit = String(string[unitRange])
+            if unit == "m" {
+                total += value * 60
+            } else {
+                total += value
+            }
+        }
+        return max(0, total)
+    }
+
+    @objc private func workTimeChanged(_ sender: NSTextField) {
+        var profile = ProfileManager.shared.currentProfile
+        profile.workSeconds = parseTime(sender.stringValue)
+        ProfileManager.shared.updateProfile(profile)
+    }
+
+    @objc private func restTimeChanged(_ sender: NSTextField) {
+        var profile = ProfileManager.shared.currentProfile
+        profile.restSeconds = parseTime(sender.stringValue)
+        ProfileManager.shared.updateProfile(profile)
+    }
+
+    @objc private func prepareTimeChanged(_ sender: NSTextField) {
+        var profile = ProfileManager.shared.currentProfile
+        profile.prepareTime = max(0, Int(sender.stringValue.replacingOccurrences(of: "s", with: "")) ?? profile.prepareTime)
+        ProfileManager.shared.updateProfile(profile)
+    }
+
+    @objc private func warmUpEnabledChanged(_ sender: NSButton) {
+        var profile = ProfileManager.shared.currentProfile
+        profile.warmUpEnabled = sender.state == .on
+        ProfileManager.shared.updateProfile(profile)
+        // Rebuild tab to update field state
+        recreateTabs()
+        tabView.selectTabViewItem(withIdentifier: "profile")
+    }
+
+    @objc private func warmUpTimeChanged(_ sender: NSTextField) {
+        var profile = ProfileManager.shared.currentProfile
+        profile.warmUpSeconds = parseTime(sender.stringValue)
+        ProfileManager.shared.updateProfile(profile)
+    }
+
+    @objc private func coolDownEnabledChanged(_ sender: NSButton) {
+        var profile = ProfileManager.shared.currentProfile
+        profile.coolDownEnabled = sender.state == .on
+        ProfileManager.shared.updateProfile(profile)
+        // Rebuild tab to update field state
+        recreateTabs()
+        tabView.selectTabViewItem(withIdentifier: "profile")
+    }
+
+    @objc private func coolDownTimeChanged(_ sender: NSTextField) {
+        var profile = ProfileManager.shared.currentProfile
+        profile.coolDownSeconds = parseTime(sender.stringValue)
+        ProfileManager.shared.updateProfile(profile)
+    }
+
+    // MARK: - Actions - Sound
+
+    @objc private func prepareCountingSoundChanged(_ sender: NSButton) {
+        var profile = ProfileManager.shared.currentProfile
+        profile.prepareCountingSoundEnabled = sender.state == .on
+        ProfileManager.shared.updateProfile(profile)
+    }
+
+    @objc private func startSoundChanged(_ sender: NSButton) {
+        var profile = ProfileManager.shared.currentProfile
+        profile.startSoundEnabled = sender.state == .on
+        ProfileManager.shared.updateProfile(profile)
+    }
+
+    @objc private func endingNotifySoundChanged(_ sender: NSButton) {
+        var profile = ProfileManager.shared.currentProfile
+        profile.endingNotifySoundEnabled = sender.state == .on
+        ProfileManager.shared.updateProfile(profile)
+    }
+
+    @objc private func endSoundChanged(_ sender: NSButton) {
+        var profile = ProfileManager.shared.currentProfile
+        profile.endSoundEnabled = sender.state == .on
+        ProfileManager.shared.updateProfile(profile)
+    }
+
+    // MARK: - Actions - Colors
+
+    @objc private func colorChanged(_ sender: NSColorWell) {
+        let hex = sender.color.toHexString()
+        var profile = ProfileManager.shared.currentProfile
+
+        switch sender.tag {
+        case 0: profile.workColor = hex
+        case 1: profile.restColor = hex
+        case 2: profile.heartRateColor = hex
+        case 3: profile.prepareColor = hex
+        case 4: profile.warmUpColor = hex
+        case 5: profile.coolDownColor = hex
+        default: break
+        }
+
+        ProfileManager.shared.updateProfile(profile)
+    }
+
+    @objc private func resetColor(_ sender: NSButton) {
+        let defaultColors = ["#FF6B6B", "#E0E0E0", "#FF8A80", "#FFAAAA", "#FF8888", "#E8A0A0"]
+        var profile = ProfileManager.shared.currentProfile
+
+        switch sender.tag {
+        case 0: profile.workColor = defaultColors[0]
+        case 1: profile.restColor = defaultColors[1]
+        case 2: profile.heartRateColor = defaultColors[2]
+        case 3: profile.prepareColor = defaultColors[3]
+        case 4: profile.warmUpColor = defaultColors[4]
+        case 5: profile.coolDownColor = defaultColors[5]
+        default: break
+        }
+
+        ProfileManager.shared.updateProfile(profile)
+        recreateTabs()
+        tabView.selectTabViewItem(withIdentifier: "colors")
+    }
+
     @objc private func openGitHub() {
         if let url = URL(string: "https://github.com/J-Liu/PulseCycle") {
             NSWorkspace.shared.open(url)
@@ -313,5 +645,35 @@ final class SettingsWindow: NSWindow {
 
     func selectTab(withIdentifier identifier: String) {
         tabView.selectTabViewItem(withIdentifier: identifier)
+    }
+
+    var currentTabIdentifier: String? {
+        return tabView.selectedTabViewItem?.identifier as? String
+    }
+}
+
+// MARK: - NSColor Extension
+
+extension NSColor {
+    convenience init?(hex: String) {
+        var hexSanitized = hex.trimmingCharacters(in: .whitespacesAndNewlines)
+        hexSanitized = hexSanitized.replacingOccurrences(of: "#", with: "")
+
+        var rgb: UInt64 = 0
+        guard Scanner(string: hexSanitized).scanHexInt64(&rgb) else { return nil }
+
+        let r = CGFloat((rgb & 0xFF0000) >> 16) / 255.0
+        let g = CGFloat((rgb & 0x00FF00) >> 8) / 255.0
+        let b = CGFloat(rgb & 0x0000FF) / 255.0
+
+        self.init(red: r, green: g, blue: b, alpha: 1.0)
+    }
+
+    func toHexString() -> String {
+        guard let rgbColor = usingColorSpace(.deviceRGB) else { return "#FFFFFF" }
+        let r = Int(rgbColor.redComponent * 255)
+        let g = Int(rgbColor.greenComponent * 255)
+        let b = Int(rgbColor.blueComponent * 255)
+        return String(format: "#%02X%02X%02X", r, g, b)
     }
 }
