@@ -4,6 +4,44 @@
 import AppKit
 import PulseCycleCore
 
+/// Custom button with solid red background
+class RedButton: NSButton {
+    override func draw(_ dirtyRect: NSRect) {
+        // Draw red background
+        NSColor.systemRed.setFill()
+        bounds.fill()
+
+        // Draw white border
+        NSColor.white.setStroke()
+        let cornerRadius: CGFloat = layer?.cornerRadius ?? 10
+        let borderPath = NSBezierPath(roundedRect: bounds.insetBy(dx: 1, dy: 1), xRadius: cornerRadius, yRadius: cornerRadius)
+        borderPath.lineWidth = 2
+        borderPath.stroke()
+
+        // Draw title with white color
+        let titleStr = title
+        if !titleStr.isEmpty {
+            let style = NSMutableParagraphStyle()
+            style.alignment = .center
+
+            let attrs: [NSAttributedString.Key: Any] = [
+                .foregroundColor: NSColor.white,
+                .font: font ?? NSFont.systemFont(ofSize: 20, weight: .bold),
+                .paragraphStyle: style
+            ]
+
+            let size = titleStr.size(withAttributes: attrs)
+            let rect = NSRect(
+                x: (bounds.width - size.width) / 2,
+                y: (bounds.height - size.height) / 2,
+                width: size.width,
+                height: size.height
+            )
+            titleStr.draw(in: rect, withAttributes: attrs)
+        }
+    }
+}
+
 /// Main view controller for the timer display.
 final class MainViewController: NSViewController {
 
@@ -43,7 +81,7 @@ final class MainViewController: NSViewController {
     // MARK: - Lifecycle
 
     override func loadView() {
-        view = NSView(frame: NSRect(x: 0, y: 0, width: 600, height: 850))
+        view = NSView(frame: NSRect(x: 0, y: 0, width: 500, height: 900))
         view.wantsLayer = true
     }
 
@@ -178,50 +216,26 @@ final class MainViewController: NSViewController {
         timerContainer.addSubview(buttonsView)
 
         // Go button - larger, red background, white text, white border
-        goButton = NSButton(title: L("main.button.go"), target: self, action: #selector(goTapped))
-        goButton.bezelStyle = .rounded
-        goButton.isBordered = true
+        goButton = RedButton(title: L("main.button.go"), target: self, action: #selector(goTapped))
         goButton.font = NSFont.systemFont(ofSize: 28, weight: .bold)
-        if let cell = goButton.cell as? NSButtonCell {
-            cell.backgroundColor = .systemRed
-        }
-        goButton.contentTintColor = .white
         goButton.wantsLayer = true
         goButton.layer?.cornerRadius = 12
-        goButton.layer?.borderWidth = 2
-        goButton.layer?.borderColor = NSColor.white.cgColor
         goButton.translatesAutoresizingMaskIntoConstraints = false
         buttonsView.addSubview(goButton)
 
         // Settings button - left side
-        settingsButton = NSButton(title: L("main.button.settings"), target: self, action: #selector(settingsTapped))
-        settingsButton.bezelStyle = .rounded
-        settingsButton.isBordered = true
+        settingsButton = RedButton(title: L("main.button.settings"), target: self, action: #selector(settingsTapped))
         settingsButton.font = NSFont.systemFont(ofSize: 20, weight: .bold)
-        if let cell = settingsButton.cell as? NSButtonCell {
-            cell.backgroundColor = .systemRed
-        }
-        settingsButton.contentTintColor = .white
         settingsButton.wantsLayer = true
         settingsButton.layer?.cornerRadius = 10
-        settingsButton.layer?.borderWidth = 2
-        settingsButton.layer?.borderColor = NSColor.white.cgColor
         settingsButton.translatesAutoresizingMaskIntoConstraints = false
         buttonsView.addSubview(settingsButton)
 
         // Reset button - right side
-        resetButton = NSButton(title: L("main.button.reset"), target: self, action: #selector(resetTapped))
-        resetButton.bezelStyle = .rounded
-        resetButton.isBordered = true
+        resetButton = RedButton(title: L("main.button.reset"), target: self, action: #selector(resetTapped))
         resetButton.font = NSFont.systemFont(ofSize: 20, weight: .bold)
-        if let cell = resetButton.cell as? NSButtonCell {
-            cell.backgroundColor = .systemRed
-        }
-        resetButton.contentTintColor = .white
         resetButton.wantsLayer = true
         resetButton.layer?.cornerRadius = 10
-        resetButton.layer?.borderWidth = 2
-        resetButton.layer?.borderColor = NSColor.white.cgColor
         resetButton.translatesAutoresizingMaskIntoConstraints = false
         buttonsView.addSubview(resetButton)
 
