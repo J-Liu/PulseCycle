@@ -80,6 +80,7 @@ private let localizedStrings: [AppLanguage: [String: String]] = [
         "settings.title": "Settings",
         "settings.tab.general": "General",
         "settings.tab.profile": "Profile",
+        "settings.tab.devices": "Devices",
         "settings.tab.sound": "Sound",
         "settings.tab.colors": "Colors",
         "settings.tab.about": "About",
@@ -108,6 +109,8 @@ private let localizedStrings: [AppLanguage: [String: String]] = [
         "settings.work": "Work Time:",
         "settings.rest": "Rest Time:",
         "settings.prepareTime": "Prepare Time:",
+        "min": "min",
+        "sec": "sec",
         "settings.warmUp": "Warm-up:",
         "settings.coolDown": "Cool-down:",
 
@@ -149,6 +152,7 @@ private let localizedStrings: [AppLanguage: [String: String]] = [
         "main.heartRate.disconnected": "Disconnected",
         "main.heartRate.scanning": "Scanning…",
         "main.heartRate.connecting": "Connecting…",
+        "Connecting": "Connecting",
         "main.error": "Error",
 
         // Menu
@@ -167,6 +171,18 @@ private let localizedStrings: [AppLanguage: [String: String]] = [
         "menu.zoom": "Zoom",
         "menu.bringAllToFront": "Bring All to Front",
         "menu.settings": "Settings...",
+
+        // Devices
+        "HRM Devices": "HRM Devices",
+        "Scan Timeout": "Scan Timeout",
+        "No heart rate devices found. Please make sure your device is powered on and nearby.": "No heart rate devices found. Please make sure your device is powered on and nearby.",
+        "Scanning": "Scanning",
+        "Looking for heart rate devices...": "Looking for heart rate devices...",
+        "Connected": "Connected",
+        "Connect": "Connect",
+        "Disconnect": "Disconnect",
+        "Set as Default": "Set as Default",
+        "Remove": "Remove",
     ],
 
     .simplifiedChinese: [
@@ -174,6 +190,7 @@ private let localizedStrings: [AppLanguage: [String: String]] = [
         "settings.title": "设置",
         "settings.tab.general": "通用",
         "settings.tab.profile": "配置",
+        "settings.tab.devices": "设备",
         "settings.tab.sound": "声音",
         "settings.tab.colors": "颜色",
         "settings.tab.about": "关于",
@@ -202,6 +219,8 @@ private let localizedStrings: [AppLanguage: [String: String]] = [
         "settings.work": "训练时间：",
         "settings.rest": "休息时间：",
         "settings.prepareTime": "准备时间：",
+        "min": "分",
+        "sec": "秒",
         "settings.warmUp": "热身：",
         "settings.coolDown": "放松：",
 
@@ -243,6 +262,7 @@ private let localizedStrings: [AppLanguage: [String: String]] = [
         "main.heartRate.disconnected": "未连接",
         "main.heartRate.scanning": "扫描中…",
         "main.heartRate.connecting": "连接中…",
+        "Connecting": "连接中",
         "main.error": "错误",
 
         // Menu
@@ -261,6 +281,18 @@ private let localizedStrings: [AppLanguage: [String: String]] = [
         "menu.zoom": "缩放",
         "menu.bringAllToFront": "全部移到最前",
         "menu.settings": "设置...",
+
+        // Devices
+        "HRM Devices": "心率设备",
+        "Scan Timeout": "扫描超时",
+        "No heart rate devices found. Please make sure your device is powered on and nearby.": "未找到心率设备。请确保设备已开机且在附近。",
+        "Scanning": "扫描中",
+        "Looking for heart rate devices...": "正在搜索心率设备...",
+        "Connected": "已连接",
+        "Connect": "连接",
+        "Disconnect": "断开",
+        "Set as Default": "设为默认",
+        "Remove": "移除",
     ],
 
     .traditionalChinese: [
@@ -268,6 +300,7 @@ private let localizedStrings: [AppLanguage: [String: String]] = [
         "settings.title": "設定",
         "settings.tab.general": "一般",
         "settings.tab.profile": "設定檔",
+        "settings.tab.devices": "裝置",
         "settings.tab.sound": "聲音",
         "settings.tab.colors": "顏色",
         "settings.tab.about": "關於",
@@ -296,6 +329,8 @@ private let localizedStrings: [AppLanguage: [String: String]] = [
         "settings.work": "訓練時間：",
         "settings.rest": "休息時間：",
         "settings.prepareTime": "準備時間：",
+        "min": "分",
+        "sec": "秒",
         "settings.warmUp": "熱身：",
         "settings.coolDown": "放鬆：",
 
@@ -337,6 +372,7 @@ private let localizedStrings: [AppLanguage: [String: String]] = [
         "main.heartRate.disconnected": "未連線",
         "main.heartRate.scanning": "掃描中…",
         "main.heartRate.connecting": "連線中…",
+        "Connecting": "連線中",
         "main.error": "錯誤",
 
         // Menu
@@ -355,5 +391,17 @@ private let localizedStrings: [AppLanguage: [String: String]] = [
         "menu.zoom": "縮放",
         "menu.bringAllToFront": "全部移到最前",
         "menu.settings": "設定...",
+
+        // Devices
+        "HRM Devices": "心率裝置",
+        "Scan Timeout": "掃描逾時",
+        "No heart rate devices found. Please make sure your device is powered on and nearby.": "未找到心率裝置。請確保裝置已開機且在附近。",
+        "Scanning": "掃描中",
+        "Looking for heart rate devices...": "正在搜尋心率裝置...",
+        "Connected": "已連線",
+        "Connect": "連線",
+        "Disconnect": "斷開",
+        "Set as Default": "設為預設",
+        "Remove": "移除",
     ]
 ]

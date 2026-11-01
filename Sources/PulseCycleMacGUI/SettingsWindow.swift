@@ -11,10 +11,12 @@ final class SettingsWindow: NSWindow {
     private var tabView: NSTabView!
     private var generalTab: NSView!
     private var profileTab: NSView!
+    private var devicesTab: NSView!
     private var soundTab: NSView!
     private var colorsTab: NSView!
     private var aboutTab: NSView!
     private var languagePopup: NSPopUpButton!
+    private var devicesTableView: NSTableView?
 
     // Layout constants
     private let labelWidth: CGFloat = 140
@@ -79,6 +81,12 @@ final class SettingsWindow: NSWindow {
         profileItem.label = L("settings.tab.profile")
         profileItem.view = profileTab
         tabView.addTabViewItem(profileItem)
+
+        devicesTab = createDevicesTab()
+        let devicesItem = NSTabViewItem(identifier: "devices")
+        devicesItem.label = L("settings.tab.devices")
+        devicesItem.view = devicesTab
+        tabView.addTabViewItem(devicesItem)
 
         soundTab = createSoundTab()
         let soundItem = NSTabViewItem(identifier: "sound")
@@ -288,6 +296,130 @@ final class SettingsWindow: NSWindow {
         stack.addArrangedSubview(makeRow(label: L("settings.coolDown"), control: coolDownRow))
 
         return wrapInTopAlignedContainer(stack)
+    }
+
+    // MARK: - Devices Tab
+
+    private func createDevicesTab() -> NSView {
+        let container = NSView()
+        container.translatesAutoresizingMaskIntoConstraints = false
+
+        // Title with add button
+        let titleLabel = NSTextField(labelWithString: L("HRM Devices"))
+        titleLabel.font = .systemFont(ofSize: 16, weight: .semibold)
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        container.addSubview(titleLabel)
+
+        let addButton = NSButton(title: "+", target: self, action: #selector(addDevice(_:)))
+        addButton.font = .systemFont(ofSize: 20, weight: .bold)
+        addButton.bezelStyle = .inline
+        addButton.isBordered = false
+        addButton.translatesAutoresizingMaskIntoConstraints = false
+        container.addSubview(addButton)
+
+        // Device list
+        let scrollView = NSScrollView()
+        scrollView.hasVerticalScroller = true
+        scrollView.borderType = .bezelBorder
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        container.addSubview(scrollView)
+
+        let tableView = NSTableView()
+        tableView.dataSource = self
+        tableView.delegate = self
+        tableView.allowsMultipleSelection = false
+        tableView.allowsEmptySelection = true
+        tableView.tag = 100 // Device list tag
+        tableView.doubleAction = #selector(deviceDoubleClicked(_:))
+
+        let column = NSTableColumn(identifier: NSUserInterfaceItemIdentifier("device"))
+        column.width = 400
+        tableView.addTableColumn(column)
+
+        scrollView.documentView = tableView
+        devicesTableView = tableView
+
+        NSLayoutConstraint.activate([
+            titleLabel.topAnchor.constraint(equalTo: container.topAnchor, constant: 16),
+            titleLabel.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 16),
+
+            addButton.centerYAnchor.constraint(equalTo: titleLabel.centerYAnchor),
+            addButton.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -16),
+
+            scrollView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 12),
+            scrollView.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 16),
+            scrollView.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -16),
+            scrollView.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -16),
+            scrollView.heightAnchor.constraint(equalToConstant: 200)
+        ])
+
+        // Listen for device list updates
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(reloadDeviceList),
+            name: NSNotification.Name("DeviceListUpdated"),
+            object: nil
+        )
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleMonitorStateChanged),
+            name: NSNotification.Name("HeartRateMonitorStateChanged"),
+            object: nil
+        )
+
+        return container
+    }
+
+    @objc private func reloadDeviceList() {
+        DispatchQueue.main.async { [weak self] in
+            self?.devicesTableView?.reloadData()
+        }
+    }
+
+    @objc private func handleMonitorStateChanged() {
+        DispatchQueue.main.async { [weak self] in
+            self?.devicesTableView?.reloadData()
+        }
+    }
+
+    @objc private func addDevice(_ sender: NSButton) {
+        let monitor = MainViewController.sharedHeartRateMonitor
+        monitor.startScanning { [weak self] in
+            // Timeout handler
+            DispatchQueue.main.async {
+                let alert = NSAlert()
+                alert.messageText = L("Scan Timeout")
+                alert.informativeText = L("No heart rate devices found. Please make sure your device is powered on and nearby.")
+                alert.alertStyle = .informational
+                alert.addButton(withTitle: L("OK"))
+                alert.beginSheetModal(for: self!)
+            }
+        }
+
+        let alert = NSAlert()
+        alert.messageText = L("Scanning")
+        alert.informativeText = L("Looking for heart rate devices...")
+        alert.alertStyle = .informational
+        alert.addButton(withTitle: L("Cancel"))
+        alert.beginSheetModal(for: self) { response in
+            if response == .alertFirstButtonReturn {
+                monitor.stopScanning()
+            }
+        }
+    }
+
+    @objc private func deviceDoubleClicked(_ sender: NSTableView) {
+        let row = sender.selectedRow
+        guard row >= 0, row < DeviceManager.shared.devices.count else { return }
+        let device = DeviceManager.shared.devices[row]
+        let monitor = MainViewController.sharedHeartRateMonitor
+
+        if monitor.isConnectedDevice(uuid: device.uuid) {
+            monitor.disconnect()
+        } else {
+            monitor.connectToDevice(uuid: device.uuid)
+        }
     }
 
     // MARK: - Sound Tab
@@ -721,5 +853,141 @@ extension NSColor {
         let g = Int(rgbColor.greenComponent * 255)
         let b = Int(rgbColor.blueComponent * 255)
         return String(format: "#%02X%02X%02X", r, g, b)
+    }
+}
+
+// MARK: - NSTableViewDataSource & Delegate for Devices
+
+extension SettingsWindow: NSTableViewDataSource, NSTableViewDelegate {
+    func numberOfRows(in tableView: NSTableView) -> Int {
+        guard tableView.tag == 100 else { return 0 }
+        return DeviceManager.shared.devices.count
+    }
+
+    func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
+        guard tableView.tag == 100, row < DeviceManager.shared.devices.count else { return nil }
+
+        let device = DeviceManager.shared.devices[row]
+        let monitor = MainViewController.sharedHeartRateMonitor
+        let isConnected = monitor.isConnectedDevice(uuid: device.uuid)
+        let isDefault = device.uuid == DeviceManager.shared.defaultDeviceUUID
+
+        let cell = NSTableCellView()
+        cell.translatesAutoresizingMaskIntoConstraints = false
+
+        // Device name
+        let nameField = NSTextField(labelWithString: device.name)
+        nameField.font = .systemFont(ofSize: 14, weight: .medium)
+        nameField.translatesAutoresizingMaskIntoConstraints = false
+        cell.addSubview(nameField)
+
+        // Status
+        let statusField = NSTextField(labelWithString: "")
+        statusField.font = .systemFont(ofSize: 12)
+        statusField.translatesAutoresizingMaskIntoConstraints = false
+        cell.addSubview(statusField)
+
+        // Default indicator
+        let defaultField = NSTextField(labelWithString: "")
+        defaultField.font = .systemFont(ofSize: 12)
+        defaultField.textColor = .systemGreen
+        defaultField.translatesAutoresizingMaskIntoConstraints = false
+        cell.addSubview(defaultField)
+
+        NSLayoutConstraint.activate([
+            nameField.leadingAnchor.constraint(equalTo: cell.leadingAnchor, constant: 4),
+            nameField.topAnchor.constraint(equalTo: cell.topAnchor, constant: 2),
+
+            statusField.leadingAnchor.constraint(equalTo: nameField.trailingAnchor, constant: 8),
+            statusField.centerYAnchor.constraint(equalTo: nameField.centerYAnchor),
+
+            defaultField.leadingAnchor.constraint(equalTo: statusField.trailingAnchor, constant: 8),
+            defaultField.centerYAnchor.constraint(equalTo: nameField.centerYAnchor),
+            defaultField.trailingAnchor.constraint(lessThanOrEqualTo: cell.trailingAnchor, constant: -4)
+        ])
+
+        if isConnected {
+            statusField.stringValue = L("Connected")
+            statusField.textColor = .systemGreen
+        } else {
+            statusField.stringValue = ""
+        }
+
+        if isDefault {
+            defaultField.stringValue = "✓"
+        }
+
+        return cell
+    }
+
+    func tableView(_ tableView: NSTableView, heightOfRow row: Int) -> CGFloat {
+        return 24
+    }
+
+    func tableViewSelectionDidChange(_ notification: Notification) {
+        guard let tableView = notification.object as? NSTableView, tableView.tag == 100 else { return }
+        let row = tableView.selectedRow
+        guard row >= 0, row < DeviceManager.shared.devices.count else { return }
+
+        // Deselect to allow action sheet
+        tableView.deselectAll(nil)
+
+        let device = DeviceManager.shared.devices[row]
+        let monitor = MainViewController.sharedHeartRateMonitor
+        let isConnected = monitor.isConnectedDevice(uuid: device.uuid)
+        let isDefault = device.uuid == DeviceManager.shared.defaultDeviceUUID
+
+        let alert = NSAlert()
+        alert.messageText = device.name
+
+        // Add buttons based on state
+        if !isConnected {
+            alert.addButton(withTitle: L("Connect"))
+        } else {
+            alert.addButton(withTitle: L("Disconnect"))
+        }
+
+        if !isDefault {
+            alert.addButton(withTitle: L("Set as Default"))
+        }
+
+        alert.addButton(withTitle: L("Remove"))
+        alert.addButton(withTitle: L("Cancel"))
+        alert.alertStyle = .informational
+
+        alert.beginSheetModal(for: self) { [weak self] response in
+            switch response {
+            case .alertFirstButtonReturn:
+                if isConnected {
+                    monitor.disconnect()
+                } else {
+                    monitor.connectToDevice(uuid: device.uuid)
+                }
+            case .alertSecondButtonReturn:
+                if isConnected {
+                    // This was Remove button
+                    monitor.disconnect()
+                    if let index = DeviceManager.shared.devices.firstIndex(where: { $0.uuid == device.uuid }) {
+                        DeviceManager.shared.removeDevice(at: index)
+                    }
+                } else {
+                    // This was Set as Default button
+                    DeviceManager.shared.setDefaultDevice(uuid: device.uuid)
+                }
+            case .alertThirdButtonReturn:
+                if !isDefault {
+                    // This was Remove button
+                    if isConnected {
+                        monitor.disconnect()
+                    }
+                    if let index = DeviceManager.shared.devices.firstIndex(where: { $0.uuid == device.uuid }) {
+                        DeviceManager.shared.removeDevice(at: index)
+                    }
+                }
+            default:
+                break
+            }
+            self?.devicesTableView?.reloadData()
+        }
     }
 }

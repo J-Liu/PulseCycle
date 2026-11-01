@@ -79,12 +79,15 @@ final class MainViewController: NSViewController {
     private var heartRateContainer: NSView!
     private var heartRateLabel: NSTextField!
     private var connectionLabel: NSTextField!
+    private var addButton: NSButton!
 
     // MARK: - State
 
+    static let sharedHeartRateMonitor = HeartRateMonitor()
+
     private var engine: IntervalEngine?
     private var currentProfile: WorkoutProfile { ProfileManager.shared.currentProfile }
-    private let heartRateMonitor = HeartRateMonitor()
+    private var heartRateMonitor: HeartRateMonitor { Self.sharedHeartRateMonitor }
     private var isProfileListPresented = false
     private var isRunning = false
     private var hasReset = true
@@ -307,9 +310,25 @@ final class MainViewController: NSViewController {
         connectionLabel.textColor = .secondaryLabelColor
         connectionLabel.alignment = .center
         connectionLabel.translatesAutoresizingMaskIntoConstraints = false
-        heartRateContainer.addSubview(connectionLabel)
 
-        // Click to connect
+        // Add button (+)
+        addButton = NSButton(title: "+", target: self, action: #selector(heartRateTapped))
+        addButton.font = NSFont.systemFont(ofSize: 24, weight: .bold)
+        addButton.bezelStyle = .inline
+        addButton.isBordered = false
+        addButton.title = "+"
+        addButton.contentTintColor = .systemYellow
+        addButton.translatesAutoresizingMaskIntoConstraints = false
+
+        // Connection stack
+        let connectionStack = NSStackView(views: [connectionLabel, addButton])
+        connectionStack.orientation = .horizontal
+        connectionStack.alignment = .centerY
+        connectionStack.spacing = 8
+        connectionStack.translatesAutoresizingMaskIntoConstraints = false
+        heartRateContainer.addSubview(connectionStack)
+
+        // Click to connect on the container
         let containerClick = NSClickGestureRecognizer(target: self, action: #selector(heartRateTapped))
         heartRateContainer.addGestureRecognizer(containerClick)
 
@@ -322,8 +341,8 @@ final class MainViewController: NSViewController {
             heartRateLabel.centerXAnchor.constraint(equalTo: heartRateContainer.centerXAnchor),
             heartRateLabel.centerYAnchor.constraint(equalTo: heartRateContainer.centerYAnchor, constant: -20),
 
-            connectionLabel.centerXAnchor.constraint(equalTo: heartRateContainer.centerXAnchor),
-            connectionLabel.topAnchor.constraint(equalTo: heartRateLabel.bottomAnchor, constant: 16),
+            connectionStack.centerXAnchor.constraint(equalTo: heartRateContainer.centerXAnchor),
+            connectionStack.topAnchor.constraint(equalTo: heartRateLabel.bottomAnchor, constant: 16),
         ])
     }
 
@@ -551,19 +570,28 @@ extension MainViewController: HeartRateMonitorDelegate {
             guard let self = self else { return }
             switch state {
             case .idle:
-                self.connectionLabel.stringValue = L("main.heartRate.disconnected")
+                self.connectionLabel.stringValue = L("Disconnected")
                 self.heartRateLabel.stringValue = "--"
+                self.addButton.isHidden = false
             case .scanning:
-                self.connectionLabel.stringValue = L("main.heartRate.scanning")
+                self.connectionLabel.stringValue = L("Scanning") + "…"
+                self.addButton.isHidden = true
             case .connecting:
-                self.connectionLabel.stringValue = L("main.heartRate.connecting")
+                if let deviceName = monitor.connectedDeviceName {
+                    self.connectionLabel.stringValue = "\(L("Connecting"))… \(deviceName)"
+                } else {
+                    self.connectionLabel.stringValue = L("Connecting") + "…"
+                }
+                self.addButton.isHidden = true
             case .connected:
                 if let name = monitor.connectedDeviceName {
                     self.connectionLabel.stringValue = name
                 }
+                self.addButton.isHidden = true
             case .disconnected:
-                self.connectionLabel.stringValue = L("main.heartRate.disconnected")
+                self.connectionLabel.stringValue = L("Disconnected")
                 self.heartRateLabel.stringValue = "--"
+                self.addButton.isHidden = false
             }
         }
     }
@@ -571,12 +599,14 @@ extension MainViewController: HeartRateMonitorDelegate {
     func heartRateMonitor(_ monitor: HeartRateMonitor, didConnectDevice name: String) {
         DispatchQueue.main.async { [weak self] in
             self?.connectionLabel.stringValue = name
+            self?.addButton.isHidden = true
         }
     }
 
     func heartRateMonitor(_ monitor: HeartRateMonitor, didFailWithError error: Error) {
         DispatchQueue.main.async { [weak self] in
-            self?.connectionLabel.stringValue = L("main.error")
+            self?.connectionLabel.stringValue = L("Error")
+            self?.addButton.isHidden = false
         }
     }
 }
