@@ -4,6 +4,7 @@
 // under Section 7. See LICENSE for details.
 
 import UIKit
+import PulseCycleCore
 
 class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMonitorDelegate {
     private let headerView = UIView()
@@ -679,13 +680,13 @@ class MainViewController: UIViewController, IntervalEngineDelegate, HeartRateMon
     }
 
     func engineDidPlaySound(_ engine: IntervalEngine, sound: String) {
-        DispatchQueue.main.async { [weak self] in
+        DispatchQueue.main.async {
             SoundManager.shared.playSound(sound)
         }
     }
 
     func engineDidSpeak(_ engine: IntervalEngine, text: String) {
-        DispatchQueue.main.async { [weak self] in
+        DispatchQueue.main.async {
             VoiceManager.shared.speak(text)
         }
     }

@@ -4,6 +4,7 @@
 // under Section 7. See LICENSE for details.
 
 import UIKit
+import PulseCycleCore
 
 class SettingsViewController: UIViewController {
     var onSave: (() -> Void)?

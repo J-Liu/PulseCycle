@@ -5,6 +5,7 @@
 
 import UIKit
 import CoreBluetooth
+import PulseCycleCore
 
 class DeviceManagementViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     private let tableView = UITableView(frame: .zero, style: .insetGrouped)

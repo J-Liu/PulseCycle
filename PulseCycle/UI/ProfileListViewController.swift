@@ -4,6 +4,7 @@
 // under Section 7. See LICENSE for details.
 
 import UIKit
+import PulseCycleCore
 
 class ProfileListViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     private let tableView = UITableView(frame: .zero, style: .insetGrouped)
