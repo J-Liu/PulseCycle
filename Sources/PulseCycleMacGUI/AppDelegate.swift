@@ -128,13 +128,25 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         windowMenuItem.submenu = createWindowMenu()
 
         NSApp.mainMenu = mainMenu
+
+        // Listen for language changes to update menu
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(languageDidChange),
+            name: .languageChanged,
+            object: nil
+        )
+    }
+
+    @objc private func languageDidChange() {
+        setupMainMenu()
     }
 
     private func createAppMenu(_ appName: String) -> NSMenu {
         let menu = NSMenu()
 
         let aboutItem = NSMenuItem(
-            title: "About \(appName)",
+            title: String(format: L("menu.about"), appName),
             action: #selector(showAbout),
             keyEquivalent: ""
         )
@@ -144,7 +156,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         menu.addItem(.separator())
 
         let checkForUpdatesItem = NSMenuItem(
-            title: "Check for Updates...",
+            title: L("menu.checkForUpdates"),
             action: #selector(manualCheckForUpdates),
             keyEquivalent: ""
         )
@@ -154,7 +166,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         menu.addItem(.separator())
 
         let preferencesItem = NSMenuItem(
-            title: "Settings...",
+            title: L("menu.settings"),
             action: #selector(showSettings),
             keyEquivalent: ","
         )
@@ -164,7 +176,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         menu.addItem(.separator())
 
         let hideItem = NSMenuItem(
-            title: "Hide \(appName)",
+            title: String(format: L("menu.hide"), appName),
             action: #selector(NSApplication.hide(_:)),
             keyEquivalent: "h"
         )
@@ -172,7 +184,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         menu.addItem(hideItem)
 
         let hideOthersItem = NSMenuItem(
-            title: "Hide Others",
+            title: L("menu.hideOthers"),
             action: #selector(NSApplication.hideOtherApplications(_:)),
             keyEquivalent: "h"
         )
@@ -181,7 +193,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         menu.addItem(hideOthersItem)
 
         let showAllItem = NSMenuItem(
-            title: "Show All",
+            title: L("menu.showAll"),
             action: #selector(NSApplication.unhideAllApplications(_:)),
             keyEquivalent: ""
         )
@@ -191,7 +203,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         menu.addItem(.separator())
 
         let quitItem = NSMenuItem(
-            title: "Quit \(appName)",
+            title: String(format: L("menu.quit"), appName),
             action: #selector(NSApplication.terminate(_:)),
             keyEquivalent: "q"
         )
@@ -202,10 +214,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func createFileMenu() -> NSMenu {
-        let menu = NSMenu(title: "File")
+        let menu = NSMenu(title: L("menu.file"))
 
         let closeWindowItem = NSMenuItem(
-            title: "Close Window",
+            title: L("menu.closeWindow"),
             action: #selector(NSWindow.performClose(_:)),
             keyEquivalent: "w"
         )
@@ -215,10 +227,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func createViewMenu() -> NSMenu {
-        let menu = NSMenu(title: "View")
+        let menu = NSMenu(title: L("menu.view"))
 
         let enterFullScreenItem = NSMenuItem(
-            title: "Enter Full Screen",
+            title: L("menu.enterFullScreen"),
             action: #selector(NSWindow.toggleFullScreen(_:)),
             keyEquivalent: "f"
         )
@@ -229,17 +241,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func createWindowMenu() -> NSMenu {
-        let menu = NSMenu(title: "Window")
+        let menu = NSMenu(title: L("menu.window"))
 
         let minimizeItem = NSMenuItem(
-            title: "Minimize",
+            title: L("menu.minimize"),
             action: #selector(NSWindow.performMiniaturize(_:)),
             keyEquivalent: "m"
         )
         menu.addItem(minimizeItem)
 
         let zoomItem = NSMenuItem(
-            title: "Zoom",
+            title: L("menu.zoom"),
             action: #selector(NSWindow.performZoom(_:)),
             keyEquivalent: ""
         )
@@ -248,7 +260,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         menu.addItem(.separator())
 
         let bringAllToFrontItem = NSMenuItem(
-            title: "Bring All to Front",
+            title: L("menu.bringAllToFront"),
             action: #selector(NSApplication.arrangeInFront(_:)),
             keyEquivalent: ""
         )

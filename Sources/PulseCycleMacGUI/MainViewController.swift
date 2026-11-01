@@ -48,7 +48,7 @@ final class MainViewController: NSViewController {
         view.addSubview(profileLabel)
 
         // Profile button
-        profileButton = NSButton(title: "Profile", target: self, action: #selector(profileTapped))
+        profileButton = NSButton(title: L("main.profile.select"), target: self, action: #selector(profileTapped))
         profileButton.bezelStyle = .rounded
         profileButton.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(profileButton)
@@ -61,23 +61,23 @@ final class MainViewController: NSViewController {
         view.addSubview(timerLabel)
 
         // Round label
-        roundLabel = NSTextField(labelWithString: "Round 0")
+        roundLabel = NSTextField(labelWithString: String(format: L("main.round"), 0))
         roundLabel.font = NSFont.systemFont(ofSize: 24, weight: .medium)
         roundLabel.alignment = .center
         roundLabel.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(roundLabel)
 
         // Phase label
-        phaseLabel = NSTextField(labelWithString: "READY")
+        phaseLabel = NSTextField(labelWithString: L("main.timer.ready"))
         phaseLabel.font = NSFont.systemFont(ofSize: 18, weight: .medium)
         phaseLabel.alignment = .center
         phaseLabel.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(phaseLabel)
 
         // Buttons
-        startButton = NSButton(title: "Start", target: self, action: #selector(startTapped))
-        pauseButton = NSButton(title: "Pause", target: self, action: #selector(pauseTapped))
-        resetButton = NSButton(title: "Reset", target: self, action: #selector(resetTapped))
+        startButton = NSButton(title: L("main.button.start"), target: self, action: #selector(startTapped))
+        pauseButton = NSButton(title: L("main.button.pause"), target: self, action: #selector(pauseTapped))
+        resetButton = NSButton(title: L("main.button.reset"), target: self, action: #selector(resetTapped))
 
         startButton.bezelStyle = .rounded
         pauseButton.bezelStyle = .rounded
@@ -110,6 +110,22 @@ final class MainViewController: NSViewController {
             buttonStack.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             buttonStack.topAnchor.constraint(equalTo: phaseLabel.bottomAnchor, constant: 32),
         ])
+
+        // Listen for language changes
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(languageDidChange),
+            name: .languageChanged,
+            object: nil
+        )
+    }
+
+    @objc private func languageDidChange() {
+        updateUI()
+        profileButton.title = L("main.profile.select")
+        startButton.title = L("main.button.start")
+        pauseButton.title = L("main.button.pause")
+        resetButton.title = L("main.button.reset")
     }
 
     // MARK: - Actions
@@ -180,8 +196,8 @@ final class MainViewController: NSViewController {
 
         guard let engine = engine else {
             timerLabel.stringValue = "00:00"
-            roundLabel.stringValue = "Round 0"
-            phaseLabel.stringValue = "READY"
+            roundLabel.stringValue = String(format: L("main.round"), 0)
+            phaseLabel.stringValue = L("main.timer.ready")
             return
         }
 
@@ -189,12 +205,12 @@ final class MainViewController: NSViewController {
         let seconds = engine.remainingSeconds % 60
         timerLabel.stringValue = String(format: "%02d:%02d", minutes, seconds)
 
-        roundLabel.stringValue = "Round \(engine.currentRound)"
+        roundLabel.stringValue = String(format: L("main.round"), engine.currentRound)
 
         switch engine.phase {
         case .warmUp: phaseLabel.stringValue = "WARM UP"
-        case .work: phaseLabel.stringValue = "WORK"
-        case .rest: phaseLabel.stringValue = "REST"
+        case .work: phaseLabel.stringValue = L("main.timer.work")
+        case .rest: phaseLabel.stringValue = L("main.timer.rest")
         case .coolDown: phaseLabel.stringValue = "COOL DOWN"
         case .finished: phaseLabel.stringValue = "FINISHED"
         }
