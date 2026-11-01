@@ -3,4 +3,10 @@
 
 import AppKit
 
-_ = NSApplicationMain(CommandLine.argc, CommandLine.unsafeArgv)
+// Create the shared application instance and drive its run loop.
+// The delegate keeps the window alive and manages application lifecycle.
+let app = NSApplication.shared
+let delegate = AppDelegate()
+app.delegate = delegate
+app.setActivationPolicy(.regular)
+app.run()
