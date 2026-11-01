@@ -16,6 +16,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     )
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        setupMainMenu()
         createMainWindow()
         configureUpdateCheck()
 
@@ -24,13 +25,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func configureUpdateCheck() {
-        // Disable Sparkle's built-in automatic check - we handle it ourselves
         updaterController.updater.automaticallyChecksForUpdates = false
 
-        // Check if we should check for updates based on frequency setting
         guard shouldCheckForUpdates() else { return }
 
-        // Delay to let the app settle
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
             self?.updaterController.updater.checkForUpdatesInBackground()
             self?.recordUpdateCheck()
@@ -40,7 +38,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func shouldCheckForUpdates() -> Bool {
         let savedInterval = UserDefaults.standard.double(forKey: "settings.updateCheckInterval")
 
-        // Default to weekly if not set
         let interval: TimeInterval
         if !UserDefaults.standard.bool(forKey: "settings.updateCheckIntervalSet") {
             interval = 604800 // Weekly default
@@ -50,13 +47,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             interval = savedInterval
         }
 
-        // Never: don't check
         if interval < 0 { return false }
-
-        // At startup: always check
         if interval == 0 { return true }
 
-        // Periodic: check if enough time has passed
         let lastCheck = UserDefaults.standard.string(forKey: "settings.lastUpdateCheck") ?? ""
         guard !lastCheck.isEmpty else { return true }
 
@@ -98,6 +91,165 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         window?.makeKeyAndOrderFront(nil)
     }
+
+    // MARK: - Menu Setup
+
+    private func setupMainMenu() {
+        let mainMenu = NSMenu()
+        let appName = "PulseCycle"
+
+        // App Menu
+        let appMenuItem = NSMenuItem()
+        mainMenu.addItem(appMenuItem)
+        appMenuItem.submenu = createAppMenu(appName)
+
+        // File Menu
+        let fileMenuItem = NSMenuItem()
+        mainMenu.addItem(fileMenuItem)
+        fileMenuItem.submenu = createFileMenu()
+
+        // View Menu
+        let viewMenuItem = NSMenuItem()
+        mainMenu.addItem(viewMenuItem)
+        viewMenuItem.submenu = createViewMenu()
+
+        // Window Menu
+        let windowMenuItem = NSMenuItem()
+        mainMenu.addItem(windowMenuItem)
+        windowMenuItem.submenu = createWindowMenu()
+
+        NSApp.mainMenu = mainMenu
+    }
+
+    private func createAppMenu(_ appName: String) -> NSMenu {
+        let menu = NSMenu()
+
+        let aboutItem = NSMenuItem(
+            title: "About \(appName)",
+            action: #selector(showAbout),
+            keyEquivalent: ""
+        )
+        aboutItem.target = self
+        menu.addItem(aboutItem)
+
+        menu.addItem(.separator())
+
+        let checkForUpdatesItem = NSMenuItem(
+            title: "Check for Updates...",
+            action: #selector(manualCheckForUpdates),
+            keyEquivalent: ""
+        )
+        checkForUpdatesItem.target = self
+        menu.addItem(checkForUpdatesItem)
+
+        menu.addItem(.separator())
+
+        let hideItem = NSMenuItem(
+            title: "Hide \(appName)",
+            action: #selector(NSApplication.hide(_:)),
+            keyEquivalent: "h"
+        )
+        hideItem.target = NSApp
+        menu.addItem(hideItem)
+
+        let hideOthersItem = NSMenuItem(
+            title: "Hide Others",
+            action: #selector(NSApplication.hideOtherApplications(_:)),
+            keyEquivalent: "h"
+        )
+        hideOthersItem.keyEquivalentModifierMask = [.command, .option]
+        hideOthersItem.target = NSApp
+        menu.addItem(hideOthersItem)
+
+        let showAllItem = NSMenuItem(
+            title: "Show All",
+            action: #selector(NSApplication.unhideAllApplications(_:)),
+            keyEquivalent: ""
+        )
+        showAllItem.target = NSApp
+        menu.addItem(showAllItem)
+
+        menu.addItem(.separator())
+
+        let quitItem = NSMenuItem(
+            title: "Quit \(appName)",
+            action: #selector(NSApplication.terminate(_:)),
+            keyEquivalent: "q"
+        )
+        quitItem.target = NSApp
+        menu.addItem(quitItem)
+
+        return menu
+    }
+
+    private func createFileMenu() -> NSMenu {
+        let menu = NSMenu(title: "File")
+
+        let closeWindowItem = NSMenuItem(
+            title: "Close Window",
+            action: #selector(NSWindow.performClose(_:)),
+            keyEquivalent: "w"
+        )
+        menu.addItem(closeWindowItem)
+
+        return menu
+    }
+
+    private func createViewMenu() -> NSMenu {
+        let menu = NSMenu(title: "View")
+
+        let enterFullScreenItem = NSMenuItem(
+            title: "Enter Full Screen",
+            action: #selector(NSWindow.toggleFullScreen(_:)),
+            keyEquivalent: "f"
+        )
+        enterFullScreenItem.keyEquivalentModifierMask = [.command, .control]
+        menu.addItem(enterFullScreenItem)
+
+        return menu
+    }
+
+    private func createWindowMenu() -> NSMenu {
+        let menu = NSMenu(title: "Window")
+
+        let minimizeItem = NSMenuItem(
+            title: "Minimize",
+            action: #selector(NSWindow.performMiniaturize(_:)),
+            keyEquivalent: "m"
+        )
+        menu.addItem(minimizeItem)
+
+        let zoomItem = NSMenuItem(
+            title: "Zoom",
+            action: #selector(NSWindow.performZoom(_:)),
+            keyEquivalent: ""
+        )
+        menu.addItem(zoomItem)
+
+        menu.addItem(.separator())
+
+        let bringAllToFrontItem = NSMenuItem(
+            title: "Bring All to Front",
+            action: #selector(NSApplication.arrangeInFront(_:)),
+            keyEquivalent: ""
+        )
+        bringAllToFrontItem.target = NSApp
+        menu.addItem(bringAllToFrontItem)
+
+        return menu
+    }
+
+    // MARK: - Actions
+
+    @objc private func showAbout() {
+        NSApp.orderFrontStandardAboutPanel(nil)
+    }
+
+    @objc private func manualCheckForUpdates() {
+        updaterController.updater.checkForUpdates()
+    }
+
+    // MARK: - NSApplicationDelegate
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
         return UserDefaults.standard.bool(forKey: "settings.quitOnClose")
