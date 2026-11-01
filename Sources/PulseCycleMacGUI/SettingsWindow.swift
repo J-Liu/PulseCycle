@@ -617,6 +617,7 @@ final class SettingsWindow: NSWindow {
         }
 
         ProfileManager.shared.updateProfile(profile)
+        NotificationCenter.default.post(name: .profileChanged, object: nil)
     }
 
     @objc private func resetColor(_ sender: NSButton) {
@@ -634,6 +635,7 @@ final class SettingsWindow: NSWindow {
         }
 
         ProfileManager.shared.updateProfile(profile)
+        NotificationCenter.default.post(name: .profileChanged, object: nil)
         recreateTabs()
         tabView.selectTabViewItem(withIdentifier: "colors")
     }

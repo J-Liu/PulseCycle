@@ -299,6 +299,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func updateSettingsMenuItem(enabled: Bool) {
         settingsMenuItem?.isEnabled = enabled
+        // Force menu to update its appearance
+        NSApp.mainMenu?.update()
     }
 
     func openSettingsWindow(allowConfigTabs: Bool) {

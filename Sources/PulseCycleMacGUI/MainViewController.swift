@@ -106,6 +106,18 @@ final class MainViewController: NSViewController {
         heartRateMonitor.delegate = self
         setupUI()
         updateUI()
+
+        // Listen for profile changes
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(profileChanged),
+            name: .profileChanged,
+            object: nil
+        )
+    }
+
+    @objc private func profileChanged() {
+        updateUI()
     }
 
     // MARK: - Setup

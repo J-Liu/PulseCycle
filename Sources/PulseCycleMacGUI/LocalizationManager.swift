@@ -5,6 +5,7 @@ import Foundation
 
 extension Notification.Name {
     static let languageChanged = Notification.Name("languageChanged")
+    static let profileChanged = Notification.Name("profileChanged")
 }
 
 /// Supported languages for the app
