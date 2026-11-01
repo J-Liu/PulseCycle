@@ -23,6 +23,7 @@ final class MainViewController: NSViewController {
     private var roundLabel: NSTextField!
     private var buttonsView: NSView!
     private var goButton: NSButton!
+    private var settingsButton: NSButton!
     private var resetButton: NSButton!
 
     // Heart rate container (lower 35%)
@@ -189,7 +190,20 @@ final class MainViewController: NSViewController {
         goButton.translatesAutoresizingMaskIntoConstraints = false
         buttonsView.addSubview(goButton)
 
-        // Reset button - smaller
+        // Settings button - left side
+        settingsButton = NSButton(title: L("main.button.settings"), target: self, action: #selector(settingsTapped))
+        settingsButton.bezelStyle = .regularSquare
+        settingsButton.font = NSFont.systemFont(ofSize: 20, weight: .bold)
+        settingsButton.contentTintColor = .white
+        settingsButton.wantsLayer = true
+        settingsButton.layer?.backgroundColor = NSColor.systemRed.cgColor
+        settingsButton.layer?.cornerRadius = 10
+        settingsButton.layer?.borderWidth = 2
+        settingsButton.layer?.borderColor = NSColor.white.cgColor
+        settingsButton.translatesAutoresizingMaskIntoConstraints = false
+        buttonsView.addSubview(settingsButton)
+
+        // Reset button - right side
         resetButton = NSButton(title: L("main.button.reset"), target: self, action: #selector(resetTapped))
         resetButton.bezelStyle = .regularSquare
         resetButton.font = NSFont.systemFont(ofSize: 20, weight: .bold)
@@ -212,6 +226,11 @@ final class MainViewController: NSViewController {
             goButton.topAnchor.constraint(equalTo: buttonsView.topAnchor, constant: 12),
             goButton.widthAnchor.constraint(equalToConstant: 140),
             goButton.heightAnchor.constraint(equalToConstant: 56),
+
+            settingsButton.leadingAnchor.constraint(equalTo: buttonsView.leadingAnchor, constant: 24),
+            settingsButton.centerYAnchor.constraint(equalTo: goButton.centerYAnchor),
+            settingsButton.widthAnchor.constraint(equalToConstant: 100),
+            settingsButton.heightAnchor.constraint(equalToConstant: 48),
 
             resetButton.trailingAnchor.constraint(equalTo: buttonsView.trailingAnchor, constant: -24),
             resetButton.centerYAnchor.constraint(equalTo: goButton.centerYAnchor),
@@ -294,6 +313,12 @@ final class MainViewController: NSViewController {
         hasReset = true
         updateUI()
         updateGoButton()
+    }
+
+    @objc private func settingsTapped() {
+        if let appDelegate = NSApp.delegate as? AppDelegate {
+            appDelegate.showSettings()
+        }
     }
 
     @objc private func profileTapped() {
