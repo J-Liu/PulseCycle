@@ -533,7 +533,7 @@ final class SettingsWindow: NSWindow {
 
     @objc private func showPreparePicker(_ sender: NSButton) {
         let profile = ProfileManager.shared.currentProfile
-        let picker = PickerViewController(title: L("settings.prepareTime"), values: Array(0...300), currentValue: profile.prepareTime) { [weak self] value in
+        let picker = PickerViewController(title: L("settings.prepareTime"), values: Array(0...300), currentValue: profile.prepareTime, unit: L("sec")) { [weak self] value in
             var p = ProfileManager.shared.currentProfile
             p.prepareTime = value
             ProfileManager.shared.updateProfile(p)

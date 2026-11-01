@@ -12,6 +12,7 @@ class PickerViewController: NSViewController {
     private var singleValues: [Int] = []
     private var initialSingleIndex: Int = 0
     private var isSingleColumn: Bool = false
+    private var singleColumnUnit: String? = nil
 
     // Dual column (minutes + seconds)
     private var minutes: [Int] = []
@@ -25,12 +26,13 @@ class PickerViewController: NSViewController {
     private var contentView: NSView?
 
     // Single column initializer
-    init(title: String, values: [Int], currentValue: Int, completion: @escaping (Int) -> Void) {
+    init(title: String, values: [Int], currentValue: Int, unit: String? = nil, completion: @escaping (Int) -> Void) {
         self.titleText = title
         self.completion = completion
         self.singleValues = values
         self.initialSingleIndex = values.firstIndex(of: currentValue) ?? 0
         self.isSingleColumn = true
+        self.singleColumnUnit = unit
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -112,36 +114,86 @@ class PickerViewController: NSViewController {
     }
 
     private func setupSingleColumn() {
-        let scrollView = NSScrollView()
-        scrollView.hasVerticalScroller = true
-        scrollView.borderType = .bezelBorder
-        scrollView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(scrollView)
-        contentView = scrollView
+        if let unit = singleColumnUnit {
+            // With unit label
+            let container = NSView()
+            container.translatesAutoresizingMaskIntoConstraints = false
+            view.addSubview(container)
+            contentView = container
 
-        let tableView = NSTableView()
-        tableView.dataSource = self
-        tableView.delegate = self
-        tableView.allowsMultipleSelection = false
-        tableView.allowsEmptySelection = false
-        tableView.selectionHighlightStyle = .regular
+            let unitLabel = NSTextField(labelWithString: unit)
+            unitLabel.font = .systemFont(ofSize: 12)
+            unitLabel.alignment = .center
+            unitLabel.translatesAutoresizingMaskIntoConstraints = false
+            container.addSubview(unitLabel)
 
-        let column = NSTableColumn(identifier: NSUserInterfaceItemIdentifier("value"))
-        column.width = 160
-        tableView.addTableColumn(column)
+            let scrollView = NSScrollView()
+            scrollView.hasVerticalScroller = true
+            scrollView.borderType = .bezelBorder
+            scrollView.translatesAutoresizingMaskIntoConstraints = false
+            container.addSubview(scrollView)
 
-        scrollView.documentView = tableView
-        singleTableView = tableView
+            let tableView = NSTableView()
+            tableView.dataSource = self
+            tableView.delegate = self
+            tableView.allowsMultipleSelection = false
+            tableView.allowsEmptySelection = false
+            tableView.selectionHighlightStyle = .regular
 
-        NSLayoutConstraint.activate([
-            scrollView.widthAnchor.constraint(equalToConstant: 180),
-            scrollView.heightAnchor.constraint(equalToConstant: 280)
-        ])
+            let column = NSTableColumn(identifier: NSUserInterfaceItemIdentifier("value"))
+            column.width = 160
+            tableView.addTableColumn(column)
+
+            scrollView.documentView = tableView
+            singleTableView = tableView
+
+            NSLayoutConstraint.activate([
+                unitLabel.topAnchor.constraint(equalTo: container.topAnchor),
+                unitLabel.leadingAnchor.constraint(equalTo: container.leadingAnchor),
+                unitLabel.trailingAnchor.constraint(equalTo: container.trailingAnchor),
+
+                scrollView.topAnchor.constraint(equalTo: unitLabel.bottomAnchor, constant: 4),
+                scrollView.leadingAnchor.constraint(equalTo: container.leadingAnchor),
+                scrollView.trailingAnchor.constraint(equalTo: container.trailingAnchor),
+                scrollView.bottomAnchor.constraint(equalTo: container.bottomAnchor),
+                scrollView.widthAnchor.constraint(equalToConstant: 80),
+                scrollView.heightAnchor.constraint(equalToConstant: 280)
+            ])
+        } else {
+            // No unit label
+            let scrollView = NSScrollView()
+            scrollView.hasVerticalScroller = true
+            scrollView.borderType = .bezelBorder
+            scrollView.translatesAutoresizingMaskIntoConstraints = false
+            view.addSubview(scrollView)
+            contentView = scrollView
+
+            let tableView = NSTableView()
+            tableView.dataSource = self
+            tableView.delegate = self
+            tableView.allowsMultipleSelection = false
+            tableView.allowsEmptySelection = false
+            tableView.selectionHighlightStyle = .regular
+
+            let column = NSTableColumn(identifier: NSUserInterfaceItemIdentifier("value"))
+            column.width = 160
+            tableView.addTableColumn(column)
+
+            scrollView.documentView = tableView
+            singleTableView = tableView
+
+            NSLayoutConstraint.activate([
+                scrollView.widthAnchor.constraint(equalToConstant: 180),
+                scrollView.heightAnchor.constraint(equalToConstant: 280)
+            ])
+        }
 
         // Scroll to initial selection
         DispatchQueue.main.async {
-            tableView.selectRowIndexes(IndexSet(integer: self.initialSingleIndex), byExtendingSelection: false)
-            self.scrollToRow(tableView, row: self.initialSingleIndex)
+            self.singleTableView?.selectRowIndexes(IndexSet(integer: self.initialSingleIndex), byExtendingSelection: false)
+            if let tableView = self.singleTableView {
+                self.scrollToRow(tableView, row: self.initialSingleIndex)
+            }
         }
     }
 
