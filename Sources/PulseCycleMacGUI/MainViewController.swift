@@ -311,10 +311,6 @@ final class MainViewController: NSViewController {
         connectionLabel.alignment = .center
         connectionLabel.translatesAutoresizingMaskIntoConstraints = false
 
-        // Make connection label clickable
-        let labelClick = NSClickGestureRecognizer(target: self, action: #selector(connectionLabelTapped))
-        connectionLabel.addGestureRecognizer(labelClick)
-
         // Add button (+) - shown when disconnected
         addButton = NSButton(title: "+", target: self, action: #selector(addButtonTapped))
         addButton.font = .systemFont(ofSize: 24, weight: .bold)
@@ -332,6 +328,10 @@ final class MainViewController: NSViewController {
         connectionStack.translatesAutoresizingMaskIntoConstraints = false
         heartRateContainer.addSubview(connectionStack)
 
+        // Click on connection stack to connect/disconnect
+        let stackClick = NSClickGestureRecognizer(target: self, action: #selector(connectionStackTapped))
+        connectionStack.addGestureRecognizer(stackClick)
+
         NSLayoutConstraint.activate([
             heartRateContainer.topAnchor.constraint(equalTo: timerContainer.bottomAnchor),
             heartRateContainer.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -346,16 +346,18 @@ final class MainViewController: NSViewController {
         ])
     }
 
-    @objc private func connectionLabelTapped() {
-        // Click on device name to disconnect
+    @objc private func connectionStackTapped() {
         let monitor = heartRateMonitor
         if monitor.connectedDeviceName != nil {
+            // Connected: disconnect
             monitor.disconnect()
+        } else {
+            // Disconnected: auto-connect
+            monitor.autoConnect()
         }
     }
 
     @objc private func addButtonTapped() {
-        // "+" button triggers auto-connect
         heartRateMonitor.autoConnect()
     }
 
