@@ -61,19 +61,22 @@ if [ "$LOCAL" != "$REMOTE" ]; then
 fi
 echo -e "${GREEN}✓ In sync with origin/main${NC}"
 
-# Get latest tag
-LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.1.2")
-echo -e "\n${GREEN}Latest tag: ${LATEST_TAG}${NC}"
+# Get latest macOS tag
+LATEST_TAG=$(git tag -l 'mac/*' --sort=-version:refname | head -1)
+if [ -z "$LATEST_TAG" ]; then
+    LATEST_TAG="mac/0.1.0"
+fi
+echo -e "\n${GREEN}Latest macOS tag: ${LATEST_TAG}${NC}"
 
 # Parse version number
-VERSION=${LATEST_TAG#v}
+VERSION=${LATEST_TAG#mac/}
 MAJOR=$(echo $VERSION | cut -d. -f1)
 MINOR=$(echo $VERSION | cut -d. -f2)
 PATCH=$(echo $VERSION | cut -d. -f3)
 
 # Increment patch version
 NEW_PATCH=$((PATCH + 1))
-NEW_TAG="v${MAJOR}.${MINOR}.${NEW_PATCH}"
+NEW_TAG="mac/${MAJOR}.${MINOR}.${NEW_PATCH}"
 NEW_VERSION="${MAJOR}.${MINOR}.${NEW_PATCH}"
 
 echo -e "${GREEN}New tag: ${NEW_TAG}${NC}"
