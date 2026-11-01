@@ -78,6 +78,11 @@ final class MainViewController: NSViewController {
     private var isRunning = false
     private var hasReset = true
 
+    /// Whether settings can be edited (timer not running)
+    var canEditSettings: Bool {
+        !isRunning && (engine == nil || engine?.phase == .finished || hasReset)
+    }
+
     // MARK: - Lifecycle
 
     override func loadView() {
@@ -339,9 +344,8 @@ final class MainViewController: NSViewController {
     }
 
     @objc private func settingsTapped() {
-        if let appDelegate = NSApp.delegate as? AppDelegate {
-            appDelegate.showSettings()
-        }
+        guard let appDelegate = NSApp.delegate as? AppDelegate else { return }
+        appDelegate.openSettingsWindow(allowConfigTabs: canEditSettings)
     }
 
     @objc private func profileTapped() {

@@ -285,12 +285,28 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @objc func showSettings() {
+        // Check if timer is running from main view controller
+        var allowConfig = true
+        if let mainVC = window?.contentViewController as? MainViewController {
+            allowConfig = mainVC.canEditSettings
+        }
+        openSettings(allowConfigTabs: allowConfig)
+    }
+
+    func openSettingsWindow(allowConfigTabs: Bool) {
+        openSettings(allowConfigTabs: allowConfigTabs)
+    }
+
+    private func openSettings(allowConfigTabs: Bool) {
         if settingsWindow == nil {
             settingsWindow = SettingsWindow()
         }
-        // If currently on About tab, switch to General tab
-        if settingsWindow?.currentTabIdentifier == "about" {
-            settingsWindow?.selectTab(withIdentifier: "general")
+        settingsWindow?.setConfigTabsEnabled(allowConfigTabs)
+        if allowConfigTabs {
+            // If currently on About tab, switch to General tab
+            if settingsWindow?.currentTabIdentifier == "about" {
+                settingsWindow?.selectTab(withIdentifier: "general")
+            }
         }
         settingsWindow?.makeKeyAndOrderFront(nil)
     }

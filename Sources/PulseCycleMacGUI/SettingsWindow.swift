@@ -47,6 +47,7 @@ final class SettingsWindow: NSWindow {
     private func setupUI() {
         tabView = NSTabView(frame: contentView!.bounds.insetBy(dx: 10, dy: 10))
         tabView.autoresizingMask = [.width, .height]
+        tabView.delegate = self
 
         recreateTabs()
 
@@ -649,6 +650,33 @@ final class SettingsWindow: NSWindow {
 
     var currentTabIdentifier: String? {
         return tabView.selectedTabViewItem?.identifier as? String
+    }
+
+    private var configTabsEnabled = true
+
+    func setConfigTabsEnabled(_ enabled: Bool) {
+        configTabsEnabled = enabled
+        if !enabled {
+            // Switch to About tab if currently on a config tab
+            let configTabs = ["general", "profile", "sound", "colors"]
+            if let current = currentTabIdentifier, configTabs.contains(current) {
+                selectTab(withIdentifier: "about")
+            }
+        }
+    }
+}
+
+// MARK: - NSTabViewDelegate
+
+extension SettingsWindow: NSTabViewDelegate {
+    func tabView(_ tabView: NSTabView, shouldSelect tabViewItem: NSTabViewItem?) -> Bool {
+        guard let identifier = tabViewItem?.identifier as? String else { return true }
+
+        // Allow About tab always, config tabs only when enabled
+        if identifier == "about" {
+            return true
+        }
+        return configTabsEnabled
     }
 }
 
