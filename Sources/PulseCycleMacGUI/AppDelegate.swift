@@ -72,6 +72,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func createMainWindow() {
+        // If window already exists, just bring it to front
+        if let existingWindow = window {
+            existingWindow.makeKeyAndOrderFront(nil)
+            return
+        }
+
         let screenFrame = NSScreen.main?.visibleFrame ?? .zero
         let width: CGFloat = 800
         let height: CGFloat = 600
@@ -79,18 +85,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let y = screenFrame.midY - height / 2
         let frame = NSRect(x: x, y: y, width: width, height: height)
 
-        window = NSWindow(
+        let newWindow = NSWindow(
             contentRect: frame,
             styleMask: [.titled, .closable, .resizable, .miniaturizable],
             backing: .buffered,
             defer: false
         )
 
-        window?.title = "PulseCycle"
-        window?.minSize = NSSize(width: 600, height: 400)
-        window?.contentViewController = MainViewController()
+        newWindow.title = "PulseCycle"
+        newWindow.minSize = NSSize(width: 600, height: 400)
+        newWindow.isReleasedWhenClosed = false
+        newWindow.contentViewController = MainViewController()
 
-        window?.makeKeyAndOrderFront(nil)
+        window = newWindow
+        newWindow.makeKeyAndOrderFront(nil)
     }
 
     // MARK: - Menu Setup
@@ -274,11 +282,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
-        if flag {
-            window?.makeKeyAndOrderFront(nil)
-        } else {
-            createMainWindow()
-        }
+        createMainWindow()
         return true
     }
 
