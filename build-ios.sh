@@ -1,11 +1,17 @@
 #!/bin/bash
 # SPDX-License-Identifier: AGPL-3.0-or-later
-# Copyright 2026 Jia Liu
-# Licensed under AGPL-3.0-or-later with an additional permission
-# under Section 7. See LICENSE for details.
+# Copyright © 2026 Jia Liu
+#
+# Build script for iOS target.
+# Usage: ./build-ios.sh
 
+set -e
+
+echo "==> Building PulseCycle for iOS..."
 xcodebuild -project PulseCycle.xcodeproj \
   -scheme PulseCycle \
   -destination 'platform=iOS,name=iPhone' \
   -allowProvisioningUpdates \
   build
+
+echo "==> Build complete"

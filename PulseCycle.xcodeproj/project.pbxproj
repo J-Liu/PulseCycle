@@ -6,6 +6,10 @@
 	objectVersion = 110;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		08F9D0333097512200A59403 /* PulseCycleCore in Frameworks */ = {isa = PBXBuildFile; productRef = 08F9D0323097512200A59403 /* PulseCycleCore */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		08ADE25E308A79DF00C4694E /* PulseCycle.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PulseCycle.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -35,6 +39,7 @@
 		08ADE25B308A79DF00C4694E /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			files = (
+				08F9D0333097512200A59403 /* PulseCycleCore in Frameworks */,
 			);
 		};
 /* End PBXFrameworksBuildPhase section */
@@ -73,6 +78,9 @@
 				08ADE260308A79DF00C4694E /* PulseCycle */,
 			);
 			name = PulseCycle;
+			packageProductDependencies = (
+				08F9D0323097512200A59403 /* PulseCycleCore */,
+			);
 			productName = PulseCycle;
 			productReference = 08ADE25E308A79DF00C4694E /* PulseCycle.app */;
 			productType = "com.apple.product-type.application";
@@ -103,6 +111,9 @@
 			);
 			mainGroup = 08ADE255308A79DF00C4694E;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				08F9D0313097512200A59403 /* XCLocalSwiftPackageReference "PulseCycleCore" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 08ADE25F308A79DF00C4694E /* Products */;
 			projectDirPath = "";
@@ -341,6 +352,20 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		08F9D0313097512200A59403 /* XCLocalSwiftPackageReference "PulseCycleCore" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = PulseCycleCore;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		08F9D0323097512200A59403 /* PulseCycleCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = PulseCycleCore;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 08ADE256308A79DF00C4694E /* Project object */;
 	validationLevel = 1;
