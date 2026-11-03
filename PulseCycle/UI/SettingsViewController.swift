@@ -79,7 +79,7 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
         case .devices: return 1
         case .sound: return 4
         case .color: return 6
-        case .misc: return 2
+        case .misc: return 3
         case .none: return 0
         }
     }
@@ -254,12 +254,18 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
     private func configureMiscCell(_ cell: UITableViewCell, row: Int) {
         switch row {
         case 0:
+            cell.textLabel?.text = L("Theme")
+            let currentTheme = ThemeManager.shared.currentTheme
+            cell.detailTextLabel?.text = currentTheme.displayName
+            cell.accessoryType = .disclosureIndicator
+            cell.selectionStyle = .default
+        case 1:
             cell.textLabel?.text = L("Language")
             let currentLang = LanguageManager.shared.currentLanguage
             cell.detailTextLabel?.text = currentLang.displayName
             cell.accessoryType = .disclosureIndicator
             cell.selectionStyle = .default
-        case 1:
+        case 2:
             cell.textLabel?.text = L("Voice output")
             let switch_ = UISwitch()
             switch_.isOn = profile.voiceOutputEnabled
@@ -373,6 +379,8 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
         } else if indexPath.section == Section.devices.rawValue {
             showDeviceManagement()
         } else if indexPath.section == Section.misc.rawValue && indexPath.row == 0 {
+            showThemePicker()
+        } else if indexPath.section == Section.misc.rawValue && indexPath.row == 1 {
             showLanguagePicker()
         } else if indexPath.section == Section.color.rawValue {
             showColorPicker(for: indexPath.row)
@@ -418,6 +426,30 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
         navigationController?.pushViewController(vc, animated: true)
     }
 
+    private func showThemePicker() {
+        let alert = UIAlertController(title: L("Theme"), message: nil, preferredStyle: .actionSheet)
+
+        for theme in Theme.allCases {
+            let action = UIAlertAction(title: theme.displayName, style: .default) { [weak self] _ in
+                ThemeManager.shared.currentTheme = theme
+                self?.tableView.reloadRows(at: [IndexPath(row: 0, section: Section.misc.rawValue)], with: .none)
+            }
+            if theme == ThemeManager.shared.currentTheme {
+                action.setValue(true, forKey: "checked")
+            }
+            alert.addAction(action)
+        }
+
+        alert.addAction(UIAlertAction(title: L("Cancel"), style: .cancel))
+
+        if let popover = alert.popoverPresentationController {
+            popover.sourceView = tableView
+            popover.sourceRect = tableView.cellForRow(at: IndexPath(row: 0, section: Section.misc.rawValue))?.frame ?? .zero
+        }
+
+        present(alert, animated: true)
+    }
+
     private func showLanguagePicker() {
         let alert = UIAlertController(title: L("Language"), message: nil, preferredStyle: .actionSheet)
 
@@ -437,7 +469,7 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
 
         if let popover = alert.popoverPresentationController {
             popover.sourceView = tableView
-            popover.sourceRect = tableView.cellForRow(at: IndexPath(row: 0, section: Section.misc.rawValue))?.frame ?? .zero
+            popover.sourceRect = tableView.cellForRow(at: IndexPath(row: 1, section: Section.misc.rawValue))?.frame ?? .zero
         }
 
         present(alert, animated: true)

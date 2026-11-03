@@ -86,6 +86,10 @@ private let localizedStrings: [AppLanguage: [String: String]] = [
         "settings.tab.about": "About",
 
         // General
+        "settings.theme": "Theme:",
+        "settings.theme.system": "System Default",
+        "settings.theme.light": "Light",
+        "settings.theme.dark": "Dark",
         "settings.language": "Language:",
         "settings.language.system": "System Default",
         "settings.language.english": "English",
@@ -196,6 +200,10 @@ private let localizedStrings: [AppLanguage: [String: String]] = [
         "settings.tab.about": "关于",
 
         // General
+        "settings.theme": "主题：",
+        "settings.theme.system": "系统默认",
+        "settings.theme.light": "浅色",
+        "settings.theme.dark": "深色",
         "settings.language": "语言：",
         "settings.language.system": "系统默认",
         "settings.language.english": "English",
@@ -306,6 +314,10 @@ private let localizedStrings: [AppLanguage: [String: String]] = [
         "settings.tab.about": "關於",
 
         // General
+        "settings.theme": "主題：",
+        "settings.theme.system": "系統預設",
+        "settings.theme.light": "淺色",
+        "settings.theme.dark": "深色",
         "settings.language": "語言：",
         "settings.language.system": "系統預設",
         "settings.language.english": "English",

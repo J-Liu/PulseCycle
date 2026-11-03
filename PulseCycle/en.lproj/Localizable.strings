@@ -73,6 +73,11 @@
 "简体中文" = "简体中文";
 "繁體中文" = "繁體中文";
 
+/* Theme Options */
+"Theme" = "Theme";
+"Light" = "Light";
+"Dark" = "Dark";
+
 /* Profile List */
 "rounds" = "rounds";
 "work" = "work";

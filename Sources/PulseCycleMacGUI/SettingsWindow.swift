@@ -15,6 +15,7 @@ final class SettingsWindow: NSWindow {
     private var soundTab: NSView!
     private var colorsTab: NSView!
     private var aboutTab: NSView!
+    private var themePopup: NSPopUpButton!
     private var languagePopup: NSPopUpButton!
 
     // Layout constants
@@ -59,6 +60,14 @@ final class SettingsWindow: NSWindow {
             self,
             selector: #selector(languageDidChange),
             name: .languageChanged,
+            object: nil
+        )
+
+        // Listen for theme changes
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(themeDidChange),
+            name: .themeChanged,
             object: nil
         )
     }
@@ -113,6 +122,10 @@ final class SettingsWindow: NSWindow {
         recreateTabs()
     }
 
+    @objc private func themeDidChange() {
+        recreateTabs()
+    }
+
     // MARK: - Layout Helpers
 
     private func wrapInTopAlignedContainer(_ stack: NSStackView) -> NSView {
@@ -164,6 +177,21 @@ final class SettingsWindow: NSWindow {
 
     private func createGeneralTab() -> NSView {
         let stack = makeVerticalStack()
+
+        // Row: Theme
+        themePopup = NSPopUpButton()
+        for theme in AppTheme.allCases {
+            themePopup.addItem(withTitle: theme.displayName)
+            themePopup.lastItem?.representedObject = theme
+        }
+        let currentTheme = ThemeManager.shared.currentTheme
+        if let index = AppTheme.allCases.firstIndex(of: currentTheme) {
+            themePopup.selectItem(at: index)
+        }
+        themePopup.target = self
+        themePopup.action = #selector(themeChanged(_:))
+        themePopup.widthAnchor.constraint(equalToConstant: controlWidth).isActive = true
+        stack.addArrangedSubview(makeRow(label: L("settings.theme"), control: themePopup))
 
         // Row: Language
         languagePopup = NSPopUpButton()
@@ -626,6 +654,11 @@ final class SettingsWindow: NSWindow {
     }
 
     // MARK: - Actions - General
+
+    @objc private func themeChanged(_ sender: NSPopUpButton) {
+        guard let selected = sender.selectedItem?.representedObject as? AppTheme else { return }
+        ThemeManager.shared.currentTheme = selected
+    }
 
     @objc private func languageChanged(_ sender: NSPopUpButton) {
         guard let selected = sender.selectedItem?.representedObject as? AppLanguage else { return }

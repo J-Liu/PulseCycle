@@ -28,7 +28,7 @@ public class SoundManager {
                     player.prepareToPlay()
                     audioPlayers[soundName] = player
                 } catch {
-                    print("Failed to load sound: \(soundName)")
+                    // Silently skip failed sound loads
                 }
             }
         }
@@ -36,7 +36,6 @@ public class SoundManager {
 
     public func playSound(_ soundName: String) {
         guard let player = audioPlayers[soundName] else {
-            print("Sound not found: \(soundName)")
             return
         }
 
