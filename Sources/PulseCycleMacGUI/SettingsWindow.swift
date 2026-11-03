@@ -575,9 +575,7 @@ final class SettingsWindow: NSWindow {
         let container = NSView()
 
         let appIcon = NSImageView()
-        if let image = NSImage(named: "PulseCycle") {
-            appIcon.image = image
-        } else if let appIconImage = NSApplication.shared.applicationIconImage {
+        if let appIconImage = NSApplication.shared.applicationIconImage {
             appIcon.image = appIconImage
         } else {
             appIcon.image = NSImage(systemSymbolName: "timer", accessibilityDescription: nil)

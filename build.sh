@@ -47,9 +47,6 @@ ICON_DIR="${ROOT_DIR}/Resources/Compiled"
 if [ -f "${ICON_DIR}/Assets.car" ]; then
     cp "${ICON_DIR}/Assets.car" "${APP_BUNDLE}/Contents/Resources/Assets.car"
 fi
-if [ -f "${ICON_DIR}/${APP_NAME}.icns" ]; then
-    cp "${ICON_DIR}/${APP_NAME}.icns" "${APP_BUNDLE}/Contents/Resources/${APP_NAME}.icns"
-fi
 
 # Copy audio files from iOS resources
 AUDIO_DIR="${ROOT_DIR}/PulseCycle"
