@@ -7,12 +7,7 @@ final class AboutViewController: UIViewController {
 
     private let iconImageView: UIImageView = {
         let imageView = UIImageView()
-        if let appIcon = UIImage(named: "AppIcon") {
-            imageView.image = appIcon
-        } else {
-            imageView.image = UIImage(systemName: "timer")
-            imageView.tintColor = .systemBlue
-        }
+        imageView.image = UIImage(named: "AboutIcon")
         imageView.contentMode = .scaleAspectFit
         imageView.layer.cornerRadius = 22
         imageView.clipsToBounds = true
