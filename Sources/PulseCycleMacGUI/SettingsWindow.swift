@@ -618,6 +618,16 @@ final class SettingsWindow: NSWindow {
         checkUpdatesButton.translatesAutoresizingMaskIntoConstraints = false
         container.addSubview(checkUpdatesButton)
 
+        let licenseButton = NSButton(title: L("License"), target: self, action: #selector(showLicense))
+        licenseButton.bezelStyle = .rounded
+        licenseButton.translatesAutoresizingMaskIntoConstraints = false
+        container.addSubview(licenseButton)
+
+        let noticeButton = NSButton(title: L("Notice"), target: self, action: #selector(showNotice))
+        noticeButton.bezelStyle = .rounded
+        noticeButton.translatesAutoresizingMaskIntoConstraints = false
+        container.addSubview(noticeButton)
+
         NSLayoutConstraint.activate([
             appIcon.topAnchor.constraint(equalTo: container.topAnchor, constant: 40),
             appIcon.centerXAnchor.constraint(equalTo: container.centerXAnchor),
@@ -636,7 +646,13 @@ final class SettingsWindow: NSWindow {
 
             checkUpdatesButton.topAnchor.constraint(equalTo: githubButton.bottomAnchor, constant: 12),
             checkUpdatesButton.centerXAnchor.constraint(equalTo: container.centerXAnchor),
-            checkUpdatesButton.bottomAnchor.constraint(lessThanOrEqualTo: container.bottomAnchor, constant: -20)
+
+            licenseButton.topAnchor.constraint(equalTo: checkUpdatesButton.bottomAnchor, constant: 12),
+            licenseButton.centerXAnchor.constraint(equalTo: container.centerXAnchor),
+
+            noticeButton.topAnchor.constraint(equalTo: licenseButton.bottomAnchor, constant: 8),
+            noticeButton.centerXAnchor.constraint(equalTo: container.centerXAnchor),
+            noticeButton.bottomAnchor.constraint(lessThanOrEqualTo: container.bottomAnchor, constant: -20)
         ])
 
         return container
@@ -879,6 +895,88 @@ final class SettingsWindow: NSWindow {
         if let url = URL(string: "https://github.com/J-Liu/PulseCycle") {
             NSWorkspace.shared.open(url)
         }
+    }
+
+    @objc private func showLicense() {
+        let window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 500, height: 400),
+            styleMask: [.titled, .closable],
+            backing: .buffered,
+            defer: false
+        )
+        window.title = L("License")
+        window.center()
+
+        let textView = NSTextView()
+        textView.isEditable = false
+        textView.isSelectable = true
+        textView.font = .monospacedSystemFont(ofSize: 11, weight: .regular)
+
+        let licenseSummary = """
+        GNU AFFERO GENERAL PUBLIC LICENSE
+        Version 3, 19 November 2007
+
+        Copyright (C) 2007 Free Software Foundation, Inc.
+
+        Additional Permission under Section 7
+
+        As an additional permission under section 7, you are allowed to distribute
+        the software through an app store, even if that store has restrictive terms
+        and conditions that are incompatible with the AGPL, provided that the source
+        is also available under the AGPL with or without this permission through a
+        channel without those restrictive terms and conditions.
+
+        Copyright (C) 2026 Jia Liu
+
+        Full license text:
+        https://github.com/J-Liu/PulseCycle/blob/main/LICENSE
+        """
+
+        textView.string = licenseSummary
+        textView.textContainerInset = NSSize(width: 16, height: 16)
+
+        let scrollView = NSScrollView()
+        scrollView.documentView = textView
+        scrollView.hasVerticalScroller = true
+        window.contentView = scrollView
+
+        window.makeKeyAndOrderFront(nil)
+    }
+
+    @objc private func showNotice() {
+        let window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 500, height: 300),
+            styleMask: [.titled, .closable],
+            backing: .buffered,
+            defer: false
+        )
+        window.title = L("Notice")
+        window.center()
+
+        let textView = NSTextView()
+        textView.isEditable = false
+        textView.isSelectable = true
+        textView.font = .systemFont(ofSize: 14, weight: .regular)
+
+        let notice = """
+        PulseCycle — A HIIT interval timer with heart rate monitoring.
+        Copyright 2026 Jia Liu
+
+        This product includes software developed by Jia Liu.
+
+        This software is licensed under AGPL-3.0-or-later with an additional
+        permission under Section 7. See LICENSE for details.
+        """
+
+        textView.string = notice
+        textView.textContainerInset = NSSize(width: 16, height: 16)
+
+        let scrollView = NSScrollView()
+        scrollView.documentView = textView
+        scrollView.hasVerticalScroller = true
+        window.contentView = scrollView
+
+        window.makeKeyAndOrderFront(nil)
     }
 
     func selectTab(withIdentifier identifier: String) {

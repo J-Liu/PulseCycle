@@ -136,6 +136,8 @@ private let localizedStrings: [AppLanguage: [String: String]] = [
         // About
         "settings.about.version": "Version",
         "settings.about.copyright": "Copyright © 2026 Jia Liu",
+        "License": "License",
+        "Notice": "Notice",
 
         // Main Window
         "main.timer.ready": "READY",
@@ -250,6 +252,8 @@ private let localizedStrings: [AppLanguage: [String: String]] = [
         // About
         "settings.about.version": "版本",
         "settings.about.copyright": "版权所有 © 2026 Jia Liu",
+        "License": "许可证",
+        "Notice": "声明",
 
         // Main Window
         "main.timer.ready": "准备",
@@ -364,6 +368,8 @@ private let localizedStrings: [AppLanguage: [String: String]] = [
         // About
         "settings.about.version": "版本",
         "settings.about.copyright": "版權所有 © 2026 Jia Liu",
+        "License": "許可證",
+        "Notice": "聲明",
 
         // Main Window
         "main.timer.ready": "準備",
