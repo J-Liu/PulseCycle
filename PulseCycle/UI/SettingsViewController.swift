@@ -22,6 +22,7 @@ class SettingsViewController: UIViewController {
         case sound
         case color
         case misc
+        case about
     }
 
     override func viewDidLoad() {
@@ -80,6 +81,7 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
         case .sound: return 4
         case .color: return 6
         case .misc: return 3
+        case .about: return 1
         case .none: return 0
         }
     }
@@ -91,6 +93,7 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
         case .sound: return L("Sound")
         case .color: return L("Color")
         case .misc: return L("Misc")
+        case .about: return nil
         case .none: return nil
         }
     }
@@ -110,6 +113,8 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
             configureColorCell(cell, row: indexPath.row)
         case .misc:
             configureMiscCell(cell, row: indexPath.row)
+        case .about:
+            configureAboutCell(cell)
         case .none:
             break
         }
@@ -276,6 +281,14 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
         }
     }
 
+    private func configureAboutCell(_ cell: UITableViewCell) {
+        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown"
+        cell.textLabel?.text = L("About")
+        cell.detailTextLabel?.text = version
+        cell.accessoryType = .disclosureIndicator
+        cell.selectionStyle = .default
+    }
+
     @objc private func warmUpCheckboxTapped(_ sender: UIButton) {
         var p = profile
         p.warmUpEnabled = !p.warmUpEnabled
@@ -384,6 +397,8 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
             showLanguagePicker()
         } else if indexPath.section == Section.color.rawValue {
             showColorPicker(for: indexPath.row)
+        } else if indexPath.section == Section.about.rawValue {
+            showAbout()
         }
     }
 
@@ -473,6 +488,11 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
         }
 
         present(alert, animated: true)
+    }
+
+    private func showAbout() {
+        let aboutVC = AboutViewController()
+        navigationController?.pushViewController(aboutVC, animated: true)
     }
 
     private func showColorPicker(for row: Int) {
