@@ -81,7 +81,7 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
         case .sound: return 4
         case .color: return 6
         case .misc: return 3
-        case .about: return 1
+        case .about: return 2
         case .none: return 0
         }
     }
@@ -114,7 +114,7 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
         case .misc:
             configureMiscCell(cell, row: indexPath.row)
         case .about:
-            configureAboutCell(cell)
+            configureAboutCell(cell, row: indexPath.row)
         case .none:
             break
         }
@@ -281,12 +281,22 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
         }
     }
 
-    private func configureAboutCell(_ cell: UITableViewCell) {
-        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown"
-        cell.textLabel?.text = L("About")
-        cell.detailTextLabel?.text = version
-        cell.accessoryType = .disclosureIndicator
-        cell.selectionStyle = .default
+    private func configureAboutCell(_ cell: UITableViewCell, row: Int) {
+        switch row {
+        case 0:
+            let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown"
+            cell.textLabel?.text = L("About")
+            cell.detailTextLabel?.text = version
+            cell.accessoryType = .disclosureIndicator
+            cell.selectionStyle = .default
+        case 1:
+            cell.textLabel?.text = L("License")
+            cell.detailTextLabel?.text = "AGPL-3.0"
+            cell.accessoryType = .disclosureIndicator
+            cell.selectionStyle = .default
+        default:
+            break
+        }
     }
 
     @objc private func warmUpCheckboxTapped(_ sender: UIButton) {
@@ -398,7 +408,11 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
         } else if indexPath.section == Section.color.rawValue {
             showColorPicker(for: indexPath.row)
         } else if indexPath.section == Section.about.rawValue {
-            showAbout()
+            if indexPath.row == 0 {
+                showAbout()
+            } else if indexPath.row == 1 {
+                showLicense()
+            }
         }
     }
 
@@ -493,6 +507,51 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
     private func showAbout() {
         let aboutVC = AboutViewController()
         navigationController?.pushViewController(aboutVC, animated: true)
+    }
+
+    private func showLicense() {
+        let vc = UIViewController()
+        vc.title = L("License")
+        vc.view.backgroundColor = .systemGroupedBackground
+
+        let textView = UITextView()
+        textView.font = .monospacedSystemFont(ofSize: 11, weight: .regular)
+        textView.isEditable = false
+        textView.isSelectable = true
+        textView.dataDetectorTypes = .link
+        textView.translatesAutoresizingMaskIntoConstraints = false
+        vc.view.addSubview(textView)
+
+        let licenseSummary = """
+        GNU AFFERO GENERAL PUBLIC LICENSE
+        Version 3, 19 November 2007
+
+        Copyright (C) 2007 Free Software Foundation, Inc.
+
+        Additional Permission under Section 7
+
+        As an additional permission under section 7, you are allowed to distribute
+        the software through an app store, even if that store has restrictive terms
+        and conditions that are incompatible with the AGPL, provided that the source
+        is also available under the AGPL with or without this permission through a
+        channel without those restrictive terms and conditions.
+
+        Copyright (C) 2026 Jia Liu
+
+        Full license text:
+        https://github.com/J-Liu/PulseCycle/blob/main/LICENSE
+        """
+
+        textView.text = licenseSummary
+
+        NSLayoutConstraint.activate([
+            textView.topAnchor.constraint(equalTo: vc.view.safeAreaLayoutGuide.topAnchor),
+            textView.leadingAnchor.constraint(equalTo: vc.view.leadingAnchor, constant: 16),
+            textView.trailingAnchor.constraint(equalTo: vc.view.trailingAnchor, constant: -16),
+            textView.bottomAnchor.constraint(equalTo: vc.view.bottomAnchor)
+        ])
+
+        navigationController?.pushViewController(vc, animated: true)
     }
 
     private func showColorPicker(for row: Int) {
