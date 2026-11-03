@@ -575,7 +575,9 @@ final class SettingsWindow: NSWindow {
         let container = NSView()
 
         let appIcon = NSImageView()
-        if let appIconImage = NSApplication.shared.applicationIconImage {
+        if let image = NSImage(named: "PulseCycle") {
+            appIcon.image = image
+        } else if let appIconImage = NSApplication.shared.applicationIconImage {
             appIcon.image = appIconImage
         } else {
             appIcon.image = NSImage(systemSymbolName: "timer", accessibilityDescription: nil)
@@ -896,7 +898,12 @@ final class SettingsWindow: NSWindow {
     }
 
     @objc private func showLicense() {
-        let licenseSummary = """
+        let textView = NSTextView(frame: NSRect(x: 0, y: 0, width: 480, height: 350))
+        textView.isEditable = false
+        textView.isSelectable = true
+        textView.font = .monospacedSystemFont(ofSize: 11, weight: .regular)
+
+        let licenseText = """
         GNU AFFERO GENERAL PUBLIC LICENSE
         Version 3, 19 November 2007
 
@@ -916,7 +923,28 @@ final class SettingsWindow: NSWindow {
         https://github.com/J-Liu/PulseCycle/blob/main/LICENSE
         """
 
-        showTextSheet(title: L("License"), text: licenseSummary, font: .monospacedSystemFont(ofSize: 11, weight: .regular))
+        let attributedString = NSMutableAttributedString(string: licenseText, attributes: [
+            .font: NSFont.monospacedSystemFont(ofSize: 11, weight: .regular)
+        ])
+
+        // Make URL clickable
+        let urlRange = (licenseText as NSString).range(of: "https://github.com/J-Liu/PulseCycle/blob/main/LICENSE")
+        attributedString.addAttribute(.link, value: "https://github.com/J-Liu/PulseCycle/blob/main/LICENSE", range: urlRange)
+        attributedString.addAttribute(.foregroundColor, value: NSColor.linkColor, range: urlRange)
+
+        textView.textStorage?.setAttributedString(attributedString)
+        textView.textContainerInset = NSSize(width: 8, height: 8)
+
+        let scrollView = NSScrollView(frame: NSRect(x: 0, y: 0, width: 500, height: 370))
+        scrollView.documentView = textView
+        scrollView.hasVerticalScroller = true
+        scrollView.borderType = .bezelBorder
+
+        let alert = NSAlert()
+        alert.messageText = L("License")
+        alert.accessoryView = scrollView
+        alert.addButton(withTitle: L("OK"))
+        alert.beginSheetModal(for: self)
     }
 
     @objc private func showNotice() {
