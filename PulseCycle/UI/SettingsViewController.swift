@@ -81,7 +81,7 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
         case .sound: return 4
         case .color: return 6
         case .misc: return 3
-        case .about: return 3
+        case .about: return 2
         case .none: return 0
         }
     }
@@ -294,10 +294,6 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
             cell.detailTextLabel?.text = "AGPL-3.0"
             cell.accessoryType = .disclosureIndicator
             cell.selectionStyle = .default
-        case 2:
-            cell.textLabel?.text = L("Notice")
-            cell.accessoryType = .disclosureIndicator
-            cell.selectionStyle = .default
         default:
             break
         }
@@ -416,8 +412,6 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
                 showAbout()
             } else if indexPath.row == 1 {
                 showLicense()
-            } else if indexPath.row == 2 {
-                showNotice()
             }
         }
     }
@@ -549,40 +543,6 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
         """
 
         textView.text = licenseSummary
-
-        NSLayoutConstraint.activate([
-            textView.topAnchor.constraint(equalTo: vc.view.safeAreaLayoutGuide.topAnchor),
-            textView.leadingAnchor.constraint(equalTo: vc.view.leadingAnchor, constant: 16),
-            textView.trailingAnchor.constraint(equalTo: vc.view.trailingAnchor, constant: -16),
-            textView.bottomAnchor.constraint(equalTo: vc.view.bottomAnchor)
-        ])
-
-        navigationController?.pushViewController(vc, animated: true)
-    }
-
-    private func showNotice() {
-        let vc = UIViewController()
-        vc.title = L("Notice")
-        vc.view.backgroundColor = .systemGroupedBackground
-
-        let textView = UITextView()
-        textView.font = .systemFont(ofSize: 14, weight: .regular)
-        textView.isEditable = false
-        textView.isSelectable = true
-        textView.translatesAutoresizingMaskIntoConstraints = false
-        vc.view.addSubview(textView)
-
-        let noticeText = """
-        PulseCycle — A HIIT interval timer with heart rate monitoring.
-        Copyright 2026 Jia Liu
-
-        This product includes software developed by Jia Liu.
-
-        This software is licensed under AGPL-3.0-or-later with an additional
-        permission under Section 7. See LICENSE for details.
-        """
-
-        textView.text = noticeText
 
         NSLayoutConstraint.activate([
             textView.topAnchor.constraint(equalTo: vc.view.safeAreaLayoutGuide.topAnchor),

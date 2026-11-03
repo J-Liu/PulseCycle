@@ -52,6 +52,14 @@ final class AboutViewController: UIViewController {
         return label
     }()
 
+    private let noticeButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle(L("Notice"), for: .normal)
+        button.titleLabel?.font = .systemFont(ofSize: 14, weight: .regular)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+
     override func viewDidLoad() {
         super.viewDidLoad()
         setupView()
@@ -66,12 +74,14 @@ final class AboutViewController: UIViewController {
         view.addSubview(versionLabel)
         view.addSubview(linkButton)
         view.addSubview(copyrightLabel)
+        view.addSubview(noticeButton)
 
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown"
         let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "Unknown"
         versionLabel.text = "\(L("Version")) \(version) (\(build))"
 
         linkButton.addTarget(self, action: #selector(openLink), for: .touchUpInside)
+        noticeButton.addTarget(self, action: #selector(showNotice), for: .touchUpInside)
 
         NSLayoutConstraint.activate([
             iconImageView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 40),
@@ -90,7 +100,10 @@ final class AboutViewController: UIViewController {
 
             copyrightLabel.topAnchor.constraint(equalTo: linkButton.bottomAnchor, constant: 30),
             copyrightLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            copyrightLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20)
+            copyrightLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+
+            noticeButton.topAnchor.constraint(equalTo: copyrightLabel.bottomAnchor, constant: 16),
+            noticeButton.centerXAnchor.constraint(equalTo: view.centerXAnchor)
         ])
     }
 
@@ -98,5 +111,39 @@ final class AboutViewController: UIViewController {
         if let url = URL(string: "https://github.com/J-Liu/PulseCycle") {
             UIApplication.shared.open(url)
         }
+    }
+
+    @objc private func showNotice() {
+        let vc = UIViewController()
+        vc.title = L("Notice")
+        vc.view.backgroundColor = .systemGroupedBackground
+
+        let textView = UITextView()
+        textView.font = .systemFont(ofSize: 14, weight: .regular)
+        textView.isEditable = false
+        textView.isSelectable = true
+        textView.translatesAutoresizingMaskIntoConstraints = false
+        vc.view.addSubview(textView)
+
+        let notice = """
+        PulseCycle — A HIIT interval timer with heart rate monitoring.
+        Copyright 2026 Jia Liu
+
+        This product includes software developed by Jia Liu.
+
+        This software is licensed under AGPL-3.0-or-later with an additional
+        permission under Section 7. See LICENSE for details.
+        """
+
+        textView.text = notice
+
+        NSLayoutConstraint.activate([
+            textView.topAnchor.constraint(equalTo: vc.view.safeAreaLayoutGuide.topAnchor),
+            textView.leadingAnchor.constraint(equalTo: vc.view.leadingAnchor, constant: 16),
+            textView.trailingAnchor.constraint(equalTo: vc.view.trailingAnchor, constant: -16),
+            textView.bottomAnchor.constraint(equalTo: vc.view.bottomAnchor)
+        ])
+
+        navigationController?.pushViewController(vc, animated: true)
     }
 }
