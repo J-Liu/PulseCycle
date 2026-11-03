@@ -4,20 +4,6 @@
     <title>PulseCycle</title>
     <description>Most recent changes with links to updates.</description>
     <language>en</language>
-
-    <item>
-    <title>Version 0.1.1</title>
-    <pubDate>Tue, 03 Nov 2026 08:34:12 +0000</pubDate>
-    <sparkle:version>2</sparkle:version>
-    <sparkle:shortVersionString>0.1.1</sparkle:shortVersionString>
-    <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
-    <enclosure
-        url="https://github.com/J-Liu/PulseCycle/releases/download/mac/0.1.1/PulseCycle-0.1.1.zip"
-        sparkle:edSignature="Y+ulg5EAFcMSnfE8IOiHVu0CPZcc/a7qvXZ8faPfpX9SW2jp6SGkd07Sekxfed7+0IYpeK8RonlVSscvw4gyCQ=="
-        length="4387164"
-        type="application/octet-stream"/>
-</item>
-
     <item>
     <title>Version 0.1.0</title>
     <pubDate>Sun, 01 Nov 2026 14:49:10 +0000</pubDate>

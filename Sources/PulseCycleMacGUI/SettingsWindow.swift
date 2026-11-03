@@ -232,18 +232,24 @@ final class SettingsWindow: NSWindow {
             updateCheckPopup.lastItem?.representedObject = freq.interval
         }
         // Select current value
-        let savedInterval = UserDefaults.standard.double(forKey: "settings.updateCheckInterval")
+        let savedInterval = UserDefaults.standard.object(forKey: "settings.updateCheckInterval") as? Double
         let selectedIndex: Int
-        if savedInterval < 0 {
-            selectedIndex = 4  // Never
-        } else if savedInterval == 0 {
-            selectedIndex = 0  // At startup
-        } else if savedInterval <= 86400 {
-            selectedIndex = 1  // Daily
-        } else if savedInterval <= 604800 {
-            selectedIndex = 2  // Weekly
+        if let interval = savedInterval {
+            if interval < 0 {
+                selectedIndex = 4  // Never
+            } else if interval == 0 {
+                selectedIndex = 0  // At startup
+            } else if interval <= 86400 {
+                selectedIndex = 1  // Daily
+            } else if interval <= 604800 {
+                selectedIndex = 2  // Weekly
+            } else {
+                selectedIndex = 3  // Monthly
+            }
         } else {
-            selectedIndex = 3  // Monthly
+            // Default to Weekly if not set
+            selectedIndex = 2
+            UserDefaults.standard.set(604800.0, forKey: "settings.updateCheckInterval")
         }
         updateCheckPopup.selectItem(at: selectedIndex)
         updateCheckPopup.target = self

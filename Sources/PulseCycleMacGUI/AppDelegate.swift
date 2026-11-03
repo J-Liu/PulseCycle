@@ -38,20 +38,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func shouldCheckForUpdates() -> Bool {
-        let savedInterval = UserDefaults.standard.double(forKey: "settings.updateCheckInterval")
+        let interval = UserDefaults.standard.double(forKey: "settings.updateCheckInterval")
 
-        let interval: TimeInterval
-        if !UserDefaults.standard.bool(forKey: "settings.updateCheckIntervalSet") {
-            interval = 604800 // Weekly default
-            UserDefaults.standard.set(true, forKey: "settings.updateCheckIntervalSet")
-            UserDefaults.standard.set(interval, forKey: "settings.updateCheckInterval")
-        } else {
-            interval = savedInterval
-        }
-
+        // Never check
         if interval < 0 { return false }
+
+        // At startup - always check
         if interval == 0 { return true }
 
+        // Interval-based check
         let lastCheck = UserDefaults.standard.string(forKey: "settings.lastUpdateCheck") ?? ""
         guard !lastCheck.isEmpty else { return true }
 
