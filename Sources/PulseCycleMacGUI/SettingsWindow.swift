@@ -575,11 +575,8 @@ final class SettingsWindow: NSWindow {
         let container = NSView()
 
         let appIcon = NSImageView()
-        if let icnsPath = Bundle.main.path(forResource: "PulseCycle", ofType: "icns"),
-           let image = NSImage(contentsOfFile: icnsPath) {
-            appIcon.image = image
-        } else if let image = NSImage(named: "NSApplicationIcon") {
-            appIcon.image = image
+        if let appIconImage = NSApplication.shared.applicationIconImage {
+            appIcon.image = appIconImage
         } else {
             appIcon.image = NSImage(systemSymbolName: "timer", accessibilityDescription: nil)
             appIcon.contentTintColor = .controlAccentColor
@@ -621,12 +618,16 @@ final class SettingsWindow: NSWindow {
         let licenseButton = NSButton(title: L("License"), target: self, action: #selector(showLicense))
         licenseButton.bezelStyle = .rounded
         licenseButton.translatesAutoresizingMaskIntoConstraints = false
-        container.addSubview(licenseButton)
 
         let noticeButton = NSButton(title: L("Notice"), target: self, action: #selector(showNotice))
         noticeButton.bezelStyle = .rounded
         noticeButton.translatesAutoresizingMaskIntoConstraints = false
-        container.addSubview(noticeButton)
+
+        let buttonRow = NSStackView(views: [licenseButton, noticeButton])
+        buttonRow.orientation = .horizontal
+        buttonRow.spacing = 16
+        buttonRow.translatesAutoresizingMaskIntoConstraints = false
+        container.addSubview(buttonRow)
 
         NSLayoutConstraint.activate([
             appIcon.topAnchor.constraint(equalTo: container.topAnchor, constant: 40),
@@ -647,12 +648,9 @@ final class SettingsWindow: NSWindow {
             checkUpdatesButton.topAnchor.constraint(equalTo: githubButton.bottomAnchor, constant: 12),
             checkUpdatesButton.centerXAnchor.constraint(equalTo: container.centerXAnchor),
 
-            licenseButton.topAnchor.constraint(equalTo: checkUpdatesButton.bottomAnchor, constant: 12),
-            licenseButton.centerXAnchor.constraint(equalTo: container.centerXAnchor),
-
-            noticeButton.topAnchor.constraint(equalTo: licenseButton.bottomAnchor, constant: 8),
-            noticeButton.centerXAnchor.constraint(equalTo: container.centerXAnchor),
-            noticeButton.bottomAnchor.constraint(lessThanOrEqualTo: container.bottomAnchor, constant: -20)
+            buttonRow.topAnchor.constraint(equalTo: checkUpdatesButton.bottomAnchor, constant: 12),
+            buttonRow.centerXAnchor.constraint(equalTo: container.centerXAnchor),
+            buttonRow.bottomAnchor.constraint(lessThanOrEqualTo: container.bottomAnchor, constant: -20)
         ])
 
         return container
@@ -898,20 +896,6 @@ final class SettingsWindow: NSWindow {
     }
 
     @objc private func showLicense() {
-        let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 500, height: 400),
-            styleMask: [.titled, .closable],
-            backing: .buffered,
-            defer: false
-        )
-        window.title = L("License")
-        window.center()
-
-        let textView = NSTextView()
-        textView.isEditable = false
-        textView.isSelectable = true
-        textView.font = .monospacedSystemFont(ofSize: 11, weight: .regular)
-
         let licenseSummary = """
         GNU AFFERO GENERAL PUBLIC LICENSE
         Version 3, 19 November 2007
@@ -932,32 +916,10 @@ final class SettingsWindow: NSWindow {
         https://github.com/J-Liu/PulseCycle/blob/main/LICENSE
         """
 
-        textView.string = licenseSummary
-        textView.textContainerInset = NSSize(width: 16, height: 16)
-
-        let scrollView = NSScrollView()
-        scrollView.documentView = textView
-        scrollView.hasVerticalScroller = true
-        window.contentView = scrollView
-
-        window.makeKeyAndOrderFront(nil)
+        showTextSheet(title: L("License"), text: licenseSummary, font: .monospacedSystemFont(ofSize: 11, weight: .regular))
     }
 
     @objc private func showNotice() {
-        let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 500, height: 300),
-            styleMask: [.titled, .closable],
-            backing: .buffered,
-            defer: false
-        )
-        window.title = L("Notice")
-        window.center()
-
-        let textView = NSTextView()
-        textView.isEditable = false
-        textView.isSelectable = true
-        textView.font = .systemFont(ofSize: 14, weight: .regular)
-
         let notice = """
         PulseCycle — A HIIT interval timer with heart rate monitoring.
         Copyright 2026 Jia Liu
@@ -968,15 +930,27 @@ final class SettingsWindow: NSWindow {
         permission under Section 7. See LICENSE for details.
         """
 
-        textView.string = notice
-        textView.textContainerInset = NSSize(width: 16, height: 16)
+        showTextSheet(title: L("Notice"), text: notice, font: .systemFont(ofSize: 14, weight: .regular))
+    }
 
-        let scrollView = NSScrollView()
+    private func showTextSheet(title: String, text: String, font: NSFont) {
+        let textView = NSTextView(frame: NSRect(x: 0, y: 0, width: 480, height: 300))
+        textView.isEditable = false
+        textView.isSelectable = true
+        textView.font = font
+        textView.string = text
+        textView.textContainerInset = NSSize(width: 8, height: 8)
+
+        let scrollView = NSScrollView(frame: NSRect(x: 0, y: 0, width: 500, height: 320))
         scrollView.documentView = textView
         scrollView.hasVerticalScroller = true
-        window.contentView = scrollView
+        scrollView.borderType = .bezelBorder
 
-        window.makeKeyAndOrderFront(nil)
+        let alert = NSAlert()
+        alert.messageText = title
+        alert.accessoryView = scrollView
+        alert.addButton(withTitle: L("OK"))
+        alert.beginSheetModal(for: self)
     }
 
     func selectTab(withIdentifier identifier: String) {

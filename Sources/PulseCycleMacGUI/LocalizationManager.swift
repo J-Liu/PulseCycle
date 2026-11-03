@@ -189,6 +189,7 @@ private let localizedStrings: [AppLanguage: [String: String]] = [
         "Disconnect": "Disconnect",
         "Set as Default": "Set as Default",
         "Remove": "Remove",
+        "OK": "OK",
     ],
 
     .simplifiedChinese: [
@@ -305,6 +306,7 @@ private let localizedStrings: [AppLanguage: [String: String]] = [
         "Disconnect": "断开",
         "Set as Default": "设为默认",
         "Remove": "移除",
+        "OK": "确定",
     ],
 
     .traditionalChinese: [
@@ -421,5 +423,6 @@ private let localizedStrings: [AppLanguage: [String: String]] = [
         "Disconnect": "斷開",
         "Set as Default": "設為預設",
         "Remove": "移除",
+        "OK": "確定",
     ]
 ]
